@@ -3,8 +3,8 @@ using System;
 
 public partial class Player_MoveControlState : State
 {
-	public const float Speed = 300.0f;
-	public const float JumpVelocity = 400.0f;
+	public const float Speed = 150.0f;
+	public const float JumpVelocity = 250.0f;
 	private Player _player = null;
 	protected override void ReadyBehavior()
 	{
@@ -16,7 +16,7 @@ public partial class Player_MoveControlState : State
 		bool isOnFloor = _player.IsOnFloor();
 
 		if (!isOnFloor)
-			velocity += _player.GetGravity() * (float)delta;
+			velocity += _player.GetGravity() * (float)delta * 0.5f;
 
 		if (Input.IsActionJustPressed("Jump") && isOnFloor)
 			velocity.Y = -JumpVelocity;
