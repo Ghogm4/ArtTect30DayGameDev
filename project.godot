@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="ArtTech30DayGameDev"
+run/main_scene="uid://bipdfv872lp1t"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
 run/max_fps=60
 config/icon="res://icon.svg"
