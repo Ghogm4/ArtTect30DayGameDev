@@ -3,7 +3,6 @@ using System;
 
 public partial class Player_JumpState : State
 {
-    [Export] private Timer _riseToFallTimer = null;
     private AnimatedSprite2D _sprite = null;
     private Player _player = null;
 
@@ -11,24 +10,23 @@ public partial class Player_JumpState : State
     {
         _sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
         _player = Storage.GetNode<Player>("Player");
-        _riseToFallTimer.Timeout += OnRiseToFallTimerTimeout;
     }
     protected override void Enter()
     {
         _sprite.Play("Rise");
-        _riseToFallTimer.Start();
+        _sprite.AnimationFinished += OnAnimationFinished;
     }
     protected override void FrameUpdate(double delta)
     {
         if (_player.IsOnFloor())
             AskTransit("Idle");
     }
-    private void OnRiseToFallTimerTimeout()
+    private void OnAnimationFinished()
     {
         _sprite.Play("Fall");
     }
     protected override void Exit()
     {
-        _riseToFallTimer.Stop();
+        _sprite.AnimationFinished -= OnAnimationFinished;
     }
 }
