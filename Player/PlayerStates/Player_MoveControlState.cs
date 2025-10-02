@@ -32,6 +32,9 @@ public partial class Player_MoveControlState : State
 		else
 			velocity.X = Mathf.MoveToward(velocity.X, 0, Speed);
 
+		if (direction != 0)
+			Storage.SetVariant("HeadingLeft", direction < 0);
+			
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
 	}
