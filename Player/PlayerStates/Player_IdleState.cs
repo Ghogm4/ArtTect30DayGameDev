@@ -16,6 +16,8 @@ public partial class Player_IdleState : State
 	}
 	protected override void FrameUpdate(double delta)
 	{
+		if (Input.IsActionJustPressed("Attack"))
+			AskTransit("Attack1");
 		if (!_player.IsOnFloor())
 			AskTransit("Jump");
 		if (!Mathf.IsZeroApprox(_player.Velocity.X))
