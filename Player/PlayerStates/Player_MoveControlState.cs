@@ -5,6 +5,7 @@ public partial class Player_MoveControlState : State
 {
 	[Export] private Timer _jumpBufferTimer = null;
 	[Export] private Timer _coyoteTimer = null;
+	[Export] private Timer _shortJumpTimer = null;
 	public const float Speed = 150.0f;
 	public const float JumpVelocity = 250.0f;
 	public const float Acceleration = 25.0f;
@@ -43,14 +44,18 @@ public partial class Player_MoveControlState : State
 			velocity.Y = -JumpVelocity;
 			_canJump = false;
 			_willJump = false;
+			_shortJumpTimer.Start();
 		}
-
+		if (Input.IsActionJustReleased("Jump") && !_shortJumpTimer.IsStopped())
+		{
+			velocity.Y *= 0.5f;
+		}
 		if (Input.IsActionPressed("Right"))
-			Storage.SetVariant("Direction", 1);
-		else if (Input.IsActionPressed("Left"))
-			Storage.SetVariant("Direction", -1);
-		else
-			Storage.SetVariant("Direction", 0);
+				Storage.SetVariant("Direction", 1);
+			else if (Input.IsActionPressed("Left"))
+				Storage.SetVariant("Direction", -1);
+			else
+				Storage.SetVariant("Direction", 0);
 
 		int direction = Storage.GetVariant<int>("Direction");
 		if (direction != 0)
