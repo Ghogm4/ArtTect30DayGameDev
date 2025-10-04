@@ -20,7 +20,7 @@ public partial class Player_RunState : State
 			AskTransit("Attack1");
         if (!_player.IsOnFloor())
             AskTransit("Jump");
-        if (Mathf.IsZeroApprox(_player.Velocity.X))
+        if (Mathf.IsZeroApprox(_player.Velocity.X) && Storage.GetVariant<int>("Direction") == 0)
             AskTransit("Idle");
     }
 }

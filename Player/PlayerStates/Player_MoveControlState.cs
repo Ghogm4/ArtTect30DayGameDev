@@ -7,6 +7,8 @@ public partial class Player_MoveControlState : State
 	[Export] private Timer _coyoteTimer = null;
 	public const float Speed = 150.0f;
 	public const float JumpVelocity = 250.0f;
+	public const float Acceleration = 25.0f;
+	public const float Deceleration = 25.0f;
 	private Player _player = null;
 	private bool _isOnFloor = false;
 	private bool _isCoyoteTimerRunning = false;
@@ -43,16 +45,18 @@ public partial class Player_MoveControlState : State
 			_willJump = false;
 		}
 
-		int direction = 0;
 		if (Input.IsActionPressed("Right"))
-			direction++;
-		if (Input.IsActionPressed("Left"))
-			direction--;
-
-		if (direction != 0)
-			velocity.X = direction * Speed;
+			Storage.SetVariant("Direction", 1);
+		else if (Input.IsActionPressed("Left"))
+			Storage.SetVariant("Direction", -1);
 		else
-			velocity.X = Mathf.MoveToward(velocity.X, 0, Speed);
+			Storage.SetVariant("Direction", 0);
+
+		int direction = Storage.GetVariant<int>("Direction");
+		if (direction != 0)
+			velocity.X = Mathf.Clamp(direction * Acceleration + velocity.X, -Speed, Speed);
+		else
+			velocity.X = Mathf.MoveToward(velocity.X, 0, Deceleration);
 
 		if (direction != 0)
 			Storage.SetVariant("HeadingLeft", direction < 0);
