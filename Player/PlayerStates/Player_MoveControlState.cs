@@ -33,7 +33,7 @@ public partial class Player_MoveControlState : State
 		_isOnFloor = _player.IsOnFloor();
 		HandleCoyoteTime();
 		HandleJumpBuffer();
-		
+
 		if (_isOnFloor)
 			_canJump = true;
 		else
@@ -51,11 +51,11 @@ public partial class Player_MoveControlState : State
 			velocity.Y *= 0.5f;
 		}
 		if (Input.IsActionPressed("Right"))
-				Storage.SetVariant("Direction", 1);
-			else if (Input.IsActionPressed("Left"))
-				Storage.SetVariant("Direction", -1);
-			else
-				Storage.SetVariant("Direction", 0);
+			Storage.SetVariant("Direction", 1);
+		else if (Input.IsActionPressed("Left"))
+			Storage.SetVariant("Direction", -1);
+		else
+			Storage.SetVariant("Direction", 0);
 
 		int direction = Storage.GetVariant<int>("Direction");
 		if (direction != 0)
@@ -68,6 +68,13 @@ public partial class Player_MoveControlState : State
 
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
+
+		for (int collisionIndex = 0; collisionIndex < _player.GetSlideCollisionCount(); collisionIndex++)
+		{
+			KinematicCollision2D collision = _player.GetSlideCollision(collisionIndex);
+			if (collision.GetCollider() is ForestSpikeLayer)
+				GD.Print("Player is hurt");
+		}
 	}
 	private void HandleCoyoteTime()
 	{
