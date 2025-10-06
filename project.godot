@@ -21,6 +21,7 @@ config/icon="res://icon.svg"
 SceneManager="*res://SceneManager/SceneManager.cs"
 GameData="*res://SceneManager/GameData.cs"
 TransitionLayer="*res://SceneManager/TransitionScene/TransitionScene.tscn"
+AudioManager="*res://AudioManager/AudioManager.cs"
 
 [display]
 
