@@ -7,7 +7,7 @@ public partial class Player_MoveControlState : State
 	[Export] private Timer _coyoteTimer = null;
 	[Export] private Timer _shortJumpTimer = null;
 	public const float Speed = 150.0f;
-	public const float JumpVelocity = 250.0f;
+	public const float JumpVelocity = 220.0f;
 	public const float Acceleration = 25.0f;
 	public const float Deceleration = 25.0f;
 	private Player _player = null;

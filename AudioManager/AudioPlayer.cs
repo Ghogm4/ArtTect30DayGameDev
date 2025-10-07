@@ -48,6 +48,6 @@ public partial class AudioPlayer : Node
 	public void OnSFXVolumeChanged(double value)
 	{
 		float db = Mathf.Lerp(-40, 0, (float)value);
-		AudioManager.Instance.setSFXVolume(db);
+		AudioManager.Instance.setAllSFXVolume(db);
 	}
 }

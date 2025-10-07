@@ -10,6 +10,7 @@ public partial class ResponsiveButton : Button
 	{
 		MouseEntered += OnMouseEntered;
 		MouseExited += OnMouseExited;
+		Pressed += OnButtonPressed;
 		_scaleVector = new Vector2(_hoverScale, _hoverScale);
 		PivotOffset = Size / 2;
 	}
@@ -19,6 +20,8 @@ public partial class ResponsiveButton : Button
 		tween.TweenProperty(this, "scale", _scaleVector, _duration)
 			.SetTrans(Tween.TransitionType.Quart)
 			.SetEase(Tween.EaseType.Out);
+
+		AudioManager.Instance.PlaySFX("Select");
 	}
 	private void OnMouseExited()
 	{
@@ -26,5 +29,10 @@ public partial class ResponsiveButton : Button
 		tween.TweenProperty(this, "scale", Vector2.One, _duration)
 			.SetTrans(Tween.TransitionType.Quart)
 			.SetEase(Tween.EaseType.Out);
+	}
+
+	private void OnButtonPressed()
+	{
+		AudioManager.Instance.PlaySFX("Confirm");
 	}
 }
