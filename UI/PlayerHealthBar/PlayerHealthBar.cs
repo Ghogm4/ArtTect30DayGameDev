@@ -5,15 +5,12 @@ public partial class PlayerHealthBar : CanvasLayer
 {
     public static PlayerHealthBar Instance;
     private Vector2 _textureSize = new Vector2(18, 15);
-    private TextureRect _fullHearts = null;
-    private TextureRect _emptyHearts = null;
-    private TextureRect _shields = null;
+    [Export] private TextureRect _fullHearts = null;
+    [Export] private TextureRect _emptyHearts = null;
+    [Export] private TextureRect _shields = null;
     public override void _Ready()
     {
         Instance = this;
-        _fullHearts = GetNode<TextureRect>("%FullHearts");
-        _emptyHearts = GetNode<TextureRect>("%EmptyHearts");
-        _shields = GetNode<TextureRect>("%Shields");
         Update();
         SignalBus.Instance.PlayerHit += Update;
     }
