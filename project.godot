@@ -18,8 +18,10 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+SignalBus="*res://Utilities/SignalBus/SignalBus.cs"
 SceneManager="*res://SceneManager/SceneManager.cs"
 GameData="*res://SceneManager/GameData.cs"
+PlayerHealthBar="*res://UI/PlayerHealthBar/PlayerHealthBar.tscn"
 TransitionLayer="*res://SceneManager/TransitionScene/TransitionScene.tscn"
 AudioManager="*res://AudioManager/AudioManager.cs"
 

@@ -68,13 +68,6 @@ public partial class Player_MoveControlState : State
 
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
-
-		for (int collisionIndex = 0; collisionIndex < _player.GetSlideCollisionCount(); collisionIndex++)
-		{
-			KinematicCollision2D collision = _player.GetSlideCollision(collisionIndex);
-			if (collision.GetCollider() is ForestSpikeLayer)
-				GD.Print("Player is hurt");
-		}
 	}
 	private void HandleCoyoteTime()
 	{
