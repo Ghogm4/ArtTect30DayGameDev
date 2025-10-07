@@ -13,6 +13,15 @@ public partial class Player_IdleState : State
 	protected override void Enter()
 	{
 		_sprite.Play("Idle");
+
+ 		if (previousState != null)
+		{
+			if (previousState.Name == "Run")
+				AudioManager.Instance.StopSFX("Run");
+
+			if (previousState.Name == "Jump")
+				AudioManager.Instance.PlaySFX("Fall");
+		}
 	}
 	protected override void FrameUpdate(double delta)
 	{

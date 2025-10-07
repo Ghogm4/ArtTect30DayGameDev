@@ -6,6 +6,7 @@ public partial class State : Node
 {
     [Signal] public delegate void TransitEventHandler(string targetStateName);
     [Export] public VarStorage Storage = null;
+    public State previousState = null;
     public State Parent = null;
 
     private bool _isActive = false;

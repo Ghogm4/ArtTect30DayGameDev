@@ -52,6 +52,7 @@ public partial class AudioManager : Node
     }
     public void PlayBGM(string name, float startLoop = 0f, float endLoop = 0f)
     {
+        GD.Print($"Playing BGM: {name}");
         if (BGMDict.ContainsKey(name))
         {
             BGMPlayer.Stream = BGMDict[name];
@@ -82,8 +83,22 @@ public partial class AudioManager : Node
 
     public void StopBGM()
     {
+        GD.Print($"Stopping BGM");
         BGMPlayer.Stop();
         isLooping = false;
+    }
+
+    public void StopSFX(string name)
+    {
+        GD.Print($"Stopping SFX: {name}");
+        foreach (var sfx in SFXPlayers)
+        {
+            if (sfx.Stream == SFXDict.GetValueOrDefault(name) && sfx.Playing)
+            {
+                sfx.Stop();
+                return;
+            }
+        }
     }
 
     public void LoadSFX(string name, string path)
@@ -96,6 +111,7 @@ public partial class AudioManager : Node
     }
     public void PlaySFX(string name)
     {
+        GD.Print($"Playing SFX: {name}");
         if (SFXDict.ContainsKey(name))
         {
             foreach (var sfx in SFXPlayers)

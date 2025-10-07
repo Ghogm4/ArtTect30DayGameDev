@@ -29,8 +29,11 @@ public partial class StateTree : State
     }
     protected void ChangeState(string targetStateName)
     {
+        GD.Print($"Changing state from {_currentState.Name} to {targetStateName}");
         List<State> currentPath = GetPathToRoot(_currentState);
+        State previousState = _currentState;
         _currentState = _stateTree[targetStateName];
+        _currentState.previousState = previousState;
         List<State> nextPath = GetPathToRoot(_currentState);
         nextPath.Reverse();
         CutIntersect(ref currentPath, ref nextPath);
