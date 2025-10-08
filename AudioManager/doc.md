@@ -45,5 +45,3 @@ AudioManager.Instance.setSFXVolume(db);
 ```csharp
 float db = Mathf.Lerp(-40, 0, (float)value);
 ```
-
-

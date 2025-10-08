@@ -112,7 +112,6 @@ public partial class AudioManager : Node
 					}
 					else
 					{
-						GD.Print($"Playing SFX: {name} with fadeTime: {fadeTime}");
 						setSFXVolume(name, DefaultSFXVolume);
 						sfx.Play();
 					}
@@ -144,7 +143,6 @@ public partial class AudioManager : Node
 		{
 			if (sfx.Stream == SFXDict.GetValueOrDefault(name) && sfx.Playing)
 			{
-				GD.Print($"Stopping SFX: {name} with fadeTime: {fadeTime}");
 				sfx.Stop();
 				return;
 			}

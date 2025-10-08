@@ -29,7 +29,6 @@ public partial class StateTree : State
     }
     protected void ChangeState(string targetStateName)
     {
-        GD.Print($"Changing state from {_currentState.Name} to {targetStateName}");
         List<State> currentPath = GetPathToRoot(_currentState);
         State previousState = _currentState;
         _currentState = _stateTree[targetStateName];

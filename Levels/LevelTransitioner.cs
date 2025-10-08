@@ -11,5 +11,5 @@ public partial class LevelTransitioner : Area2D
 			if (body is Player)
 				SceneManager.Instance.ChangeScene(TargetLevelPath);
 		};
-    }
+	}
 }
