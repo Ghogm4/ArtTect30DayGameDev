@@ -15,7 +15,7 @@ public partial class Player_UniversalState : State
 		_invincibilityTimer.Timeout += () =>
 		{
 			_isInvincible = false;
-			_player.Modulate = Colors.White;
+			_sprite.Modulate = Colors.White;
 			if (IsInstanceValid(_invincibilityTween))
 				_invincibilityTween.Kill();
 		};
@@ -60,20 +60,20 @@ public partial class Player_UniversalState : State
 	public async void Flash()
 	{
 		Color pureWhite = new Color(18.892f, 18.892f, 18.892f, 1);
-		Color originalModulate = _player.Modulate;
-		_invincibilityTween = _player.CreateTween();
+		Color originalModulate = _sprite.Modulate;
+		_invincibilityTween = _sprite.CreateTween();
 		_invincibilityTween
-			.TweenProperty(_player, "modulate", pureWhite, 0.1f)
+			.TweenProperty(_sprite, "modulate", pureWhite, 0.1f)
 			.SetTrans(Tween.TransitionType.Quad)
 			.SetEase(Tween.EaseType.In);
 		_invincibilityTween
-			.TweenProperty(_player, "modulate", originalModulate, 0.1f)
+			.TweenProperty(_sprite, "modulate", originalModulate, 0.1f)
 			.SetTrans(Tween.TransitionType.Quad)
 			.SetEase(Tween.EaseType.Out);
 		await ToSignal(_invincibilityTween, Tween.SignalName.Finished);
-		_invincibilityTween = _player.CreateTween();
+		_invincibilityTween = _sprite.CreateTween();
 		_invincibilityTween.SetLoops(10);
-		_invincibilityTween.TweenProperty(_player, "modulate:a", 0.5f, 0.1f);
-		_invincibilityTween.TweenProperty(_player, "modulate:a", 1, 0.1f);
+		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 0.5f, 0.1f);
+		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 1, 0.1f);
 	}
 }

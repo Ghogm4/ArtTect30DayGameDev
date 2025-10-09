@@ -7,11 +7,11 @@ public partial class Player_MoveControlState : State
 	[Export] private Timer _jumpBufferTimer = null;
 	[Export] private Timer _coyoteTimer = null;
 	[Export] private Timer _shortJumpTimer = null;
-	public const float Speed = 150.0f;
 	public const float JumpVelocity = 220.0f;
 	public const float Acceleration = 25.0f;
 	public const float Deceleration = 25.0f;
 	public int AvailableJumps => Storage.GetVariant<int>("AvailableJumps");
+	public float Speed => Storage.GetVariant<int>("Speed");
 	private Player _player = null;
 	private bool _isOnFloor = false;
 	private bool _isCoyoteTimerRunning = false;
@@ -22,7 +22,8 @@ public partial class Player_MoveControlState : State
 		_player = Storage.GetNode<Player>("Player");
 		_coyoteTimer.Timeout += () =>
 		{
-			if (AvailableJumps == GameData.Instance.PlayerMaxJumps) DecreaseJump();
+			if (AvailableJumps == GameData.Instance.PlayerMaxJumps)
+				DecreaseJump();
 			_isCoyoteTimerRunning = false;
 			_canCoyoteTimerStart = false;
 		};
@@ -31,6 +32,7 @@ public partial class Player_MoveControlState : State
 	}
 	protected override void PhysicsUpdate(double delta)
 	{
+		GD.Print(AvailableJumps);
 		Vector2 velocity = _player.Velocity;
 		_isOnFloor = _player.IsOnFloor();
 		HandleCoyoteTime();
@@ -38,8 +40,6 @@ public partial class Player_MoveControlState : State
 
 		if (_isOnFloor)
 			ResetJumps();
-		else
-			velocity += _player.GetGravity() * (float)delta * 0.5f;
 
 		if ((Input.IsActionJustPressed("Jump") && AvailableJumps > 0) || (_willJump && _isOnFloor))
 		{
