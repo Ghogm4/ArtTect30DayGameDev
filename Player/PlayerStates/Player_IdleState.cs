@@ -14,12 +14,12 @@ public partial class Player_IdleState : State
 	{
 		_sprite.Play("Idle");
 
- 		if (previousState != null)
+ 		if (PreviousState != null)
 		{
-			if (previousState.Name == "Run")
+			if (PreviousState.Name == "Run")
 				AudioManager.Instance.StopSFX("Run");
 
-			if (previousState.Name == "Jump")
+			if (PreviousState.Name == "Jump")
 				AudioManager.Instance.PlaySFX("Fall");
 		}
 	}

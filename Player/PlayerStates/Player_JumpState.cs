@@ -16,7 +16,7 @@ public partial class Player_JumpState : State
 		_sprite.Play("Rise");
 		_sprite.AnimationFinished += OnAnimationFinished;
 
-		if (previousState.Name == "Run")
+		if (PreviousState.Name == "Run")
 			AudioManager.Instance.StopSFX("Run");
 		AudioManager.Instance.PlaySFX("Jump");
 	}

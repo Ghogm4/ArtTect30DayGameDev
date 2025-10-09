@@ -16,7 +16,7 @@ public partial class Player_Attack1State : State
 		_sprite.Play("Attack1");
 		_attack1ComboTimer.Start();
 		
-		if (previousState != null && previousState.Name == "Run")
+		if (PreviousState != null && PreviousState.Name == "Run")
 			AudioManager.Instance.StopSFX("Run");
 		AudioManager.Instance.PlaySFX("Attack1");
 	}

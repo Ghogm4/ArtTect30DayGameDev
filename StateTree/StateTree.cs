@@ -32,7 +32,7 @@ public partial class StateTree : State
         List<State> currentPath = GetPathToRoot(_currentState);
         State previousState = _currentState;
         _currentState = _stateTree[targetStateName];
-        _currentState.previousState = previousState;
+        _currentState.PreviousState = previousState;
         List<State> nextPath = GetPathToRoot(_currentState);
         nextPath.Reverse();
         CutIntersect(ref currentPath, ref nextPath);
