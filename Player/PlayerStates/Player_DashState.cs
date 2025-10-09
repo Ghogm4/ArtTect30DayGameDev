@@ -34,8 +34,9 @@ public partial class Player_DashState : State
 			velocity.X = Mathf.Lerp(velocity.X, 0, 0.7f);
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
-		if (Mathf.Abs(velocity.X) < tolerance ||
-			Input.IsActionJustPressed("Left") ||
+		if (Mathf.Abs(velocity.X) < tolerance)
+			AskTransit("DashEndAttack");
+		if (Input.IsActionJustPressed("Left") ||
 			Input.IsActionJustPressed("Right") ||
 			Input.IsActionJustPressed("Jump"))
 			AskTransit("Idle");
