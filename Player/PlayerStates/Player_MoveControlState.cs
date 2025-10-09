@@ -31,8 +31,6 @@ public partial class Player_MoveControlState : State
 	}
 	protected override void PhysicsUpdate(double delta)
 	{
-		GD.Print(AvailableJumps);
-		GD.Print(_coyoteTimer.TimeLeft);
 		Vector2 velocity = _player.Velocity;
 		_isOnFloor = _player.IsOnFloor();
 		HandleCoyoteTime();
