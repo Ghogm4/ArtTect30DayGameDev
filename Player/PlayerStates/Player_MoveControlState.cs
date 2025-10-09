@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.IO;
 
 public partial class Player_MoveControlState : State
 {
@@ -10,41 +11,45 @@ public partial class Player_MoveControlState : State
 	public const float JumpVelocity = 220.0f;
 	public const float Acceleration = 25.0f;
 	public const float Deceleration = 25.0f;
+	public int AvailableJumps => Storage.GetVariant<int>("AvailableJumps");
 	private Player _player = null;
 	private bool _isOnFloor = false;
 	private bool _isCoyoteTimerRunning = false;
 	private bool _canCoyoteTimerStart = true;
-	private bool _canJump = false;
 	private bool _willJump = false;
 	protected override void ReadyBehavior()
 	{
 		_player = Storage.GetNode<Player>("Player");
 		_coyoteTimer.Timeout += () =>
 		{
-			_canJump = false;
+			if (AvailableJumps == GameData.Instance.PlayerMaxJumps) DecreaseJump();
 			_isCoyoteTimerRunning = false;
 			_canCoyoteTimerStart = false;
 		};
 		_jumpBufferTimer.Timeout += () => _willJump = false;
+		ResetJumps();
 	}
 	protected override void PhysicsUpdate(double delta)
 	{
+		GD.Print(AvailableJumps);
+		GD.Print(_coyoteTimer.TimeLeft);
 		Vector2 velocity = _player.Velocity;
 		_isOnFloor = _player.IsOnFloor();
 		HandleCoyoteTime();
 		HandleJumpBuffer();
 
 		if (_isOnFloor)
-			_canJump = true;
+			ResetJumps();
 		else
 			velocity += _player.GetGravity() * (float)delta * 0.5f;
 
-		if ((Input.IsActionJustPressed("Jump") && _canJump) || (_willJump && _isOnFloor))
+		if ((Input.IsActionJustPressed("Jump") && AvailableJumps > 0) || (_willJump && _isOnFloor))
 		{
 			velocity.Y = -JumpVelocity;
-			_canJump = false;
 			_willJump = false;
 			_shortJumpTimer.Start();
+			DecreaseJump();
+			_canCoyoteTimerStart = false;
 		}
 		if (Input.IsActionJustReleased("Jump") && !_shortJumpTimer.IsStopped())
 		{
@@ -90,4 +95,7 @@ public partial class Player_MoveControlState : State
 			_jumpBufferTimer.Start();
 		}
 	}
+	private void ResetJumps() => Storage.SetVariant("AvailableJumps", GameData.Instance.PlayerMaxJumps);
+	private void DecreaseJump() => Storage.SetVariant("AvailableJumps", AvailableJumps - 1);
+	private void IncreaseJump() => Storage.SetVariant("AvailableJumps", AvailableJumps + 1);
 }
