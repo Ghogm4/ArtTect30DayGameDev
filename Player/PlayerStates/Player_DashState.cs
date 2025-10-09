@@ -39,8 +39,6 @@ public partial class Player_DashState : State
 			Input.IsActionJustPressed("Right") ||
 			Input.IsActionJustPressed("Jump"))
 			AskTransit("Idle");
-		if (Input.IsActionJustPressed("Jump"))
-			Callable.From(() => Callable.From(() => Input.ActionPress("Jump")).CallDeferred()).CallDeferred();
 	}
 	protected override void Exit()
 	{
