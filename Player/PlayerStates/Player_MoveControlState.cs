@@ -7,7 +7,6 @@ public partial class Player_MoveControlState : State
 	[Export] private Timer _jumpBufferTimer = null;
 	[Export] private Timer _coyoteTimer = null;
 	[Export] private Timer _shortJumpTimer = null;
-	public const float JumpVelocity = 220.0f;
 	public const float Acceleration = 25.0f;
 	public const float Deceleration = 25.0f;
 	public int AvailableJumps => Storage.GetVariant<int>("AvailableJumps");
@@ -32,7 +31,6 @@ public partial class Player_MoveControlState : State
 	}
 	protected override void PhysicsUpdate(double delta)
 	{
-		GD.Print(AvailableJumps);
 		Vector2 velocity = _player.Velocity;
 		_isOnFloor = _player.IsOnFloor();
 		HandleCoyoteTime();
@@ -43,7 +41,7 @@ public partial class Player_MoveControlState : State
 
 		if ((Input.IsActionJustPressed("Jump") && AvailableJumps > 0) || (_willJump && _isOnFloor))
 		{
-			velocity.Y = -JumpVelocity;
+			velocity.Y = -Storage.GetVariant<float>("JumpVelocity");
 			_willJump = false;
 			_shortJumpTimer.Start();
 			DecreaseJump();
