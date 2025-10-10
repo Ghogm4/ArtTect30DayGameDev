@@ -9,12 +9,20 @@ public partial class Player_MoveControlState : State
 	[Export] private Timer _shortJumpTimer = null;
 	public const float Acceleration = 25.0f;
 	public const float Deceleration = 25.0f;
-	public int AvailableJumps => Storage.GetVariant<int>("AvailableJumps");
-	public float Speed => Storage.GetVariant<int>("Speed");
+	private int AvailableJumps
+	{
+		get => Storage.GetVariant<int>("AvailableJumps");
+		set => Storage.SetVariant("AvailableJumps", value);
+	}
+	private float Speed => Storage.GetVariant<float>("Speed");
 	private Player _player = null;
 	private bool _isOnFloor = false;
 	private bool _isCoyoteTimerRunning = false;
-	private bool _canCoyoteTimerStart = true;
+	private bool CanCoyoteTimerStart
+	{
+		get => Storage.GetVariant<bool>("CanCoyoteTimerStart");
+		set => Storage.SetVariant("CanCoyoteTimerStart", value);
+	}
 	private bool _willJump = false;
 	protected override void ReadyBehavior()
 	{
@@ -22,9 +30,9 @@ public partial class Player_MoveControlState : State
 		_coyoteTimer.Timeout += () =>
 		{
 			if (AvailableJumps == GameData.Instance.PlayerMaxJumps)
-				DecreaseJump();
+				AvailableJumps--;
 			_isCoyoteTimerRunning = false;
-			_canCoyoteTimerStart = false;
+			CanCoyoteTimerStart = false;
 		};
 		_jumpBufferTimer.Timeout += () => _willJump = false;
 		ResetJumps();
@@ -44,8 +52,8 @@ public partial class Player_MoveControlState : State
 			velocity.Y = -Storage.GetVariant<float>("JumpVelocity");
 			_willJump = false;
 			_shortJumpTimer.Start();
-			DecreaseJump();
-			_canCoyoteTimerStart = false;
+			AvailableJumps--;
+			CanCoyoteTimerStart = false;
 		}
 		if (Input.IsActionJustReleased("Jump") && !_shortJumpTimer.IsStopped())
 		{
@@ -70,14 +78,18 @@ public partial class Player_MoveControlState : State
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
 	}
+	protected override void Exit()
+	{
+		_coyoteTimer.Stop();
+	}
 	private void HandleCoyoteTime()
 	{
 		if (_isCoyoteTimerRunning) return;
 		if (_isOnFloor)
 		{
-			_canCoyoteTimerStart = true;
+			CanCoyoteTimerStart = true;
 		}
-		else if (_canCoyoteTimerStart)
+		else if (CanCoyoteTimerStart)
 		{
 			_coyoteTimer.Start();
 			_isCoyoteTimerRunning = true;
@@ -91,7 +103,5 @@ public partial class Player_MoveControlState : State
 			_jumpBufferTimer.Start();
 		}
 	}
-	private void ResetJumps() => Storage.SetVariant("AvailableJumps", GameData.Instance.PlayerMaxJumps);
-	private void DecreaseJump() => Storage.SetVariant("AvailableJumps", AvailableJumps - 1);
-	private void IncreaseJump() => Storage.SetVariant("AvailableJumps", AvailableJumps + 1);
+	private void ResetJumps() => AvailableJumps = GameData.Instance.PlayerMaxJumps;
 }

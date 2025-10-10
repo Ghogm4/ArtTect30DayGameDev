@@ -8,6 +8,15 @@ public partial class Player_DashState : State
 	[Export] private GpuParticles2D _dashTrail = null;
 	private Player _player = null;
 	private AnimatedSprite2D _sprite = null;
+	private int AvailableJumps
+	{
+		get => Storage.GetVariant<int>("AvailableJumps");
+		set => Storage.SetVariant("AvailableJumps", value);
+	}
+	private bool CanCoyoteTimerStart
+	{
+		set => Storage.SetVariant("CanCoyoteTimerStart", value);
+	}
 	protected override void ReadyBehavior()
 	{
 		_player = Storage.GetNode<Player>("Player");
@@ -32,14 +41,25 @@ public partial class Player_DashState : State
 			velocity.X = Storage.GetVariant<int>("Speed") * DashSpeedMultiplier * direction;
 		else
 			velocity.X = Mathf.Lerp(velocity.X, 0, 0.7f);
+
+		if (Input.IsActionJustPressed("Attack"))
+			AskTransit("DashAttack");
+		if (Mathf.Abs(velocity.X) < tolerance ||
+			Input.IsActionJustPressed("Left") ||
+			Input.IsActionJustPressed("Right"))
+		{
+			AskTransit("Idle");
+			CanCoyoteTimerStart = false;
+		}
+		if (Input.IsActionJustPressed("Jump"))
+		{
+			velocity.Y = -Storage.GetVariant<float>("JumpVelocity");
+			AvailableJumps--;
+			AskTransit("Idle");
+			CanCoyoteTimerStart = false;
+		}
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
-		if (Mathf.Abs(velocity.X) < tolerance)
-			AskTransit("DashEndAttack");
-		if (Input.IsActionJustPressed("Left") ||
-			Input.IsActionJustPressed("Right") ||
-			Input.IsActionJustPressed("Jump"))
-			AskTransit("Idle");
 	}
 	protected override void Exit()
 	{

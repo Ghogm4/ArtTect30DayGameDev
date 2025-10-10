@@ -5,7 +5,20 @@ public partial class Player_WallClimbState : State
 {
 	private AnimatedSprite2D _sprite = null;
 	private Player _player = null;
-	public int AvailableJumps => Storage.GetVariant<int>("AvailableJumps");
+	private int AvailableJumps
+	{
+		get => Storage.GetVariant<int>("AvailableJumps");
+		set => Storage.SetVariant("AvailableJumps", value);
+	}
+	private bool HeadingLeft
+	{
+		get => Storage.GetVariant<bool>("HeadingLeft");
+		set => Storage.SetVariant("HeadingLeft", value);
+	}
+	private bool CanCoyoteTimerStart
+	{
+		set => Storage.SetVariant("CanCoyoteTimerStart", value);
+	}
 	protected override void ReadyBehavior()
 	{
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
@@ -32,29 +45,29 @@ public partial class Player_WallClimbState : State
 		else
 			velocity.Y = -_player.GetGravity().Y * 0.05f;
 
-		if ((Input.IsActionJustPressed("Left") && !Storage.GetVariant<bool>("HeadingLeft")) ||
-			(Input.IsActionJustPressed("Right") && Storage.GetVariant<bool>("HeadingLeft")) ||
+		if ((Input.IsActionJustPressed("Left") && !HeadingLeft) ||
+			(Input.IsActionJustPressed("Right") && HeadingLeft) ||
 			!_player.IsOnWallOnly())
 			AskTransit("Idle");
 
 		if (Input.IsActionJustPressed("Jump"))
 		{
-			int direction = Storage.GetVariant<bool>("HeadingLeft") ? -1 : 1;
+			int direction = HeadingLeft ? -1 : 1;
 			velocity.X = -direction * Storage.GetVariant<float>("Speed");
 			velocity.Y = -Storage.GetVariant<float>("JumpVelocity");
-			Storage.SetVariant("HeadingLeft", !Storage.GetVariant<bool>("HeadingLeft"));
-			DecreaseJump();
+			HeadingLeft = !HeadingLeft;
+			CanCoyoteTimerStart = false;
+			AvailableJumps--;
 			AskTransit("Idle");
 		}
 
 		if (Input.IsActionJustPressed("Dash"))
 		{
-			Storage.SetVariant("HeadingLeft", !Storage.GetVariant<bool>("HeadingLeft"));
+			HeadingLeft = !HeadingLeft;
 			AskTransit("Dash");
 		}
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
 	}
 	private void ResetJumps() => Storage.SetVariant("AvailableJumps", GameData.Instance.PlayerMaxJumps);
-	private void DecreaseJump() => Storage.SetVariant("AvailableJumps", AvailableJumps - 1);
 }

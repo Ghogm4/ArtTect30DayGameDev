@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class Player_DashEndAttackState : State
+public partial class Player_DashAttackState : State
 {
 	private AnimatedSprite2D _sprite = null;
 	private Player _player = null;
@@ -13,7 +13,7 @@ public partial class Player_DashEndAttackState : State
 	protected override void Enter()
 	{
 		_sprite.AnimationFinished += OnAnimationFinished;
-		_sprite.Play("DashEndAttack");
+		_sprite.Play("DashAttack");
 		_player.Velocity = Vector2.Zero;
     }
 
