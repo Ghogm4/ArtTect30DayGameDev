@@ -27,13 +27,13 @@ public partial class Player_JumpState : State
 	{
 		// The reason of including 0 is that the number of available jumps is first consumed by MoveControlState,
 		// causing bug when available jump is exactly 1 if using Storage.GetVariant<int>("AvailableJumps") > 0
-		if (Input.IsActionJustPressed("Jump") && Storage.GetVariant<int>("AvailableJumps") >= 0 && _canTriggerRise)
+		if (Input.IsActionJustPressed("Jump") && _canTriggerRise)
 		{
 			if (_sprite.Animation == "Fall")
 				_sprite.Play("Rise");
 			_sprite.Frame = _leapFrame;
 		}
-		if (Storage.GetVariant<int>("AvailableJumps") == 0)
+		if (Storage.GetVariant<int>("AvailableJumps") <= 0)
 			_canTriggerRise = false;
 		if (_player.IsOnFloor())
 			AskTransit("Idle");

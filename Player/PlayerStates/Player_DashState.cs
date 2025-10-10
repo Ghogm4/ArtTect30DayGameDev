@@ -51,7 +51,7 @@ public partial class Player_DashState : State
 			AskTransit("Idle");
 			CanCoyoteTimerStart = false;
 		}
-		if (Input.IsActionJustPressed("Jump"))
+		if (Input.IsActionJustPressed("Jump") && AvailableJumps > 0)
 		{
 			velocity.Y = -Storage.GetVariant<float>("JumpVelocity");
 			AvailableJumps--;
