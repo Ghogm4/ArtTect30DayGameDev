@@ -34,5 +34,7 @@ public partial class ResponsiveButton : Button
 	private void OnButtonPressed()
 	{
 		AudioManager.Instance.PlaySFX("Confirm");
+		OnPressed();
 	}
+	public virtual void OnPressed() { }
 }
