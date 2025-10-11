@@ -7,4 +7,6 @@ public partial class SignalBus : Node
     public override void _Ready() => Instance = this;
     [Signal] public delegate void PlayerHitEventHandler();
     [Signal] public delegate void PlayerDiedEventHandler();
+    [Signal] public delegate void ShowTextEventHandler();
+    [Signal] public delegate void WaitAdvanceEventHandler();
 }

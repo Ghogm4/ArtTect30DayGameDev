@@ -24,6 +24,7 @@ GameData="*res://SceneManager/GameData.cs"
 PlayerHealthBar="*res://UI/PlayerHealthBar/PlayerHealthBar.tscn"
 TransitionLayer="*res://SceneManager/TransitionScene/TransitionScene.tscn"
 AudioManager="*res://AudioManager/AudioManager.cs"
+TextManager="*res://TextManager/TextManager.cs"
 
 [display]
 
