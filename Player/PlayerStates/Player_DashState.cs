@@ -38,7 +38,7 @@ public partial class Player_DashState : State
 		float tolerance = 1f;
 		Vector2 velocity = _player.Velocity;
 		if (!_dashTimer.IsStopped())
-			velocity.X = Storage.GetVariant<int>("Speed") * DashSpeedMultiplier * direction;
+			velocity.X = Stats.GetStatValue("Speed") * DashSpeedMultiplier * direction;
 		else
 			velocity.X = Mathf.Lerp(velocity.X, 0, 0.7f);
 
@@ -53,7 +53,7 @@ public partial class Player_DashState : State
 		}
 		if (Input.IsActionJustPressed("Jump") && AvailableJumps > 0)
 		{
-			velocity.Y = -Storage.GetVariant<float>("JumpVelocity");
+			velocity.Y = -Stats.GetStatValue("JumpVelocity");
 			AvailableJumps--;
 			AskTransit("Idle");
 			CanCoyoteTimerStart = false;

@@ -35,4 +35,10 @@ public partial class StatModifier : RefCounted
             _ => Value
         };
     }
+    public class Factory
+    {
+        public static StatModifier BaseAdd(float value) => new(OperationType.BaseAdd, value);
+        public static StatModifier Mult(float value) => new(OperationType.Mult, value);
+        public static StatModifier FinalAdd(float value) => new(OperationType.FinalAdd, value);
+    }
 }

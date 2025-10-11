@@ -53,8 +53,8 @@ public partial class Player_WallClimbState : State
 		if (Input.IsActionJustPressed("Jump"))
 		{
 			int direction = HeadingLeft ? -1 : 1;
-			velocity.X = -direction * Storage.GetVariant<float>("Speed");
-			velocity.Y = -Storage.GetVariant<float>("JumpVelocity");
+			velocity.X = -direction * Stats.GetStatValue("Speed");
+			velocity.Y = -Stats.GetStatValue("JumpVelocity");
 			HeadingLeft = !HeadingLeft;
 			CanCoyoteTimerStart = false;
 			AvailableJumps--;

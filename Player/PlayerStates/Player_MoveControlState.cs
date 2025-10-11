@@ -14,7 +14,7 @@ public partial class Player_MoveControlState : State
 		get => Storage.GetVariant<int>("AvailableJumps");
 		set => Storage.SetVariant("AvailableJumps", value);
 	}
-	private float Speed => Storage.GetVariant<float>("Speed");
+	private float Speed => Stats.GetStatValue("Speed");
 	private Player _player = null;
 	private bool _isOnFloor = false;
 	private bool _isCoyoteTimerRunning = false;
@@ -49,7 +49,7 @@ public partial class Player_MoveControlState : State
 
 		if ((Input.IsActionJustPressed("Jump") && AvailableJumps > 0) || (_willJump && _isOnFloor))
 		{
-			velocity.Y = -Storage.GetVariant<float>("JumpVelocity");
+			velocity.Y = -Stats.GetStatValue("JumpVelocity");
 			_willJump = false;
 			_shortJumpTimer.Start();
 			AvailableJumps--;
