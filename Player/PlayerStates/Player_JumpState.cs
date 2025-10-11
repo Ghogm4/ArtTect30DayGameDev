@@ -3,7 +3,7 @@ using System;
 
 public partial class Player_JumpState : State
 {
-	private const int _leapFrame = 2;
+	private const int LeapFrame = 2;
 	private AnimatedSprite2D _sprite = null;
 	private Player _player = null;
 	private bool _canTriggerRise = true;
@@ -31,7 +31,7 @@ public partial class Player_JumpState : State
 		{
 			if (_sprite.Animation == "Fall")
 				_sprite.Play("Rise");
-			_sprite.Frame = _leapFrame;
+			_sprite.Frame = LeapFrame;
 		}
 		if (Storage.GetVariant<int>("AvailableJumps") <= 0)
 			_canTriggerRise = false;

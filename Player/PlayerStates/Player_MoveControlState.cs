@@ -7,8 +7,8 @@ public partial class Player_MoveControlState : State
 	[Export] private Timer _jumpBufferTimer = null;
 	[Export] private Timer _coyoteTimer = null;
 	[Export] private Timer _shortJumpTimer = null;
-	public const float Acceleration = 25.0f;
-	public const float Deceleration = 25.0f;
+	private const float Acceleration = 25.0f;
+	private const float Deceleration = 25.0f;
 	private int AvailableJumps
 	{
 		get => Storage.GetVariant<int>("AvailableJumps");
