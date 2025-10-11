@@ -17,7 +17,7 @@ public partial class ResponsiveButton : Button
 	private void OnMouseEntered()
 	{
 		Tween tween = CreateTween();
-		tween.TweenProperty(this, "scale", _scaleVector, _duration)
+		tween.TweenProperty(this, "scale", _scaleVector, Duration)
 			.SetTrans(Tween.TransitionType.Quart)
 			.SetEase(Tween.EaseType.Out);
 
@@ -26,7 +26,7 @@ public partial class ResponsiveButton : Button
 	private void OnMouseExited()
 	{
 		Tween tween = CreateTween();
-		tween.TweenProperty(this, "scale", Vector2.One, _duration)
+		tween.TweenProperty(this, "scale", Vector2.One, Duration)
 			.SetTrans(Tween.TransitionType.Quart)
 			.SetEase(Tween.EaseType.Out);
 	}
