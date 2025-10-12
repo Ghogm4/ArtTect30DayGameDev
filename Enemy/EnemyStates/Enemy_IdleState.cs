@@ -23,6 +23,14 @@ public partial class Enemy_IdleState : State
 	{
 
 	}
+
+    protected override void PhysicsUpdate(double delta)
+    {
+        Vector2 velocity = _enemy.Velocity;
+		if (!_enemy.IsOnFloor())
+			velocity.Y = Math.Min(_enemy.GetGravity().Y * (float)delta * 0.5f + velocity.Y, _enemy.MaxFallSpeed);
+		_enemy.Velocity = velocity;
+    }
 	
 	public void OnEnterMonitor(Node2D body)
 	{
