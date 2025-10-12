@@ -12,6 +12,13 @@ public partial class StatComponent : Node
         GD.PushError($"Stat '{statName}' not found in StatComponent.");
         return null;
     }
+    public bool IsStatValueApprox(string statName, float value, float tolerance = 0.01f)
+    {
+        var stat = GetStat(statName);
+        if (stat != null)
+            return Mathf.IsEqualApprox(stat.FinalValue, value, tolerance);
+        return false;
+    }
     public float GetStatValue(string statName)
     {
         return GetStat(statName)?.FinalValue ?? 0f;

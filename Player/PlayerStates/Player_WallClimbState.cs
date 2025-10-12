@@ -7,8 +7,8 @@ public partial class Player_WallClimbState : State
 	private Player _player = null;
 	private int AvailableJumps
 	{
-		get => Storage.GetVariant<int>("AvailableJumps");
-		set => Storage.SetVariant("AvailableJumps", value);
+		get => (int)Stats.GetStatValue("AvailableJumps");
+		set => Stats.GetStat("AvailableJumps").AddFinal(value - (int)Stats.GetStatValue("AvailableJumps"));
 	}
 	private bool HeadingLeft
 	{
@@ -69,5 +69,5 @@ public partial class Player_WallClimbState : State
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
 	}
-	private void ResetJumps() => Storage.SetVariant("AvailableJumps", GameData.Instance.PlayerMaxJumps);
+	private void ResetJumps() => AvailableJumps = (int)Stats.GetStatValue("MaxJump");
 }

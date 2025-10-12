@@ -7,6 +7,11 @@ public partial class Player_JumpState : State
 	private AnimatedSprite2D _sprite = null;
 	private Player _player = null;
 	private bool _canTriggerRise = true;
+	private int AvailableJumps
+	{
+		get => (int)Stats.GetStatValue("AvailableJumps");
+		set => Stats.GetStat("AvailableJumps").AddFinal(value - (int)Stats.GetStatValue("AvailableJumps"));
+	}
 	protected override void ReadyBehavior()
 	{
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
@@ -33,7 +38,7 @@ public partial class Player_JumpState : State
 				_sprite.Play("Rise");
 			_sprite.Frame = LeapFrame;
 		}
-		if (Storage.GetVariant<int>("AvailableJumps") <= 0)
+		if (AvailableJumps <= 0)
 			_canTriggerRise = false;
 		if (_player.IsOnFloor())
 			AskTransit("Idle");

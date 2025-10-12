@@ -11,8 +11,8 @@ public partial class Player_MoveControlState : State
 	private const float Deceleration = 25.0f;
 	private int AvailableJumps
 	{
-		get => Storage.GetVariant<int>("AvailableJumps");
-		set => Storage.SetVariant("AvailableJumps", value);
+		get => (int)Stats.GetStatValue("AvailableJumps");
+		set => Stats.GetStat("AvailableJumps").AddFinal(value - (int)Stats.GetStatValue("AvailableJumps"));
 	}
 	private float Speed => Stats.GetStatValue("Speed");
 	private Player _player = null;
@@ -29,7 +29,7 @@ public partial class Player_MoveControlState : State
 		_player = Storage.GetNode<Player>("Player");
 		_coyoteTimer.Timeout += () =>
 		{
-			if (AvailableJumps == GameData.Instance.PlayerMaxJumps)
+			if (AvailableJumps == (int)Stats.GetStatValue("MaxJump"))
 				AvailableJumps--;
 			_isCoyoteTimerRunning = false;
 			CanCoyoteTimerStart = false;
@@ -103,5 +103,5 @@ public partial class Player_MoveControlState : State
 			_jumpBufferTimer.Start();
 		}
 	}
-	private void ResetJumps() => AvailableJumps = GameData.Instance.PlayerMaxJumps;
+	private void ResetJumps() => AvailableJumps = (int)Stats.GetStatValue("MaxJump");
 }
