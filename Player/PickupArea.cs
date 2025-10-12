@@ -5,9 +5,9 @@ public partial class PickupArea : Area2D
 {
 	[Export] public StatComponent StatComponent;
 	public override void _Ready()
-    {
+	{
 		BodyEntered += OnBodyEntered;
-    }
+	}
 	public void OnBodyEntered(Node2D body)
 	{
 		if (body.IsInGroup("Pickups"))

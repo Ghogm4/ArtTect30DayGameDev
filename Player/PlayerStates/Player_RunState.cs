@@ -24,8 +24,8 @@ public partial class Player_RunState : State
 		if (Mathf.IsZeroApprox(_player.Velocity.X) && Storage.GetVariant<int>("Direction") == 0)
 			AskTransit("Idle");
 	}
-    protected override void Exit()
-    {
+	protected override void Exit()
+	{
 		AudioManager.Instance.StopSFX("Run", 1f);
-    }
+	}
 }

@@ -15,9 +15,9 @@ public partial class Player_DashAttackState : State
 		_sprite.AnimationFinished += OnAnimationFinished;
 		_sprite.Play("DashAttack");
 		_player.Velocity = Vector2.Zero;
-    }
+	}
 
-    protected override void Exit()
+	protected override void Exit()
 	{
 		_sprite.AnimationFinished -= OnAnimationFinished;
 	}
