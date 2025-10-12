@@ -10,8 +10,8 @@ public partial class Player_DashState : State
 	private AnimatedSprite2D _sprite = null;
 	private int AvailableJumps
 	{
-		get => Storage.GetVariant<int>("AvailableJumps");
-		set => Storage.SetVariant("AvailableJumps", value);
+		get => (int)Stats.GetStatValue("AvailableJumps");
+		set => Stats.GetStat("AvailableJumps").AddFinal(value - (int)Stats.GetStatValue("AvailableJumps"));
 	}
 	private bool CanCoyoteTimerStart
 	{
