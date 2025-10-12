@@ -7,14 +7,14 @@ public partial class StatModifier : RefCounted
 	public OperationType Type { get; private set; } = OperationType.BaseAdd;
 	public Stat ReferencedStat { get; private set; } = null;
 	private float _referencedPercentage = 100f;
-	private float _value;
-	private float Value
+	private float _value = 0;
+	public float Value
 	{
 		get
 		{
 			return ReferencedStat != null ? ReferencedStat.FinalValue * _referencedPercentage / 100f : _value;
 		}
-		set => _value = value;
+		private set => _value = value;
 	}
 	public StatModifier(OperationType type, float value)
 	{
