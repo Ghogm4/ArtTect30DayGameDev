@@ -35,7 +35,6 @@ public partial class State : Node
 	public void EnterState()
 	{
 		_isActive = true;
-		GD.Print($"Entering State: {Name}");
 		Enter();
 	}
 	// 重载以实现进入状态时的行为

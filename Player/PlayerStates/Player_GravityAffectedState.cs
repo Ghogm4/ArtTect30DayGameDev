@@ -15,5 +15,5 @@ public partial class Player_GravityAffectedState : State
 		if (!_player.IsOnFloor())
 			velocity.Y = Math.Min(_player.GetGravity().Y * (float)delta * 0.5f + velocity.Y, _maxFallSpeed);
 		_player.Velocity = velocity;
-    }
+	}
 }
