@@ -94,6 +94,14 @@ public partial class Stat : Resource
     public void AddModifier(StatModifier modifier)
     {
         if (modifier == null) return;
+        if ((
+                (modifier.Type == StatModifier.OperationType.BaseAdd || modifier.Type == StatModifier.OperationType.FinalAdd)
+                && Mathf.IsZeroApprox(modifier.Value)
+            ) ||
+            (
+                modifier.Type == StatModifier.OperationType.Mult && Mathf.IsEqualApprox(modifier.Value, 1f)
+            ))
+            return;
         _modifiers.Add(modifier);
         _needRefresh = true;
 
