@@ -14,6 +14,10 @@ public partial class Enemy_AttackState : State
 
 	protected override void Enter()
 	{
+		if (Storage.GetVariant<bool>("HeadingLeft"))
+			_sprite.FlipH = true;
+		else
+			_sprite.FlipH = false;
 		GD.Print("Enemy Entered Attack State");
 		_sprite.Play("Attack1");
 		_enemy.Velocity = Vector2.Zero;

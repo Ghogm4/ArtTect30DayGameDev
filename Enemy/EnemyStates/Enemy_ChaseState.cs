@@ -31,11 +31,10 @@ public partial class Enemy_ChaseState : State
 		if (direction.X < 0)
 		{
 			Storage.SetVariant("HeadingLeft", true);
-			_sprite.FlipH = true;
 		}
 		else
 		{
-			_sprite.FlipH = false;
+			Storage.SetVariant("HeadingLeft", false);
 		}
 		float distance = _enemy.GlobalPosition.DistanceTo(playerPos);
 		if (distance > 200f)
