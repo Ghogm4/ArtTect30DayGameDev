@@ -47,7 +47,8 @@ public partial class Player_WallClimbState : State
 
 		if ((Input.IsActionJustPressed("Left") && !HeadingLeft) ||
 			(Input.IsActionJustPressed("Right") && HeadingLeft) ||
-			!_player.IsOnWallOnly())
+			_player.IsOnFloor() ||
+			(!_player.IsOnFloor() && !_player.IsOnWall() && !_player.IsOnCeiling())) 
 			AskTransit("Idle");
 
 		if (Input.IsActionJustPressed("Jump"))
