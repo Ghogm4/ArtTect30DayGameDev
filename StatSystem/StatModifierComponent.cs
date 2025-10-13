@@ -3,7 +3,7 @@ using System;
 [GlobalClass]
 public partial class StatModifierComponent : Node
 {
-	[Export] public StatModifierComponentResource[] ModifierResources;
+	[Export] public StatModifierResource[] ModifierResources;
 	public void ModifyStatComponent(StatComponent statComponent)
 	{
 		foreach (var resource in ModifierResources)

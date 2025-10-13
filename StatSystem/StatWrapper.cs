@@ -34,6 +34,25 @@ public partial class StatWrapper : RefCounted
     }
     public static StatWrapper operator ++(StatWrapper a) => a + 1f;
     public static StatWrapper operator --(StatWrapper a) => a - 1f;
-    public static implicit operator float(StatWrapper a) => a._stat.FinalValue;
-    public static implicit operator int(StatWrapper a) => (int)a._stat.FinalValue;
+    public static explicit operator float(StatWrapper a) => a._stat.FinalValue;
+    public static explicit operator int(StatWrapper a) => (int)a._stat.FinalValue;
+    public static bool operator ==(StatWrapper a, float b) => Mathf.IsEqualApprox((float)a, b);
+    public static bool operator ==(StatWrapper a, int b) => (int)a == b;
+    public static bool operator !=(StatWrapper a, float b) => !(a == b);
+    public static bool operator !=(StatWrapper a, int b) => !(a == b);
+    public static bool operator <(StatWrapper a, float b) => (float)a < b;
+    public static bool operator <(StatWrapper a, int b) => (int)a < b;
+    public static bool operator <=(StatWrapper a, float b) => (float)a <= b;
+    public static bool operator <=(StatWrapper a, int b) => (int)a <= b;
+    public static bool operator >=(StatWrapper a, float b) => (float)a >= b;
+    public static bool operator >=(StatWrapper a, int b) => (int)a >= b;
+    public static bool operator >(StatWrapper a, float b) => (float)a > b;
+    public static bool operator >(StatWrapper a, int b) => (int)a > b;
+    public override bool Equals(object obj)
+    {
+        if (obj is StatWrapper other)
+            return this == (float)other;
+        return false;
+    }
+    public override int GetHashCode() => base.GetHashCode();
 }
