@@ -20,12 +20,18 @@ public partial class Player_UniversalState : State
 		{
 			_isInvincible = false;
 			_sprite.Modulate = Colors.White;
-			if (IsInstanceValid(_invincibilityTween))
-				_invincibilityTween.Kill();
+			_invincibilityTween?.Kill();
 		};
+		InitializeSignals();
 		InitializeWrappers();
 		EmitHealthStatus();
 	}
+	private void InitializeSignals()
+    {
+        Stats.GetStat("Health").StatChanged += EmitHealthStatus;
+		Stats.GetStat("MaxHealth").StatChanged += EmitHealthStatus;
+		Stats.GetStat("Shield").StatChanged += EmitHealthStatus;
+    }
 	private void InitializeWrappers()
 	{
 		_health = new(Stats.GetStat("Health"));
@@ -46,8 +52,7 @@ public partial class Player_UniversalState : State
 		if (_sprite.Animation == "Die")
 		{
 			_sprite.Modulate = Colors.White;
-			if (IsInstanceValid(_invincibilityTween))
-				_invincibilityTween.Kill();
+			_invincibilityTween?.Kill();
 			return;
 		}
 		for (int collisionIndex = 0; collisionIndex < _player.GetSlideCollisionCount(); collisionIndex++)
@@ -58,7 +63,7 @@ public partial class Player_UniversalState : State
 				HandleDamage();
 				Flash();
 				_isInvincible = true;
-				_invincibilityTimer.WaitTime = _invincibilityTime;
+				_invincibilityTimer.WaitTime = (float)_invincibilityTime;
 				_invincibilityTimer.Start();
 			}
 		}
@@ -70,7 +75,7 @@ public partial class Player_UniversalState : State
 		else
 		{
 			_health--;
-			if (_health == 0)
+			if (_health <= 0)
 				AskTransit("Die");
 		}
 		EmitHit();
@@ -92,13 +97,14 @@ public partial class Player_UniversalState : State
 
 		_invincibilityTween = _sprite.CreateTween();
 		float flashSequenceLength = 0.2f;
-		_invincibilityTween.SetLoops(_invincibilityTime / flashSequenceLength);
+		int loops = (int)Mathf.Ceil((float)_invincibilityTime / flashSequenceLength);
+		_invincibilityTween.SetLoops(loops);
 		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 0.5f, 0.1f);
 		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 1, 0.1f);
 	}
 	private void EmitHealthStatus()
 	{
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated, _health, _maxHealth, _shield);
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated, (int)_health, (int)_maxHealth, (int)_shield);
 	}
 	private void EmitHit()
 	{
