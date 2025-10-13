@@ -10,4 +10,5 @@ public partial class SignalBus : Node
     [Signal] public delegate void PlayerDiedEventHandler();
     [Signal] public delegate void ShowTextEventHandler();
     [Signal] public delegate void WaitAdvanceEventHandler();
+    [Signal] public delegate void SceneChangeStartedEventHandler();
 }
