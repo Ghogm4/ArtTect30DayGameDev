@@ -8,8 +8,8 @@ public partial class SceneManager : Node
 	public TransitionLayer Transition => GetNode<TransitionLayer>("/root/TransitionLayer");
 	public async void ChangeScene(string scenePath)
 	{
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.SceneChangeStarted);
 		await Transition.FadeIn(0.5f);
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.SceneChangeStarted);
 		GetTree().ChangeSceneToFile(scenePath);
 		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 		await Transition.FadeOut(0.5f);

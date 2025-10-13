@@ -41,12 +41,13 @@ public partial class Player_DashState : State
 		HandleTrailDirection();
 	}
 	private void CreateDashCooldownTimer()
-    {
-        GetTree().CreateTimer(Stats.GetStatValue("DashCooldown")).Timeout += () =>
+	{
+		Scheduler.Instance.ScheduleAction(Stats.GetStatValue("DashCooldown"), () =>
 		{
 			if (AvailableDashes < (int)Stats.GetStatValue("MaxDash"))
 				AvailableDashes++;
-		};
+		}
+		, true);
     }
 	private void HandleTrailDirection()
     {

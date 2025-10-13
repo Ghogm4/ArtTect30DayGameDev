@@ -12,7 +12,7 @@ public partial class StatComponent : Node
 		{
 			if (GameData.Instance.StatModifierDict.Count > 0)
 				InitializeStatsWithGameData();
-			SignalBus.Instance.Connect(SignalBus.SignalName.SceneChangeStarted, Callable.From(OnSceneChangeStarted), (uint)ConnectFlags.OneShot);
+			SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
         }
 	}
 	public Stat GetStat(string statName)
@@ -72,7 +72,7 @@ public partial class StatComponent : Node
 				AddModifier(pair.Key, modifierResource.CreateModifier(this));
 	}
 	private void OnSceneChangeStarted()
-    {
+	{
 		SaveStatModifiersToGameData();
 		QueueFree();
     }
