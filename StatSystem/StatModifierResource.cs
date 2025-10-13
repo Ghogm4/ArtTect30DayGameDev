@@ -9,7 +9,7 @@ public partial class StatModifierResource : Resource
 	[Export] public float ReferencedPercentage = -1f;
 	[Export] public string ReferencedStatName = string.Empty;
 	[Export] public string TargetStatName = string.Empty;
-	public virtual StatModifier CreateModifier(StatComponent statComponent)
+	public StatModifier CreateModifier(StatComponent statComponent)
 	{
 		if (!string.IsNullOrEmpty(ReferencedStatName))
 			return CreateReferencedModifier(statComponent.GetStat(ReferencedStatName));

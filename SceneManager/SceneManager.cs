@@ -8,9 +8,10 @@ public partial class SceneManager : Node
 	public TransitionLayer Transition => GetNode<TransitionLayer>("/root/TransitionLayer");
 	public async void ChangeScene(string scenePath)
 	{
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.SceneChangeStarted);
 		await Transition.FadeIn(0.5f);
 		GetTree().ChangeSceneToFile(scenePath);
-		await ToSignal(GetTree(), "scene_changed");
+		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 		await Transition.FadeOut(0.5f);
 	}
 	// Called when the node enters the scene tree for the first time.

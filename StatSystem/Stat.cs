@@ -5,9 +5,12 @@ using System.Collections.Generic;
 public partial class Stat : Resource
 {
     [Signal] public delegate void StatChangedEventHandler();
+    [Export] public string Name = string.Empty;
     [Export] public float BaseValue { get; private set; } = 0f;
     // Enable this for frequently modified stats to merge all normal modifiers into the three types when the count exceeds threshold
     [Export] public bool Mergeable = false;
+    // Enable this to allow instant calculation upon modification, suitable for those needed to be shown on UI
+    [Export] public bool CalculateOnModify = false;
     private const int NormalModifierThreshold = 20;
     private int _normalModifierCount = 0;
     public float FinalValue
@@ -26,7 +29,7 @@ public partial class Stat : Resource
     {
         if (Mergeable && _normalModifierCount > NormalModifierThreshold)
             MergeNormalModifiers();
-            
+
         float baseAdd = 0f;
         float mult = 1f;
         float finalAdd = 0f;
@@ -51,10 +54,10 @@ public partial class Stat : Resource
     }
     public void MergeNormalModifiers()
     {
+        _normalModifierCount = 0;
         float baseAdd = 0f;
         float mult = 1f;
         float finalAdd = 0f;
-
         foreach (var modifier in _modifiers)
         {
             switch (modifier.Type)
@@ -75,17 +78,17 @@ public partial class Stat : Resource
         int types = 0;
         if (!Mathf.IsZeroApprox(baseAdd))
         {
-            _modifiers.Add(StatModifier.Factory.BaseAdd(baseAdd));
+            AddBase(baseAdd);
             types++;
         }
         if (!Mathf.IsZeroApprox(mult - 1f))
         {
-            _modifiers.Add(StatModifier.Factory.Mult(mult));
+            Mult(mult);
             types++;
         }
         if (!Mathf.IsZeroApprox(finalAdd))
         {
-            _modifiers.Add(StatModifier.Factory.FinalAdd(finalAdd));
+            AddFinal(finalAdd);
             types++;
         }
         _normalModifierCount = types;
@@ -105,6 +108,8 @@ public partial class Stat : Resource
         _modifiers.Add(modifier);
         _needRefresh = true;
 
+        if (CalculateOnModify)
+            Calculate();
         if (modifier.ReferencedStat == null)
             _normalModifierCount++;
     }
@@ -114,8 +119,31 @@ public partial class Stat : Resource
         _modifiers.Remove(modifier);
         _needRefresh = true;
 
+        if (CalculateOnModify)
+            Calculate();
         if (modifier.ReferencedStat == null)
             _normalModifierCount--;
+    }
+    public List<StatModifierResource> CreateModifierResources()
+    {
+        var resources = new List<StatModifierResource>();
+        foreach (var modifier in _modifiers)
+        {
+            StatModifierResource resource = new();
+            resource.Type = modifier.Type;
+            if (modifier.ReferencedStat != null)
+            {
+                resource.ReferencedStatName = modifier.ReferencedStat.Name;
+                resource.ReferencedPercentage = modifier.Value / modifier.ReferencedStat.FinalValue * 100f;
+            }
+            else
+            {
+                resource.Value = modifier.Value;
+            }
+            resources.Add(resource);
+        }
+        _modifiers.Clear();
+        return resources;
     }
     public void AddBase(float value) => AddModifier(StatModifier.Factory.BaseAdd(value));
     public void Mult(float value) => AddModifier(StatModifier.Factory.Mult(value));
