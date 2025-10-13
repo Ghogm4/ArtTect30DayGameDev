@@ -8,6 +8,10 @@ public partial class Player_UniversalState : State
 	private Player _player = null;
 	private bool _isInvincible = false;
 	private Tween _invincibilityTween = null;
+	private StatWrapper _health;
+	private StatWrapper _shield;
+	private StatWrapper _maxHealth;
+	private StatWrapper _invincibilityTime;
 	protected override void ReadyBehavior()
 	{
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
@@ -19,6 +23,15 @@ public partial class Player_UniversalState : State
 			if (IsInstanceValid(_invincibilityTween))
 				_invincibilityTween.Kill();
 		};
+		InitializeWrappers();
+		EmitHealthStatus();
+	}
+	private void InitializeWrappers()
+	{
+		_health = new(Stats.GetStat("Health"));
+		_shield = new(Stats.GetStat("Shield"));
+		_maxHealth = new(Stats.GetStat("MaxHealth"));
+		_invincibilityTime = new(Stats.GetStat("InvincibilityTime"));
 	}
 	protected override void FrameUpdate(double delta)
 	{
@@ -30,6 +43,13 @@ public partial class Player_UniversalState : State
 	}
 	protected override void PhysicsUpdate(double delta)
 	{
+		if (_sprite.Animation == "Die")
+		{
+			_sprite.Modulate = Colors.White;
+			if (IsInstanceValid(_invincibilityTween))
+				_invincibilityTween.Kill();
+			return;
+		}
 		for (int collisionIndex = 0; collisionIndex < _player.GetSlideCollisionCount(); collisionIndex++)
 		{
 			KinematicCollision2D collision = _player.GetSlideCollision(collisionIndex);
@@ -37,25 +57,23 @@ public partial class Player_UniversalState : State
 			{
 				HandleDamage();
 				Flash();
-				SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit);
 				_isInvincible = true;
+				_invincibilityTimer.WaitTime = _invincibilityTime;
 				_invincibilityTimer.Start();
 			}
 		}
 	}
 	public void HandleDamage()
 	{
-		ref int health = ref GameData.Instance.PlayerHealth;
-		ref int shield = ref GameData.Instance.PlayerShield;
-
-		if (shield > 0)
-			shield--;
+		if (_shield > 0)
+			_shield--;
 		else
 		{
-			health--;
-			if (health == 0)
-				SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerDied);
+			_health--;
+			if (_health == 0)
+				AskTransit("Die");
 		}
+		EmitHit();
 	}
 	public async void Flash()
 	{
@@ -71,9 +89,20 @@ public partial class Player_UniversalState : State
 			.SetTrans(Tween.TransitionType.Quad)
 			.SetEase(Tween.EaseType.Out);
 		await ToSignal(_invincibilityTween, Tween.SignalName.Finished);
+
 		_invincibilityTween = _sprite.CreateTween();
-		_invincibilityTween.SetLoops(10);
+		float flashSequenceLength = 0.2f;
+		_invincibilityTween.SetLoops(_invincibilityTime / flashSequenceLength);
 		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 0.5f, 0.1f);
 		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 1, 0.1f);
+	}
+	private void EmitHealthStatus()
+	{
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated, _health, _maxHealth, _shield);
+	}
+	private void EmitHit()
+	{
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit);
+		EmitHealthStatus();
 	}
 }

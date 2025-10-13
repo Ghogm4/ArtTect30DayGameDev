@@ -17,10 +17,7 @@ public partial class StatWrapper : RefCounted
         a._stat.AddFinal(b);
         return a;
     }
-    public static StatWrapper operator -(StatWrapper a, float b)
-    {
-        return a + (-b);
-    }
+    public static StatWrapper operator -(StatWrapper a, float b) => a + (-b);
     public static StatWrapper operator *(StatWrapper a, float b)
     {
         a._stat.Mult(b);
@@ -35,12 +32,8 @@ public partial class StatWrapper : RefCounted
         }
         return a * (1f / b);
     }
-    public static StatWrapper operator ++(StatWrapper a)
-    {
-        return a + 1f;
-    }
-    public static StatWrapper operator --(StatWrapper a)
-    {
-        return a - 1f;
-    }
+    public static StatWrapper operator ++(StatWrapper a) => a + 1f;
+    public static StatWrapper operator --(StatWrapper a) => a - 1f;
+    public static implicit operator float(StatWrapper a) => a._stat.FinalValue;
+    public static implicit operator int(StatWrapper a) => (int)a._stat.FinalValue;
 }
