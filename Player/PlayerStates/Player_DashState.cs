@@ -13,6 +13,11 @@ public partial class Player_DashState : State
 		get => (int)Stats.GetStatValue("AvailableJumps");
 		set => Stats.GetStat("AvailableJumps").AddFinal(value - (int)Stats.GetStatValue("AvailableJumps"));
 	}
+	private int AvailableDashes
+	{
+		get => (int)Stats.GetStatValue("AvailableDashes");
+		set => Stats.GetStat("AvailableDashes").AddFinal(value - (int)Stats.GetStatValue("AvailableDashes"));
+	}
 	private bool CanCoyoteTimerStart
 	{
 		set => Storage.SetVariant("CanCoyoteTimerStart", value);
@@ -25,13 +30,31 @@ public partial class Player_DashState : State
 	protected override void Enter()
 	{
 		_sprite.Play("Dash");
+
+		_dashTimer.WaitTime = Stats.GetStatValue("DashDuration");
 		_dashTimer.Start();
+
 		_dashTrail.Emitting = true;
-		if (Storage.GetVariant<bool>("HeadingLeft"))
+
+		CreateDashCooldownTimer();
+
+		HandleTrailDirection();
+	}
+	private void CreateDashCooldownTimer()
+    {
+        GetTree().CreateTimer(Stats.GetStatValue("DashCooldown")).Timeout += () =>
+		{
+			if (AvailableDashes < (int)Stats.GetStatValue("MaxDash"))
+				AvailableDashes++;
+		};
+    }
+	private void HandleTrailDirection()
+    {
+        if (Storage.GetVariant<bool>("HeadingLeft"))
 			_dashTrail.Texture = ResourceLoader.Load<Texture2D>("res://Assets/PlayerSpriteSheet/PlayerDashLeft.png");
 		else
 			_dashTrail.Texture = ResourceLoader.Load<Texture2D>("res://Assets/PlayerSpriteSheet/PlayerDashRight.png");
-	}
+    }
 	protected override void PhysicsUpdate(double delta)
 	{
 		int direction = Storage.GetVariant<bool>("HeadingLeft") ? -1 : 1;

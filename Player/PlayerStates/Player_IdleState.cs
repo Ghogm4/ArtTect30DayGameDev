@@ -21,14 +21,9 @@ public partial class Player_IdleState : State
 
 		if (PreviousState.Name == "Jump")
 			AudioManager.Instance.PlaySFX("Fall");
-
-		// if (PreviousState.Name == "Dash")
-		// 	Callable.From(() => Input.ActionPress("Jump")).CallDeferred();
 	}
 	protected override void FrameUpdate(double delta)
 	{
-		if (Input.IsActionJustPressed("Dash"))
-			AskTransit("Dash");
 		if (Input.IsActionJustPressed("Attack"))
 			AskTransit("Attack1");
 		if (!_player.IsOnFloor())

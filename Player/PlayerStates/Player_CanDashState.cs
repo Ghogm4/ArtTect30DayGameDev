@@ -14,11 +14,6 @@ public partial class Player_CanDashState : State
 		{
 			AskTransit("Dash");
 			AvailableDashes--;
-			GetTree().CreateTimer(Stats.GetStatValue("DashCooldown")).Timeout += () =>
-			{
-				if (AvailableDashes < (int)Stats.GetStatValue("MaxDash"))
-					AvailableDashes++;
-			};
 		}
     }
 }

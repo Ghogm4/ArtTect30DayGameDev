@@ -10,6 +10,11 @@ public partial class Player_WallClimbState : State
 		get => (int)Stats.GetStatValue("AvailableJumps");
 		set => Stats.GetStat("AvailableJumps").AddFinal(value - (int)Stats.GetStatValue("AvailableJumps"));
 	}
+	private int AvailableDashes
+	{
+		get => (int)Stats.GetStatValue("AvailableDashes");
+		set => Stats.GetStat("AvailableDashes").AddFinal(value - (int)Stats.GetStatValue("AvailableDashes"));
+	}
 	private bool HeadingLeft
 	{
 		get => Storage.GetVariant<bool>("HeadingLeft");
@@ -65,6 +70,7 @@ public partial class Player_WallClimbState : State
 		if (Input.IsActionJustPressed("Dash"))
 		{
 			HeadingLeft = !HeadingLeft;
+			AvailableDashes--;
 			AskTransit("Dash");
 		}
 		_player.Velocity = velocity;
