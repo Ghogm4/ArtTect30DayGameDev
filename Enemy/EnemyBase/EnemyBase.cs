@@ -57,4 +57,8 @@ public partial class EnemyBase : CharacterBody2D
 		this.MoveAndSlide();
 	}
 
+	public virtual void CustomBehaviour()
+	{
+
+	}
 }
