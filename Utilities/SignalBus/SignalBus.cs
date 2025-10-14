@@ -5,7 +5,7 @@ using System.Linq;
 
 public partial class SignalBus : Node
 {
-    [Signal] public delegate void PlayerHitEventHandler();
+    [Signal] public delegate void PlayerHitEventHandler(int damage, Callable customBehavior);
     [Signal] public delegate void PlayerHealthStatusUpdatedEventHandler(int health, int maxHealth, int shield);
     [Signal] public delegate void PlayerDiedEventHandler();
     [Signal] public delegate void ShowTextEventHandler();
@@ -22,7 +22,6 @@ public partial class SignalBus : Node
         Instance = this;
         SceneChangeStarted += TriggerSceneChangeStartedActions;
     }
-
     public void RegisterSceneChangeStartedAction(Action action, int priority)
     {
         _onSceneChangeStartedActions.Add(new Tuple<int, Action>(priority, action));
@@ -31,9 +30,8 @@ public partial class SignalBus : Node
     {
         var tuple = _onSceneChangeStartedActions.FirstOrDefault(x => x.Item2 == action);
         if (tuple != default)
-        {
             _onSceneChangeStartedActions.Remove(tuple);
-        }
+
     }
     public void RegisterSceneChangeStartedAction(Action action, Priority priority)
     {
@@ -46,4 +44,10 @@ public partial class SignalBus : Node
             tuple.Item2?.Invoke();
         _onSceneChangeStartedActions.Clear();
     }
+    /*
+    Registered Actions / Priority:
+        Player buff removal, 10
+        Finalize all dash recovery timers, 10
+        Transfer stat modifiers of player's StatComponent into GameData's StatModifierDict, 0
+    */
 }

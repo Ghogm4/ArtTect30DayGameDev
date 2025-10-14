@@ -47,7 +47,7 @@ public partial class Player_DashState : State
 			if (AvailableDashes < (int)Stats.GetStatValue("MaxDash"))
 				AvailableDashes++;
 		}
-		, true);
+		, 10, true);
     }
 	private void HandleTrailDirection()
     {
