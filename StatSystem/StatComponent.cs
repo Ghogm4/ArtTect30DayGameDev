@@ -44,6 +44,11 @@ public partial class StatComponent : Node
 		else
 			GD.PushError($"Stat '{statName}' not found in StatComponent.");
 	}
+	public void AddBuff(string statName, StatModifier modifier, float duration = 1f)
+	{
+		AddModifier(statName, modifier);
+		Scheduler.Instance.ScheduleAction(duration, () => RemoveModifier(statName, modifier), 10, true);
+    }
 	public void RemoveModifier(string statName, StatModifier modifier)
 	{
 		if (Stats.ContainsKey(statName))
