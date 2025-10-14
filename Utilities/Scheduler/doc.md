@@ -1,2 +1,2 @@
 # 使用方法
-如果设置了一些一次性计时事件（比如`GetTree().CreateTimer(delay).Timeout += someAction`），可以使用此单例提供的`ScheduleAction`函数，`delay`表明多久后发生，`action`即为要调用的函数，`finalizeBeforeSceneChange`若设为`true`，就会在场景转换前一刻立即结算所有还没结算的一次性计时事件（注：场景转换前结算这些事件的Priority是Medium，即10）。
+如果设置了一些一次性计时事件（比如`GetTree().CreateTimer(delay).Timeout += someAction`），可以使用此单例提供的`ScheduleAction`函数，`delay`表明多久后发生，`action`即为要调用的函数，`finalizeBeforeSceneChange`若设为`true`，就会在场景转换前一刻立即结算所有还没结算的一次性计时事件，`priority`即优先级
