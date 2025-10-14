@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class GreenSlime_JumpState : State
+public partial class RedSlime_JumpState : State
 {
 	private CharacterBody2D _enemy = null;
 	private Player _player = null;

@@ -10,7 +10,7 @@ public partial class GreenSlime_IdleState : State
     protected override void ReadyBehavior()
     {
         _sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
-        _player = GetTree().GetRoot().FindChild("Player", true, false) as Player;
+        _player = GetTree().GetFirstNodeInGroup("Player") as Player;
         _enemy = Storage.GetNode<CharacterBody2D>("Enemy");
 
         _enemy.Connect("EnterMonitor", new Callable(this, nameof(OnEnterMonitor)));
@@ -19,7 +19,6 @@ public partial class GreenSlime_IdleState : State
     protected override void Enter()
     {
         _sprite.Stop();
-        GD.Print("GreenSlime is now idle.");
         _sprite.Play("Idle");
     }
 
@@ -28,7 +27,6 @@ public partial class GreenSlime_IdleState : State
         if (body is Player)
         {
             Storage.SetVariant("Is_Chasing", true);
-            GD.Print("Transition to Chase State");
             if (_player == null)
             {
                 GD.Print("Player reference is null!");

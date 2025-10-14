@@ -1,13 +1,13 @@
 using Godot;
 using System;
 
-public partial class GreenSlime_MoveControlState : State
+public partial class RedSlime_MoveControlState : State
 {
 	private CharacterBody2D _enemy = null;
 	private Player _player = null;
 	private AnimatedSprite2D _sprite = null;
 	[Export] private float _maxFallSpeed = 500f;
-	[Export] public float Speed = 70f;
+	[Export] public float Speed = 105f;
 	[Export] public float JumpForce = 120f;
 	
 	[Signal] public delegate void JumpEventHandler();

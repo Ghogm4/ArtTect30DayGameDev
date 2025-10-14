@@ -30,7 +30,6 @@ public partial class EnemyBase : CharacterBody2D
 	public void OnMonitorAreaBodyEntered(Node2D body)
 	{
 		EmitSignal("EnterMonitor", body);
-		GD.Print($"Body entered MonitorArea: {body.Name}");
 	}
 	public void OnMonitorAreaBodyExited(Node2D body)
 	{
@@ -58,4 +57,8 @@ public partial class EnemyBase : CharacterBody2D
 		this.MoveAndSlide();
 	}
 
+	public virtual void CustomBehaviour()
+	{
+
+	}
 }
