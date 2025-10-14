@@ -42,6 +42,7 @@ project/assembly_name="ArtTech30DayGameDev"
 [global_group]
 
 Pickups="Things that can be picked up to provide stat bonus"
+Player=""
 
 [input]
 

@@ -6,20 +6,21 @@ public partial class GreenSlime_JumpState : State
 	private CharacterBody2D _enemy = null;
 	private Player _player = null;
 	private AnimatedSprite2D _sprite = null;
-	
+
+	private bool setCollide = false;
 	[Signal] public delegate void JumpEventHandler();
 
 	protected override void ReadyBehavior()
 	{
 		_enemy = Storage.GetNode<CharacterBody2D>("Enemy");
-		_player = GetTree().GetRoot().FindChild("Player", true, false) as Player;
+		_player = GetTree().GetFirstNodeInGroup("Player") as Player;
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
 		
 		
 	}
 	protected override void Enter()
 	{
-		GD.Print("GreenSlime is now jumping.");
+		
 		Charge();
 	}
 
@@ -34,7 +35,7 @@ public partial class GreenSlime_JumpState : State
 	public async void Charge()
 	{
 		_sprite.Play("Charge");
-		await ToSignal(GetTree().CreateTimer(0.3f), "timeout");
+		await ToSignal(GetTree().CreateTimer(0.2f), "timeout");
 		JumpUp();
 	}
 	public void JumpDown()
@@ -48,10 +49,29 @@ public partial class GreenSlime_JumpState : State
 		{
 			JumpDown();
 		}
-		
+
 		if (_enemy.IsOnFloor() && _sprite.Animation == "JumpDown")
 		{
 			AskTransit("Jumpidle");
+		}
+	}
+
+	protected override void PhysicsUpdate(double delta)
+	{
+		
+		for (int i = 0; i < _enemy.GetSlideCollisionCount(); i++)
+		{
+			var collision = _enemy.GetSlideCollision(i);
+			if (collision.GetCollider() == _player)
+			{
+				Storage.SetVariant("Is_Collision", true);
+				if (!setCollide)
+				{
+					Storage.SetVariant("Colliding", true);
+					setCollide = true;
+				}
+			}
+			else setCollide = false;
 		}
 	}
 	

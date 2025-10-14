@@ -15,14 +15,15 @@ public partial class GreenSlime_JumpidleState : State
 
 	protected override void Enter()
 	{
-		GD.Print("GreenSlime is now in Jumpidle state.");
+		
 		_sprite.Stop();
 		_sprite.Play("Jumpidle");
+		Storage.SetVariant("Is_Collision", false);
 	}
 
 	public void IdleDone()
 	{
-		GD.Print("Idle animation finished.");
+		
 		_sprite.Stop();
 		AskTransit("Jump");
 		
