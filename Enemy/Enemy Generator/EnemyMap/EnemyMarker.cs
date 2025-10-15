@@ -4,6 +4,7 @@ using Godot.Collections;
 
 
 [GlobalClass]
+[Tool]
 public partial class EnemyMarker : Node2D
 {
 	[Export] public Dictionary<string, float> EnemyTypes = new();
@@ -17,4 +18,13 @@ public partial class EnemyMarker : Node2D
 	public override void _Process(double delta)
 	{
 	}
+
+    public override void _Draw()
+    {
+        if (Engine.IsEditorHint()) // 只有在编辑器中绘制
+    {
+        DrawCircle(Vector2.Zero, 5, Colors.Red);
+    }
+    }
+
 }

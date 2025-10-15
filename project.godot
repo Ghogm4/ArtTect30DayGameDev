@@ -25,7 +25,6 @@ PlayerHealthBar="*res://UI/PlayerHealthBar/PlayerHealthBar.tscn"
 TransitionLayer="*res://SceneManager/TransitionScene/TransitionScene.tscn"
 AudioManager="*res://AudioManager/AudioManager.cs"
 TextManager="*res://TextManager/TextManager.cs"
-EnemyGenerator="*res://Enemy/Enemy Generator/EnemyGenerator.cs"
 Scheduler="*res://Utilities/Scheduler/Scheduler.cs"
 
 [display]
