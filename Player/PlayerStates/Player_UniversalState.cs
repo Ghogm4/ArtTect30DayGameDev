@@ -77,14 +77,13 @@ public partial class Player_UniversalState : State
 		_health -= remainingDamage;
 		customBehavior.Call(_player);
 		EmitHealthStatus();
-		
+
 		if (_health <= 0)
 		{
 			AskTransit("Die");
 			return;
 		}
 		
-		EmitHealthStatus();
 		SetInvincible();
 	}
 	private void SetInvincible()
