@@ -4,7 +4,7 @@ using System;
 [GlobalClass]
 [Tool]
 
-public partial class MoveHandler : Node2D
+public partial class MoveHandler : StaticBody2D
 {
 	private float _xoffset = 0f;
 	[Export]
@@ -73,17 +73,6 @@ public partial class MoveHandler : Node2D
 			QueueRedraw();
 		}
 	}
-	private Tween.EaseType _easeType = Tween.EaseType.InOut;
-	[Export]
-	public Tween.EaseType EaseType
-	{
-		get => _easeType;
-		set
-		{
-			_easeType = value;
-			QueueRedraw();
-		}
-	}
 	private bool _loop = false;
 	[Export] public bool Loop
 	{
@@ -102,11 +91,6 @@ public partial class MoveHandler : Node2D
 		set
 		{
 			_reverse = value;
-			if (!_loop)
-			{
-				GD.PrintErr("Reverse only works when Loop is enabled.");
-				_reverse = false;
-			}
 			QueueRedraw();
 		}
 	}
@@ -117,36 +101,85 @@ public partial class MoveHandler : Node2D
 	private Vector2 _initialPosition;
 	private float _initialRotation;
 	private Tween _tween;
+
+	private Vector2 _startPos;
+	private float _startRot;
+	private Vector2 _targetPos;
+	private float _targetRot;
+	private float _elapsedTime = 0f;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		_initialPosition = GlobalPosition;
 		_initialRotation = GlobalRotationDegrees;
+		_startPos = _initialPosition;
+		_targetPos = _initialPosition + new Vector2(_xoffset, _yoffset);
+		_startRot = _initialRotation;
+		_targetRot = _initialRotation + (_rotationClockwise ? _rotationOffset : -_rotationOffset);
+
 		if (AutoStart) StartMove();
 	}
 
 	public void StartMove()
 	{
-		_tween = CreateTween();
-		if (_loop && !_reverse)
-		{
-			_tween.SetLoops();
-		}
-		Vector2 targetPosition = _initialPosition + new Vector2(_xoffset, _yoffset);
-		_tween.TweenProperty(this, "global_position", targetPosition, _duration).SetTrans(_tweenType).SetEase(_easeType);
-		_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _initialRotation + (_rotationClockwise ? _rotationOffset : -_rotationOffset), _duration).SetTrans(_tweenType).SetEase(_easeType);
-		if (_reverse)
-		{
-			_tween.TweenCallback(Callable.From(() => ReverseMove()));
-		}
+		_elapsedTime = 0f;
 	}
+
 	public void ReverseMove()
-    {
-		_tween = CreateTween();
-		_tween.TweenProperty(this, "global_position", _initialPosition, _duration).SetTrans(_tweenType).SetEase(_easeType);
-		_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _rotationOffset > 180 ? _initialRotation - 360 : _initialRotation, _duration).SetTrans(_tweenType).SetEase(_easeType);
-		_tween.TweenCallback(Callable.From(() => StartMove()));
+	{
+		(_startPos, _targetPos) = (_targetPos, _startPos);
+    	(_startRot, _targetRot) = (_targetRot, _startRot);
+		_elapsedTime = 0f;
+    }
+
+	public override void _PhysicsProcess(double delta)
+	{
+		if (_duration <= 0) return;
+
+		_elapsedTime += (float)delta;
+		float t = Mathf.Clamp(_elapsedTime / _duration, 0f, 1f);
+		float easedT = Ease(t, _tweenType);
+
+		Vector2 currentPos = _startPos.Lerp(_targetPos, easedT);
+		float currentRot = Mathf.LerpAngle(_startRot, _targetRot, easedT);
+
+		GlobalPosition = currentPos;
+		GlobalRotationDegrees = currentRot;
+		
+
+		if (t >= 1f)
+		{
+			if (_reverse)
+			{
+				ReverseMove();
+			}
+
+			else if (_loop)
+			{
+				StartMove();
+			}
+		}
+
 	}
+
+	private float Ease(float t, Tween.TransitionType type)
+    {
+        switch (type)
+        {
+            case Tween.TransitionType.Linear:
+				return t;
+			case Tween.TransitionType.Sine:
+				return Mathf.Sin(t * Mathf.Pi / 2);
+			case Tween.TransitionType.Quad:
+				return t * t;
+			case Tween.TransitionType.Cubic:
+				return t * t * t;
+			default:
+				return t;
+        }
+    }
+	
     
 
     public override void _Draw()

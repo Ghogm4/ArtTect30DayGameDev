@@ -13,7 +13,7 @@ public partial class StatComponent : Node
 			if (GameData.Instance.StatModifierDict.Count > 0)
 				InitializeStatsWithGameData();
 			SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
-        }
+		}
 	}
 	public Stat GetStat(string statName)
 	{
@@ -48,7 +48,7 @@ public partial class StatComponent : Node
 	{
 		AddModifier(statName, modifier);
 		Scheduler.Instance.ScheduleAction(duration, () => RemoveModifier(statName, modifier), 10, true);
-    }
+	}
 	public void RemoveModifier(string statName, StatModifier modifier)
 	{
 		if (Stats.ContainsKey(statName))
@@ -80,5 +80,5 @@ public partial class StatComponent : Node
 	{
 		SaveStatModifiersToGameData();
 		QueueFree();
-    }
+	}
 }
