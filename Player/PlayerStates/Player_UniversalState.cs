@@ -27,11 +27,13 @@ public partial class Player_UniversalState : State
 		EmitHealthStatus();
 	}
 	private void InitializeSignals()
-    {
-        Stats.GetStat("Health").StatChanged += EmitHealthStatus;
+	{
+		Stats.GetStat("Health").StatChanged += EmitHealthStatus;
 		Stats.GetStat("MaxHealth").StatChanged += EmitHealthStatus;
 		Stats.GetStat("Shield").StatChanged += EmitHealthStatus;
-    }
+		SignalBus.Instance.PlayerHit += OnPlayerHit;
+		SignalBus.Instance.RegisterSceneChangeStartedAction(() => SignalBus.Instance.PlayerHit -= OnPlayerHit, SignalBus.Priority.Super);
+	}
 	private void InitializeWrappers()
 	{
 		_health = new(Stats.GetStat("Health"));
@@ -59,26 +61,38 @@ public partial class Player_UniversalState : State
 		{
 			KinematicCollision2D collision = _player.GetSlideCollision(collisionIndex);
 			if (!_isInvincible && collision.GetCollider() is ForestSpikeLayer)
-			{
-				HandleDamage();
-				Flash();
-				_isInvincible = true;
-				_invincibilityTimer.WaitTime = (float)_invincibilityTime;
-				_invincibilityTimer.Start();
-			}
+				SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, 1,
+				Callable.From<Player>((player) => {}));
 		}
 	}
-	public void HandleDamage()
+	
+	public void OnPlayerHit(int damage, Callable customBehavior)
 	{
-		if (_shield > 0)
-			_shield--;
-		else
+		int remainingDamage = damage;
+
+		int shieldReceivedDamage = Mathf.Min((int)_shield, remainingDamage);
+		_shield -= shieldReceivedDamage;
+		remainingDamage -= shieldReceivedDamage;
+
+		_health -= remainingDamage;
+		customBehavior.Call(_player);
+		EmitHealthStatus();
+		
+		if (_health <= 0)
 		{
-			_health--;
-			if (_health <= 0)
-				AskTransit("Die");
+			AskTransit("Die");
+			return;
 		}
-		EmitHit();
+		
+		EmitHealthStatus();
+		SetInvincible();
+	}
+	private void SetInvincible()
+	{
+		Flash();
+		_isInvincible = true;
+		_invincibilityTimer.WaitTime = (float)_invincibilityTime;
+		_invincibilityTimer.Start();
 	}
 	public async void Flash()
 	{
@@ -105,10 +119,5 @@ public partial class Player_UniversalState : State
 	private void EmitHealthStatus()
 	{
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated, (int)_health, (int)_maxHealth, (int)_shield);
-	}
-	private void EmitHit()
-	{
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit);
-		EmitHealthStatus();
 	}
 }

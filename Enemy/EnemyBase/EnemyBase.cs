@@ -29,35 +29,35 @@ public partial class EnemyBase : CharacterBody2D
 
 	public void OnMonitorAreaBodyEntered(Node2D body)
 	{
-		EmitSignal("EnterMonitor", body);
+		EmitSignal(SignalName.EnterMonitor, body);
 	}
 	public void OnMonitorAreaBodyExited(Node2D body)
 	{
-		EmitSignal("ExitMonitor", body);
+		EmitSignal(SignalName.ExitMonitor, body);
 	}
 	public void OnChaseAreaBodyEntered(Node2D body)
 	{
-		EmitSignal("EnterChase", body);
+		EmitSignal(SignalName.EnterChase, body);
 	}
 	public void OnChaseAreaBodyExited(Node2D body)
 	{
-		EmitSignal("ExitChase", body);
+		EmitSignal(SignalName.ExitChase, body);
 	}
 	public void OnAttackAreaBodyEntered(Node2D body)
 	{
-		EmitSignal("EnterAttack", body);
+		EmitSignal(SignalName.EnterAttack, body);
 	}
 	public void OnAttackAreaBodyExited(Node2D body)
 	{
-		EmitSignal("ExitAttack", body);
+		EmitSignal(SignalName.ExitAttack, body);
 	}
 
 	public override void _PhysicsProcess(double delta)
 	{
-		this.MoveAndSlide();
+		MoveAndSlide();
 	}
 
-	public virtual void CustomBehaviour()
+	public virtual void CustomBehaviour(Player player)
 	{
 
 	}

@@ -44,8 +44,10 @@ public partial class SignalBus : Node
             tuple.Item2?.Invoke();
         _onSceneChangeStartedActions.Clear();
     }
+
     /*
     Registered Actions / Priority:
+        Disconnect the method OnPlayerHit in Player_UniversalState from PlayerHit signal, 30
         Player buff removal, 10
         Finalize all dash recovery timers, 10
         Transfer stat modifiers of player's StatComponent into GameData's StatModifierDict, 0
