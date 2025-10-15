@@ -28,7 +28,7 @@ public partial class SceneManager : Node
 		{
 			QueueFree();
 		}
-		SignalBus.Instance.PlayerDied += () => ChangeScene("res://UI/StartMenu/StartMenu.tscn");
+		SignalBus.Instance.PlayerDied += () => ChangeScene("res://UI/StartMenu/StartMenuExclusive/StartMenu.tscn");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
