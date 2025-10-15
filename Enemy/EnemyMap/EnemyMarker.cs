@@ -22,9 +22,9 @@ public partial class EnemyMarker : Node2D
     public override void _Draw()
     {
         if (Engine.IsEditorHint()) // 只有在编辑器中绘制
-    {
-        DrawCircle(Vector2.Zero, 5, Colors.Red);
-    }
+		{
+			DrawCircle(Vector2.Zero, 5, Colors.Red);
+		}
     }
 
 }
