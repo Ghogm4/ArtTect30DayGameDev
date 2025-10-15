@@ -75,6 +75,8 @@ public partial class Player_MoveControlState : State
 		if (direction != 0)
 			Storage.SetVariant("HeadingLeft", direction < 0);
 
+		velocity += _player.GetPlatformVelocity();
+		GD.Print(_player.GetPlatformVelocity());
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
 	}

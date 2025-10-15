@@ -73,17 +73,6 @@ public partial class MoveHandler : AnimatableBody2D
 			QueueRedraw();
 		}
 	}
-	private Tween.EaseType _easeType = Tween.EaseType.InOut;
-	[Export]
-	public Tween.EaseType EaseType
-	{
-		get => _easeType;
-		set
-		{
-			_easeType = value;
-			QueueRedraw();
-		}
-	}
 	private bool _loop = false;
 	[Export] public bool Loop
 	{
@@ -102,11 +91,6 @@ public partial class MoveHandler : AnimatableBody2D
 		set
 		{
 			_reverse = value;
-			if (!_loop)
-			{
-				GD.PrintErr("Reverse only works when Loop is enabled.");
-				_reverse = false;
-			}
 			QueueRedraw();
 		}
 	}
@@ -117,11 +101,23 @@ public partial class MoveHandler : AnimatableBody2D
 	private Vector2 _initialPosition;
 	private float _initialRotation;
 	private Tween _tween;
+
+	private Vector2 _startPos;
+	private float _startRot;
+	private Vector2 _targetPos;
+	private float _targetRot;
+	private float _elapsedTime = 0f;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		_initialPosition = GlobalPosition;
 		_initialRotation = GlobalRotationDegrees;
+		_startPos = _initialPosition;
+		_targetPos = _initialPosition + new Vector2(_xoffset, _yoffset);
+		_startRot = _initialRotation;
+		_targetRot = _initialRotation + (_rotationClockwise ? _rotationOffset : -_rotationOffset);
+
 		if (AutoStart) StartMove();
 	}
 
