@@ -4,19 +4,12 @@ using System;
 public partial class VolumeSlider : HSlider
 {
 	[Export] public string ModifiedBus = "";
-	private bool isDragging = false;
 	public override void _Ready()
 	{
-		DragStarted += () => isDragging = true;
-		DragEnded += (valueChanged) => isDragging = false;
-		SetBusVolume((float)Value);
+		ValueChanged += SetBusVolume;
+		SetBusVolume(Value);
 	}
-	public override void _Process(double delta)
-	{
-		if (!isDragging) return;
-		SetBusVolume((float)Value);
-	}
-	public void SetBusVolume(float weight)
+	public void SetBusVolume(double weight)
     {
         int index = AudioServer.GetBusIndex(ModifiedBus);
 		if (index == -1)
@@ -24,8 +17,7 @@ public partial class VolumeSlider : HSlider
 			GD.PushError($"Bus {ModifiedBus} not found.");
 			return;
 		}
-		float value = Mathf.Lerp(-40f, 0, weight);
-		GD.Print(value);
+		float value = Mathf.Lerp(-40f, 0, (float)weight);
 		AudioServer.SetBusVolumeDb(index, value);
     }
 }
