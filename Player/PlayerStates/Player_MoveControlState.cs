@@ -126,7 +126,6 @@ public partial class Player_MoveControlState : State
 
 		
 		_player.Velocity = velocity;
-		GD.Print(_player.Velocity);
 		_player.MoveAndSlide();
 	}
 	protected override void Exit()

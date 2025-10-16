@@ -3,17 +3,18 @@ using System;
 
 public partial class RedSlime_MoveControlState : State
 {
-	private CharacterBody2D _enemy = null;
+	private EnemyBase _enemy = null;
 	private Player _player = null;
 	private AnimatedSprite2D _sprite = null;
 	[Export] private float _maxFallSpeed = 500f;
 	[Export] public float Speed = 105f;
 	[Export] public float JumpForce = 120f;
+	[Export] public float Damage = 2f;
 	
 	[Signal] public delegate void JumpEventHandler();
 	protected override void ReadyBehavior()
 	{
-		_enemy = Storage.GetNode<CharacterBody2D>("Enemy");
+		_enemy = Storage.GetNode<EnemyBase>("Enemy");
 		_player = GetTree().GetFirstNodeInGroup("Player") as Player;
 		
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
@@ -70,16 +71,20 @@ public partial class RedSlime_MoveControlState : State
 
 		if (Storage.GetVariant<bool>("Colliding"))
 		{
-			GD.Print("Collision detected");
 			Storage.SetVariant("Colliding", false);
+			Attack();
 		}
 	}
-	
+
 	public void OnJump()
 	{
 		Vector2 velocity = _enemy.Velocity;
 		velocity.Y = -JumpForce;
 		_enemy.Velocity = velocity;
 		Storage.SetVariant("Is_Jumping", true);
+	}
+	public void Attack()
+	{
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, Damage, Callable.From<Player>(_enemy.CustomBehaviour));
 	}
 }
