@@ -61,4 +61,6 @@ public partial class EnemyBase : CharacterBody2D
 	{
 
 	}
+
+	
 }
