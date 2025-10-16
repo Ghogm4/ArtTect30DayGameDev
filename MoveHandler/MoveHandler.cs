@@ -140,16 +140,16 @@ public partial class MoveHandler : AnimatableBody2D
 		}
 	}
 	public void ReverseMove()
-    {
+	{
 		_tween = CreateTween();
 		_tween.TweenProperty(this, "global_position", _initialPosition, _duration).SetTrans(_tweenType).SetEase(_easeType);
 		//_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _rotationOffset > 180 ? _initialRotation - 360 : _initialRotation, _duration).SetTrans(_tweenType).SetEase(_easeType);
 		_tween.TweenCallback(Callable.From(() => StartMove()));
 	}
-    
+	
 
-    public override void _Draw()
-    {
+	public override void _Draw()
+	{
 		if (Engine.IsEditorHint())
 		{
 			Vector2 start = Vector2.Zero;
@@ -159,9 +159,9 @@ public partial class MoveHandler : AnimatableBody2D
 			DrawLine(end + new Vector2(0, 4), end + new Vector2(0, -4), Colors.White, 1);
 
 			if (RotationOffset != 0)
-            {
-                DrawArc(start, 20, 0, Mathf.DegToRad(RotationOffset), 16, Colors.OrangeRed, 1);
-            }
+			{
+				DrawArc(start, 20, 0, Mathf.DegToRad(RotationOffset), 16, Colors.OrangeRed, 1);
+			}
 		}
 		
 	}

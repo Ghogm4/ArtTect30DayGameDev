@@ -9,6 +9,7 @@ public partial class Player_MoveControlState : State
 	[Export] private Timer _shortJumpTimer = null;
 	private const float Acceleration = 25.0f;
 	private const float Deceleration = 25.0f;
+	
 	private int AvailableJumps
 	{
 		get => (int)Stats.GetStatValue("AvailableJumps");
@@ -17,6 +18,8 @@ public partial class Player_MoveControlState : State
 	private float Speed => Stats.GetStatValue("Speed");
 	private Player _player = null;
 	private bool _isOnFloor = false;
+	private bool _wasOnFloor = false;
+	private float _platformVelocity = 0f;
 	private bool _isCoyoteTimerRunning = false;
 	private bool CanCoyoteTimerStart
 	{
@@ -45,7 +48,17 @@ public partial class Player_MoveControlState : State
 		HandleJumpBuffer();
 
 		if (_isOnFloor)
+		{
 			ResetJumps();
+			_platformVelocity = _player.GetPlatformVelocity().X;
+			_wasOnFloor = true;
+		}
+		else if (_wasOnFloor)
+		{
+			velocity += new Vector2(_platformVelocity, 0);
+			_wasOnFloor = false;
+		}
+			
 
 		if ((Input.IsActionJustPressed("Jump") && AvailableJumps > 0) || (_willJump && _isOnFloor))
 		{
@@ -67,15 +80,35 @@ public partial class Player_MoveControlState : State
 			Storage.SetVariant("Direction", 0);
 
 		int direction = Storage.GetVariant<int>("Direction");
-		if (direction != 0)
-			velocity.X = Mathf.Clamp(direction * Acceleration + velocity.X, -Speed, Speed);
-		else
-			velocity.X = Mathf.MoveToward(velocity.X, 0, Deceleration);
-
+		if (!_isOnFloor)
+		{
+			if (direction != 0)
+			{
+				velocity.X = Mathf.Clamp(direction * Acceleration + velocity.X, -Speed, Speed);
+			}
+			else
+			{
+				velocity.X = Mathf.Lerp(velocity.X, 0, 0.05f);
+			}
+		}
+        else
+        {
+            if (direction != 0)
+            {
+                velocity.X = Mathf.Clamp(direction * Acceleration + velocity.X, -Speed, Speed);
+			}
+			else
+			{
+				velocity.X = Mathf.MoveToward(velocity.X, 0, Deceleration);
+            }
+        }
 		if (direction != 0)
 			Storage.SetVariant("HeadingLeft", direction < 0);
 
+
+		
 		_player.Velocity = velocity;
+		GD.Print(_platformVelocity);
 		_player.MoveAndSlide();
 	}
 	protected override void Exit()
