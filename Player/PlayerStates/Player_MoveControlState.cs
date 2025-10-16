@@ -77,7 +77,7 @@ public partial class Player_MoveControlState : State
 			CanCoyoteTimerStart = false;
 
 			_jumpedFromPlatform = _wasOnFloor && Mathf.Abs(_platformVelocity) > 0.1f;
-			if (_jumpedFromPlatform) _launchPlatformSpeed = _platformVelocity;
+			if (_jumpedFromPlatform) _launchPlatformSpeed = Mathf.Abs(_platformVelocity);
 		}
 		if (Input.IsActionJustReleased("Jump") && !_shortJumpTimer.IsStopped())
 		{
@@ -93,7 +93,7 @@ public partial class Player_MoveControlState : State
 		int direction = Storage.GetVariant<int>("Direction");
 		if (!_isOnFloor)
 		{
-			if (direction != 0)
+			if (direction != 0 && Mathf.Abs(velocity.X) <= Speed)
 			{
 				velocity.X = Mathf.Clamp(direction * Acceleration + velocity.X, -Speed, Speed);
 			}

@@ -26,6 +26,8 @@ public partial class GreenSlime_MoveControlState : State
 
 		var jumpState = GetNode<State>("Jump");
 		jumpState.Connect("Jump", new Callable(this, nameof(OnJump)));
+
+		_enemy.Connect("EnterAttack", new Callable(this, nameof(OnEnterAttack)));
 	}
 	protected override void PhysicsUpdate(double delta)
 	{
@@ -74,12 +76,23 @@ public partial class GreenSlime_MoveControlState : State
 			Storage.SetVariant("Colliding", false);
 		}
 	}
-	
+
 	public void OnJump()
 	{
 		Vector2 velocity = _enemy.Velocity;
 		velocity.Y = -JumpForce;
 		_enemy.Velocity = velocity;
 		Storage.SetVariant("Is_Jumping", true);
+
+	}
+	
+	public void OnEnterAttack(Node2D body)
+	{
+		if (body is Player)
+		{
+			_enemy.Velocity = new Vector2(0, 0);
+			_sprite.Stop();
+			AskTransit("Attack");
+		}
 	}
 }
