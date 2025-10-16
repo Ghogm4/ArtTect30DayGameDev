@@ -20,6 +20,11 @@ public partial class Player_MoveControlState : State
 	private bool _isOnFloor = false;
 	private bool _wasOnFloor = false;
 	private float _platformVelocity = 0f;
+	private bool _jumpedFromPlatform = false;
+	private float _launchPlatformSpeed = 0f;
+	private const float _airDragMin = 0.1f;
+	private const float _airDragMax = 10f;
+	private const float _platformSpeedMax = 200f;
 	private bool _isCoyoteTimerRunning = false;
 	private bool CanCoyoteTimerStart
 	{
@@ -52,6 +57,9 @@ public partial class Player_MoveControlState : State
 			ResetJumps();
 			_platformVelocity = _player.GetPlatformVelocity().X;
 			_wasOnFloor = true;
+
+			_jumpedFromPlatform = false;
+			_launchPlatformSpeed = 0f;
 		}
 		else if (_wasOnFloor)
 		{
@@ -67,6 +75,9 @@ public partial class Player_MoveControlState : State
 			_shortJumpTimer.Start();
 			AvailableJumps--;
 			CanCoyoteTimerStart = false;
+
+			_jumpedFromPlatform = _wasOnFloor && Mathf.Abs(_platformVelocity) > 0.1f;
+			if (_jumpedFromPlatform) _launchPlatformSpeed = _platformVelocity;
 		}
 		if (Input.IsActionJustReleased("Jump") && !_shortJumpTimer.IsStopped())
 		{
@@ -88,27 +99,34 @@ public partial class Player_MoveControlState : State
 			}
 			else
 			{
-				velocity.X = Mathf.Lerp(velocity.X, 0, 0.05f);
+				float drag = _airDragMax;
+				if (_jumpedFromPlatform)
+				{
+					float t = Mathf.Clamp(_launchPlatformSpeed / _platformSpeedMax, 0f, 1f);
+					drag = Mathf.Lerp(_airDragMax, _airDragMin, t);
+				}
+				velocity.X = Mathf.Lerp(velocity.X, 0, drag * (float)delta);
+
 			}
 		}
-        else
-        {
-            if (direction != 0)
-            {
-                velocity.X = Mathf.Clamp(direction * Acceleration + velocity.X, -Speed, Speed);
+		else
+		{
+			if (direction != 0)
+			{
+				velocity.X = Mathf.Clamp(direction * Acceleration + velocity.X, -Speed, Speed);
 			}
 			else
 			{
 				velocity.X = Mathf.MoveToward(velocity.X, 0, Deceleration);
-            }
-        }
+			}
+		}
 		if (direction != 0)
 			Storage.SetVariant("HeadingLeft", direction < 0);
 
 
 		
 		_player.Velocity = velocity;
-		GD.Print(_platformVelocity);
+		GD.Print(_player.Velocity);
 		_player.MoveAndSlide();
 	}
 	protected override void Exit()
