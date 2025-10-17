@@ -9,6 +9,13 @@ public partial class Bird_MoveControlState : State
     [Export] public float Speed = 100f;
     [Export] public float Acceleration = 100f;
     [Export] public float Deceleration = 500f;
+    [Export] public float MaxForce = 300f;
+    [Export] public float TurnSpeed = 80f;
+
+    private float _currentRotation = 0f;
+    private float _targetRotation = 0f;
+
+    
 
     private Vector2 pastPlayerPosition = Vector2.Zero;
     private int pastTime = 0;
@@ -35,20 +42,28 @@ public partial class Bird_MoveControlState : State
         }
         if (Storage.GetVariant<bool>("Is_Chasing"))
         {
-            Vector2 direction = new Vector2(pastPlayerPosition.X - _enemy.GlobalPosition.X, pastPlayerPosition.Y - _enemy.GlobalPosition.Y).Normalized();
-            if (Mathf.Abs(velocity.Length()) < Speed)
+            Vector2 direction = (pastPlayerPosition - _enemy.GlobalPosition).Normalized();
+            Vector2 desiredVelocity = direction * Speed;
+
+            Vector2 steering = desiredVelocity - velocity;
+            float maxForceThisFrame = MaxForce * (float)delta;
+            if (steering.Length() > maxForceThisFrame)
             {
-                velocity += direction * Acceleration * (float)delta;
+                steering = steering.Normalized() * maxForceThisFrame;
             }
-            else
+            velocity += steering;
+            if (velocity.Length() > Speed)
             {
-                velocity = direction * Speed;
-            }
+                velocity = velocity.Normalized() * Speed;
+            }   
+            _targetRotation = velocity.Angle();
             Storage.SetVariant("HeadingLeft", velocity.X < 0);
+
         }
         else
         {
-            velocity = Vector2.Zero;
+            velocity.X = Mathf.MoveToward(velocity.X, 0f, Deceleration * (float)delta);
+            velocity.Y = Mathf.MoveToward(velocity.Y, 0f, Deceleration * (float)delta);
         }
 
         _enemy.Velocity = velocity;
@@ -58,12 +73,25 @@ public partial class Bird_MoveControlState : State
     {
         if (Storage.GetVariant<bool>("HeadingLeft"))
         {
-            _sprite.FlipH = false;
+            _sprite.FlipH = true;
         }
         else
         {
             _sprite.FlipH = true;
         }
+        _currentRotation = Mathf.LerpAngle(_currentRotation, _targetRotation, TurnSpeed * (float)delta);
+        _sprite.Rotation = _currentRotation;
+        if (_enemy.Velocity.X < 0)
+        {
+            _sprite.FlipV = true;
+        }
+        else
+        {
+            _sprite.FlipV = false;
+        }
+        
+        
+        
     }
 
     private void OnChase()
@@ -71,4 +99,6 @@ public partial class Bird_MoveControlState : State
         GD.Print("Chase event triggered");
         Storage.SetVariant("Is_Chasing", true);
     }
+
+    
 }
