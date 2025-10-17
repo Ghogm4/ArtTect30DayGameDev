@@ -26,6 +26,7 @@ TransitionLayer="*res://SceneManager/TransitionScene/TransitionScene.tscn"
 AudioManager="*res://AudioManager/AudioManager.cs"
 TextManager="*res://TextManager/TextManager.cs"
 Scheduler="*res://Utilities/Scheduler/Scheduler.cs"
+InGameMenu="*res://UI/InGameMenu/InGameMenu.tscn"
 
 [display]
 

@@ -85,7 +85,7 @@ public partial class Player_UniversalState : State
 		_health -= remainingDamage;
 		behavior.Call(_player);
 		EmitHealthStatus();
-		GD.Print(Stats.GetStatValue("Health"));
+
 		if (_health <= 0)
 		{
 			AskTransit("Die");

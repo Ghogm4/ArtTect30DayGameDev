@@ -10,11 +10,11 @@ public partial class PickupArea : Area2D
 	}
 	public void OnBodyEntered(Node2D body)
 	{
-		if (body.IsInGroup("Pickups"))
+		if (body is Boost boost)
 		{
-			StatModifierComponent statModifierComponent = body.GetNode<StatModifierComponent>("StatModifierComponent");
-			statModifierComponent.ModifyStatComponent(StatComponent);
-			body.QueueFree();
+			boost.DoBoost(StatComponent);
+			SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp, boost.Info, boost.NeedDisplay);
+			boost.Free();
 		}
 	}
 }
