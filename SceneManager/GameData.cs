@@ -9,4 +9,5 @@ public partial class GameData : Node
     public Dictionary<string, List<StatModifierResource>> StatModifierDict = new();
     public List<IntervalTrigger> PlayerIntervalTriggers = new();
     public List<Action<StatComponent>> PlayerSpecialActions = new();
+    public bool PlayerStatComponentInitialized = false;
 }
