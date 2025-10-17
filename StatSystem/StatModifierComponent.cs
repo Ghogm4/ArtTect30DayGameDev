@@ -4,11 +4,11 @@ using System;
 public partial class StatModifierComponent : Node
 {
 	[Export] public StatModifierResource[] ModifierResources;
-	public void ModifyStatComponent(StatComponent statComponent)
+	public void ModifyStatComponent(StatComponent statComponent, bool reverse = false)
 	{
 		foreach (var resource in ModifierResources)
 		{
-			var modifier = resource.CreateModifier(statComponent);
+			var modifier = reverse ? resource.CreateModifier(statComponent).Reverse() : resource.CreateModifier(statComponent);
 			if (modifier != null)
 				statComponent.AddModifier(resource.TargetStatName, modifier);
 		}

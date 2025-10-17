@@ -36,6 +36,14 @@ public partial class StatModifier : RefCounted
 			_ => Value
 		};
 	}
+	public StatModifier Reverse()
+    {
+		if (Type is OperationType.BaseAdd or OperationType.FinalAdd)
+			Value = -Value;
+		else if (Type is OperationType.Mult)
+			Value = Mathf.IsZeroApprox(Value) ? 0 : 1f / Value;
+		return this;
+    }
 	public class Factory
 	{
 		public static StatModifier BaseAdd(float value) => new(OperationType.BaseAdd, value);

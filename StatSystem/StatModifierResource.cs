@@ -9,21 +9,26 @@ public partial class StatModifierResource : Resource
 	[Export] public float ReferencedPercentage = -1f;
 	[Export] public string ReferencedStatName = string.Empty;
 	[Export] public string TargetStatName = string.Empty;
-	public StatModifier CreateModifier(StatComponent statComponent)
+	public StatModifier CreateModifier(StatComponent statComponent, bool reverse = false)
 	{
 		if (!string.IsNullOrEmpty(ReferencedStatName))
-			return CreateReferencedModifier(statComponent.GetStat(ReferencedStatName));
+			return CreateReferencedModifier(statComponent.GetStat(ReferencedStatName), reverse);
 		else
-			return CreateNormalModifier();
+			return CreateNormalModifier(reverse);
 	}
-	public StatModifier CreateNormalModifier() => new StatModifier(Type, Value);
-	public StatModifier CreateReferencedModifier(Stat referencedStat)
+	public StatModifier CreateNormalModifier(bool reverse)
+	{
+		StatModifier modifier = new StatModifier(Type, Value);
+		return reverse ? modifier.Reverse() : modifier;
+	}
+	public StatModifier CreateReferencedModifier(Stat referencedStat, bool reverse)
 	{
 		if (referencedStat == null)
 		{
 			GD.PushError($"Stat \"{ReferencedStatName}\" not found.");
 			return null;
 		}
-		return new StatModifier(Type, referencedStat, ReferencedPercentage);
+		StatModifier modifier = new StatModifier(Type, referencedStat, ReferencedPercentage);
+		return reverse ? modifier.Reverse() : modifier;
 	}
 }
