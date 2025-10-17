@@ -61,21 +61,29 @@ public partial class Player_UniversalState : State
 		{
 			KinematicCollision2D collision = _player.GetSlideCollision(collisionIndex);
 			if (!_isInvincible && collision.GetCollider() is ForestSpikeLayer)
+			{
 				SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, 1,
-				Callable.From<Player>((player) => {}));
+					Callable.From<Player>((player) => { }));
+			}
 		}
 	}
-	
+
 	public void OnPlayerHit(int damage, Callable customBehavior)
 	{
 		int remainingDamage = damage;
-
+		Callable behavior = customBehavior;
+		float evasion = Mathf.Clamp(Stats.GetStatValue("Evasion"), 0f, 100f) / 100f;
+		Probability.RunSingle(evasion, () =>
+		{
+			remainingDamage = 0;
+			behavior = Callable.From<Player>((player) => { });
+		});
 		int shieldReceivedDamage = Mathf.Min((int)_shield, remainingDamage);
 		_shield -= shieldReceivedDamage;
 		remainingDamage -= shieldReceivedDamage;
 
 		_health -= remainingDamage;
-		customBehavior.Call(_player);
+		behavior.Call(_player);
 		EmitHealthStatus();
 		GD.Print(Stats.GetStatValue("Health"));
 		if (_health <= 0)
@@ -83,7 +91,7 @@ public partial class Player_UniversalState : State
 			AskTransit("Die");
 			return;
 		}
-		
+
 		SetInvincible();
 	}
 	private void SetInvincible()
