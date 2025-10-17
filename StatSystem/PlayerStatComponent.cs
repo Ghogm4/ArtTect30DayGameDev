@@ -16,8 +16,18 @@ public partial class PlayerStatComponent : StatComponent
             float maxDamageMultiplier = GetStatValue("MaxDamageMultiplier");
             float minVal = Mathf.Min(minDamageMultiplier, maxDamageMultiplier);
             float maxVal = Mathf.Max(minDamageMultiplier, maxDamageMultiplier);
-            float damageMultiplier = (float)GD.RandRange(minVal, maxVal);
-            component.GetStat("Health").AddFinal(-GetStatValue("Attack") * damageMultiplier);
+            float resultDamageMultiplier = (float)GD.RandRange(minVal, maxVal);
+
+            float critChance = GetStatValue("CritChance");
+            float critDamage = GetStatValue("CritDamage");
+            float resultCritDamage = 100f;
+            Probability.RunSingle(critChance, () =>
+            {
+                resultCritDamage = critDamage;
+            });
+            
+            float resultDamage = GetStatValue("Attack") * resultDamageMultiplier * (resultCritDamage / 100f);
+            component.GetStat("Health").AddFinal(-resultDamage);
         });
     }
     public override void _Ready()
