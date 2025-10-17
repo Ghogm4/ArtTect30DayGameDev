@@ -28,8 +28,8 @@ public partial class Player_AttackUniversalState : State
 			if (body is EnemyBase enemy)
 			{
 				StatComponent enemyStats = enemy.GetNode<StatComponent>("StatComponent");
-				PlayerStatComponent PlayerStats = Stats as PlayerStatComponent;
-				foreach (var attackAction in PlayerStats.AttackActions)
+				PlayerStatComponent playerStats = Stats as PlayerStatComponent;
+				foreach (var attackAction in playerStats.AttackActions)
 					attackAction?.Invoke(enemyStats);
 			}
 	}
