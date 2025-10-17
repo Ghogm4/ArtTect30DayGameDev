@@ -6,11 +6,11 @@ public partial class IntervalTrigger : RefCounted
     // Repeats infinitely if set to 0
     public int IntervalCount { get; private set; } = 1;
     public float Interval { get; private set; } = 1f;
+    public bool IsCompleted { get; private set; } = false;
     private int _currentIntervalCount = 0;
     private float _currentTimeElapsed = 0;
     private Action _onIntervalAction = null;
     private Action _onCompletedAction = null;
-    private bool _isCompleted = false;
     private bool _isValid = true;
     public IntervalTrigger(int intervalCount, float interval, bool triggerOnStart, Action onIntervalAction, Action onCompletedAction = null)
     {
@@ -29,7 +29,7 @@ public partial class IntervalTrigger : RefCounted
     }
     public void Tick(double delta)
     {
-        if (_isCompleted || !_isValid)
+        if (IsCompleted || !_isValid)
             return;
         _currentTimeElapsed += (float)delta;
         if (_currentTimeElapsed > Interval || Mathf.IsEqualApprox(_currentTimeElapsed, Interval))
@@ -40,7 +40,7 @@ public partial class IntervalTrigger : RefCounted
             if (_currentIntervalCount >= IntervalCount && IntervalCount != 0)
             {
                 _onCompletedAction?.Invoke();
-                _isCompleted = true;
+                IsCompleted = true;
             }
         }
     }
