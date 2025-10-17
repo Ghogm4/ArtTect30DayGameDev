@@ -29,10 +29,10 @@ public partial class Player_DashAttackState : State
 	}
 	private void HandleAttack(double delta)
 	{
-		if (_sprite.Frame != FirstAttackFrame)
-			_canAttack = false;
-		else
+		if (_sprite.Frame == FirstAttackFrame || _sprite.Frame == SecondAttackFrame)
 			_canAttack = true;
+		else
+			_canAttack = false;
 
 		if (_lastFrame != _sprite.Frame)
 			DealtDamageThisFrame = false;
@@ -46,6 +46,7 @@ public partial class Player_DashAttackState : State
 	}
 	private void Attack()
 	{
+		GD.Print("Dash Attack!");
 		foreach (var body in _attackArea.GetOverlappingBodies())
 			if (body is EnemyBase enemy)
 			{
