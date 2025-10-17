@@ -6,6 +6,7 @@ public partial class Player_UniversalState : State
 	[Export] private Timer _invincibilityTimer = null;
 	private AnimatedSprite2D _sprite = null;
 	private Player _player = null;
+	private Area2D _attackArea = null;
 	private bool _isInvincible = false;
 	private Tween _invincibilityTween = null;
 	private StatWrapper _health;
@@ -16,6 +17,7 @@ public partial class Player_UniversalState : State
 	{
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
 		_player = Storage.GetNode<Player>("Player");
+		_attackArea = Storage.GetNode<Area2D>("AttackArea");
 		_invincibilityTimer.Timeout += () =>
 		{
 			_isInvincible = false;
@@ -44,13 +46,19 @@ public partial class Player_UniversalState : State
 	protected override void FrameUpdate(double delta)
 	{
 		bool headingLeft = Storage.GetVariant<bool>("HeadingLeft");
-		if (headingLeft)
+		if (headingLeft) 
 			_sprite.FlipH = true;
 		else
 			_sprite.FlipH = false;
 	}
 	protected override void PhysicsUpdate(double delta)
 	{
+		bool headingLeft = Storage.GetVariant<bool>("HeadingLeft");
+		if (headingLeft)
+			_attackArea.Scale = -Vector2.One;
+		else
+			_attackArea.Scale = Vector2.One;
+			
 		if (_sprite.Animation == "Die")
 		{
 			_sprite.Modulate = Colors.White;

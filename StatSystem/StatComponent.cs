@@ -1,20 +1,12 @@
 using Godot;
 using System;
 using Godot.Collections;
+using System.Collections.Generic;
 [GlobalClass]
 public partial class StatComponent : Node
 {
-	[Export] public Dictionary<string, Stat> Stats = new();
-	[Export] public bool IsUsedByPlayer = false;
-	public override void _Ready()
-	{
-		if (IsUsedByPlayer)
-		{
-			if (GameData.Instance.StatModifierDict.Count > 0)
-				InitializeStatsWithGameData();
-			SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
-		}
-	}
+	[Export] public Godot.Collections.Dictionary<string, Stat> Stats = new();
+
 	public Stat GetStat(string statName)
 	{
 		if (Stats.ContainsKey(statName))
@@ -59,26 +51,5 @@ public partial class StatComponent : Node
 		}
 		else
 			GD.PushError($"Stat '{statName}' not found in StatComponent.");
-	}
-	public void SaveStatModifiersToGameData()
-	{
-		if (!IsUsedByPlayer)
-			return;
-		GameData.Instance.StatModifierDict.Clear();
-		foreach (var stat in Stats.Values)
-			GameData.Instance.StatModifierDict[stat.Name] = stat.CreateModifierResources();
-	}
-	public void InitializeStatsWithGameData()
-	{
-		if (!IsUsedByPlayer)
-			return;
-		foreach (var pair in GameData.Instance.StatModifierDict)
-			foreach (var modifierResource in pair.Value)
-				AddModifier(pair.Key, modifierResource.CreateModifier(this));
-	}
-	private void OnSceneChangeStarted()
-	{
-		SaveStatModifiersToGameData();
-		QueueFree();
 	}
 }

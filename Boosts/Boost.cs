@@ -21,8 +21,6 @@ public partial class Boost : RigidBody2D
     {
         int amount = Info.Amount;
         for (int i = 0; i < amount; i++)
-        {
             _modifierComponent.ModifyStatComponent(statComponent);
-        }
     }
 }

@@ -4,9 +4,11 @@ using System;
 public partial class Player_AttackUniversalState : State
 {
 	private AnimatedSprite2D _sprite = null;
+	private Area2D _attackArea = null;
 	protected override void ReadyBehavior()
 	{
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
+		_attackArea = Storage.GetNode<Area2D>("AttackArea");
 	}
 	private void OnAnimationFinished()
 	{
@@ -16,8 +18,19 @@ public partial class Player_AttackUniversalState : State
 	{
 		_sprite.AnimationFinished += OnAnimationFinished;
 	}
-    protected override void Exit()
-    {
+	protected override void Exit()
+	{
 		_sprite.AnimationFinished -= OnAnimationFinished;
-    }
+	}
+	public void Attack()
+	{
+		foreach (var body in _attackArea.GetOverlappingBodies())
+			if (body is EnemyBase enemy)
+			{
+				StatComponent enemyStats = enemy.GetNode<StatComponent>("StatComponent");
+				PlayerStatComponent PlayerStats = Stats as PlayerStatComponent;
+				foreach (var attackAction in PlayerStats.AttackActions)
+					attackAction?.Invoke(enemyStats);
+			}
+	}
 }

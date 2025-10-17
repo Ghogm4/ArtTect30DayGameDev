@@ -4,6 +4,7 @@ using System;
 public partial class StatModifierComponent : Node
 {
 	[Export] public StatModifierResource[] ModifierResources;
+	protected virtual void Modify(StatComponent statComponent, bool reverse = false) { }
 	public void ModifyStatComponent(StatComponent statComponent, bool reverse = false)
 	{
 		foreach (var resource in ModifierResources)
@@ -12,5 +13,6 @@ public partial class StatModifierComponent : Node
 			if (modifier != null)
 				statComponent.AddModifier(resource.TargetStatName, modifier);
 		}
+		Modify(statComponent, reverse);
 	}
 }
