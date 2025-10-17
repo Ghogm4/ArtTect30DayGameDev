@@ -52,4 +52,7 @@ public partial class StatComponent : Node
 		else
 			GD.PushError($"Stat '{statName}' not found in StatComponent.");
 	}
+	public void AddBase(string statName, float value) => GetStat(statName)?.AddBase(value);
+	public void Mult(string statName, float multiplier) => GetStat(statName)?.Mult(multiplier);
+	public void AddFinal(string statName, float value) => GetStat(statName)?.AddFinal(value);
 }
