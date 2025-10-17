@@ -52,5 +52,7 @@ public partial class SignalBus : Node
         Player buff removal, 10
         Finalize all dash recovery timers, 10
         Transfer stat modifiers of player's StatComponent into GameData's StatModifierDict, 0
+        Make PlayerHealthBar visible when entering game from start menu, 0
+        Make PlayerHealthBar invisible when exiting to title, 0
     */
 }

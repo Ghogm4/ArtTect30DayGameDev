@@ -3,8 +3,17 @@ using System;
 
 public partial class ExitToTitleButton : ResponsiveButton
 {
+    private bool _isPressedOnce = false;
     public override void OnPressed()
     {
-		SceneManager.Instance.ChangeScene("res://UI/StartMenu/StartMenuExclusive/StartMenu.tscn");
+        if (_isPressedOnce)
+            return;
+        SceneManager.Instance.ChangeScene("res://UI/StartMenu/StartMenuExclusive/StartMenu.tscn");
+        SignalBus.Instance.RegisterSceneChangeStartedAction(() =>
+        {
+            CanvasLayer playerHealthBar = GetNode<CanvasLayer>("/root/PlayerHealthBar");
+            playerHealthBar.Visible = false;
+        }, SignalBus.Priority.Low);
+        _isPressedOnce = true;
     }
 }
