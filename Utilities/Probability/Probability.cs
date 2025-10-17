@@ -12,12 +12,7 @@ public partial class Probability : RefCounted
     public Probability Register(float probability, Action action)
     {
         int converted = ConvertProbability(probability);
-        if (converted == 0)
-        {
-            GD.PushError("Cannot register impossible action.");
-            return this;
-        }
-        else if (_currentProbabilityConvertedSum + converted > MaxProbabilityConvertedSum)
+        if (_currentProbabilityConvertedSum + converted > MaxProbabilityConvertedSum)
         {
             GD.PushError("Total probability registered to a Probability exceeded 1. Registration failed.");
             return this;
@@ -51,5 +46,14 @@ public partial class Probability : RefCounted
         }
         probability.Run();
     }
+    public static void RunIfElse(float firstProbability, Action first, Action second)
+    {
+        using Probability probability = new();
+        probability
+            .Register(firstProbability, first)
+            .Register(1f - firstProbability, second);
+        probability.Run();
+    }
+    public static void RunSingle(float probability, Action action) => RunIfElse(probability, action, () => { });
     public int ConvertProbability(float probability) => Convert.ToInt32(probability * MaxProbabilityConvertedSum);
 }
