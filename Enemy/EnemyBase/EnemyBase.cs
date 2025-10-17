@@ -8,6 +8,8 @@ public partial class EnemyBase : CharacterBody2D
 	[Export] public Area2D ChaseArea;
 	[Export] public VarStorage Storage;
 	[Export] public AnimatedSprite2D Sprite;
+	[Export] public StatComponent Stats;
+	[Export] public TextureProgressBar HealthBar; 
 
 	[Signal] public delegate void EnterMonitorEventHandler(Node2D body);
 	[Signal] public delegate void EnterChaseEventHandler(Node2D body);
@@ -15,6 +17,8 @@ public partial class EnemyBase : CharacterBody2D
 	[Signal] public delegate void ExitAttackEventHandler(Node2D body);
 	[Signal] public delegate void ExitChaseEventHandler(Node2D body);
 	[Signal] public delegate void ExitMonitorEventHandler(Node2D body);
+
+	private StatWrapper _health;
 
 	public Player player = null;
 	public override void _Ready()
@@ -25,6 +29,10 @@ public partial class EnemyBase : CharacterBody2D
 		ChaseArea.BodyExited += OnChaseAreaBodyExited;
 		AttackArea.BodyEntered += OnAttackAreaBodyEntered;
 		AttackArea.BodyExited += OnAttackAreaBodyExited;
+
+		Stats.GetStat("Health").StatChanged += OnHealthChanged;
+
+		_health = new(Stats.GetStat("Health"));
 	}
 
 	public void OnMonitorAreaBodyEntered(Node2D body)
@@ -62,5 +70,12 @@ public partial class EnemyBase : CharacterBody2D
 
 	}
 
-	
+	public void OnHealthChanged()
+	{
+		_health = new(Stats.GetStat("Health"));
+		if (HealthBar != null)
+		{
+			HealthBar.Value = (float)_health;
+		}
+	}
 }
