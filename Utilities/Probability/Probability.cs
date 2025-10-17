@@ -11,7 +11,7 @@ public partial class Probability : RefCounted
     private RandomNumberGenerator _rng = new();
     public Probability Register(float probability, Action action)
     {
-        int converted = ConvertProbability(probability);
+        int converted = ConvertProbability(Mathf.Clamp(probability, 0f, 1f));
         if (_currentProbabilityConvertedSum + converted > MaxProbabilityConvertedSum)
         {
             GD.PushError("Total probability registered to a Probability exceeded 1. Registration failed.");
@@ -49,7 +49,6 @@ public partial class Probability : RefCounted
     public static void RunIfElse(float firstProbability, Action first, Action second)
     {
         using Probability probability = new();
-        float firstProb = Mathf.Clamp(firstProbability, 0f, 1f);
         probability
             .Register(firstProbability, first)
             .Register(1f - firstProbability, second);

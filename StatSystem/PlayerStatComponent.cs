@@ -21,7 +21,7 @@ public partial class PlayerStatComponent : StatComponent
             float critChance = GetStatValue("CritChance");
             float critDamage = GetStatValue("CritDamage");
             float resultCritDamage = 100f;
-            Probability.RunSingle(critChance, () =>
+            Probability.RunSingle(critChance / 100f, () =>
             {
                 resultCritDamage = critDamage;
             });
