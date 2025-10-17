@@ -7,10 +7,13 @@ public partial class RedSlime_MoveControlState : State
 	private Player _player = null;
 	private AnimatedSprite2D _sprite = null;
 	[Export] private float _maxFallSpeed = 500f;
-	[Export] public float Speed = 105f;
-	[Export] public float JumpForce = 120f;
-	[Export] public float Damage = 2f;
-	
+	// [Export] public float Speed = 105f;
+	private StatWrapper _speed;
+	// [Export] public float JumpForce = 120f;
+	private StatWrapper _jumpForce;
+	// [Export] public float Damage = 2f;
+	private StatWrapper _damage;
+
 	[Signal] public delegate void JumpEventHandler();
 	protected override void ReadyBehavior()
 	{
@@ -25,6 +28,11 @@ public partial class RedSlime_MoveControlState : State
 		Storage.RegisterVariant<bool>("Is_Collision", false);
 		Storage.RegisterVariant<bool>("Colliding", false);
 
+		_speed = new(Stats.GetStat("Speed"));
+		_jumpForce = new(Stats.GetStat("JumpForce"));
+		_damage = new(Stats.GetStat("Damage"));
+
+		
 		var jumpState = GetNode<State>("Jump");
 		jumpState.Connect("Jump", new Callable(this, nameof(OnJump)));
 	}
@@ -37,7 +45,7 @@ public partial class RedSlime_MoveControlState : State
 
 		if (Storage.GetVariant<bool>("Is_Chasing") && !_enemy.IsOnFloor() && !Storage.GetVariant<bool>("Is_Collision"))
 		{
-			velocity.X = (_player.GlobalPosition.X < _enemy.GlobalPosition.X) ? -Speed : Speed;
+			velocity.X = (_player.GlobalPosition.X < _enemy.GlobalPosition.X) ? -(float)_speed : (float)_speed;
 			Storage.SetVariant("HeadingLeft", velocity.X < 0);
 		}
 
@@ -49,7 +57,7 @@ public partial class RedSlime_MoveControlState : State
 		if (Storage.GetVariant<bool>("Is_Collision"))
 		{
 			
-			velocity = new Vector2((_player.GlobalPosition.X < _enemy.GlobalPosition.X) ? Speed : -Speed, velocity.Y);
+			velocity = new Vector2((_player.GlobalPosition.X < _enemy.GlobalPosition.X) ? -(float)_speed : (float)_speed, velocity.Y);
 		}
 
 		if (Storage.GetVariant<bool>("Colliding"))
@@ -79,12 +87,12 @@ public partial class RedSlime_MoveControlState : State
 	public void OnJump()
 	{
 		Vector2 velocity = _enemy.Velocity;
-		velocity.Y = -JumpForce;
+		velocity.Y = -(float)_jumpForce;
 		_enemy.Velocity = velocity;
 		Storage.SetVariant("Is_Jumping", true);
 	}
 	public void Attack()
 	{
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, Damage, Callable.From<Player>(_enemy.CustomBehaviour));
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, (float)_damage, Callable.From<Player>(_enemy.CustomBehaviour));
 	}
 }
