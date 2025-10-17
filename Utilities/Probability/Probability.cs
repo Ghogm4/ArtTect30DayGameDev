@@ -49,6 +49,7 @@ public partial class Probability : RefCounted
     public static void RunIfElse(float firstProbability, Action first, Action second)
     {
         using Probability probability = new();
+        float firstProb = Mathf.Clamp(firstProbability, 0f, 1f);
         probability
             .Register(firstProbability, first)
             .Register(1f - firstProbability, second);
