@@ -12,6 +12,8 @@ public partial class SignalBus : Node
     [Signal] public delegate void WaitAdvanceEventHandler();
     [Signal] public delegate void SceneChangeStartedEventHandler();
     [Signal] public delegate void PlayerBoostPickedUpEventHandler(BoostInfo info, bool needDisplay);
+
+    [Signal] public delegate void EntranceSignalEventHandler(string entrance);
     public static SignalBus Instance { get; private set; }
     public enum Priority
     {
