@@ -32,6 +32,6 @@ public partial class Bird_ChaseState : State
 
 	protected override void PhysicsUpdate(double delta)
 	{
-		GD.Print(_sprite.IsPlaying());
+		
 	}
 }
