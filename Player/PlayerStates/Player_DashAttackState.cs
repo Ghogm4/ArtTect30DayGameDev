@@ -46,7 +46,6 @@ public partial class Player_DashAttackState : State
 	}
 	private void Attack()
 	{
-		GD.Print("Dash Attack!");
 		foreach (var body in _attackArea.GetOverlappingBodies())
 			if (body is EnemyBase enemy)
 			{
