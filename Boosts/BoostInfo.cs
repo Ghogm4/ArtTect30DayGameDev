@@ -11,7 +11,7 @@ public partial class BoostInfo : Resource
         Epic = 2,
         Mythical = 3
     }
-    public readonly Dictionary<Rarity, Color> RarityColorMap = new()
+    public static Dictionary<Rarity, Color> RarityColorMap = new()
     {
         [Rarity.Common] = Colors.White,
         [Rarity.Rare] = Colors.Blue,
