@@ -14,7 +14,11 @@ public partial class PickupArea : Area2D
 		{
 			boost.DoBoost(StatComponent);
 			SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp, boost.Info, boost.NeedDisplay);
-			boost.Free();
+			Tween tween = boost.CreateTween();
+			tween.TweenProperty(boost, "scale", Vector2.Zero, 0.3f)
+				.SetTrans(Tween.TransitionType.Quad)
+				.SetEase(Tween.EaseType.In);
+			tween.TweenCallback(Callable.From(boost.QueueFree));
 		}
 	}
 }
