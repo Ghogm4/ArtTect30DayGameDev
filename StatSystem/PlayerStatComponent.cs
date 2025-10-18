@@ -25,10 +25,13 @@ public partial class PlayerStatComponent : StatComponent
             {
                 resultCritDamage = critDamage;
             });
-            
+
             float resultDamage = GetStatValue("Attack") * resultDamageMultiplier * (resultCritDamage / 100f);
             component.GetStat("Health").AddFinal(-resultDamage);
         });
+        
+        using Boost flowerOfSerenity = ResourceLoader.Load<PackedScene>("res://Boosts/Special/FlowerOfSerenity.tscn").Instantiate<Boost>();
+        SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp, flowerOfSerenity.Info, flowerOfSerenity.NeedDisplay);
     }
     public override void _Ready()
     {

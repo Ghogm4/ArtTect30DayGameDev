@@ -24,6 +24,14 @@ public partial class Player_WallClimbState : State
 	{
 		set => Storage.SetVariant("CanCoyoteTimerStart", value);
 	}
+	private float WallSlideVelocityMultiplier
+	{
+		get => Stats.GetStatValue("WallSlideVelocityMultiplier");
+	}
+	private float WallClimbVelocityMultiplier
+	{
+		get => Stats.GetStatValue("WallClimbVelocityMultiplier");
+	}
 	protected override void ReadyBehavior()
 	{
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
@@ -46,9 +54,9 @@ public partial class Player_WallClimbState : State
 
 		Vector2 velocity = _player.Velocity;
 		if (_sprite.Animation == "WallSlide")
-			velocity.Y = _player.GetGravity().Y * 0.05f;
+			velocity.Y = _player.GetGravity().Y * WallSlideVelocityMultiplier;
 		else
-			velocity.Y = -_player.GetGravity().Y * 0.05f;
+			velocity.Y = -_player.GetGravity().Y * WallClimbVelocityMultiplier;
 
 		if ((Input.IsActionJustPressed("Left") && !HeadingLeft) ||
 			(Input.IsActionJustPressed("Right") && HeadingLeft) ||
