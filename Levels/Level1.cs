@@ -12,6 +12,6 @@ public partial class Level1 : Node2D
 	}
 	public void RestartScene()
 	{
-		SceneManager.Instance.ChangeScene("res://Levels/Level1.tscn");
+		SceneManager.Instance.ChangeScenePath("res://Levels/Level1.tscn");
 	}
 }

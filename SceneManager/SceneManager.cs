@@ -4,16 +4,28 @@ using System;
 public partial class SceneManager : Node
 {
 	public static SceneManager Instance { get; private set; }
+	public PackedScene StartMenuScene;
 
 	public TransitionLayer Transition => GetNode<TransitionLayer>("/root/TransitionLayer");
-	public async void ChangeScene(string scenePath)
+	public async void ChangeScene(PackedScene scene)
 	{
 		await Transition.FadeIn(0.5f);
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.SceneChangeStarted);
-		GetTree().ChangeSceneToFile(scenePath);
+		GetTree().ChangeSceneToPacked(scene);
 		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 		await Transition.FadeOut(0.5f);
 	}
+	public async void ChangeScenePath(string scene)
+	{
+		await Transition.FadeIn(0.5f);
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.SceneChangeStarted);
+		GetTree().ChangeSceneToFile(scene);
+		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
+		await Transition.FadeOut(0.5f);
+	}
+
+
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -28,7 +40,8 @@ public partial class SceneManager : Node
 		{
 			QueueFree();
 		}
-		SignalBus.Instance.PlayerDied += () => ChangeScene("res://UI/StartMenu/StartMenuExclusive/StartMenu.tscn");
+		StartMenuScene = GD.Load<PackedScene>("res://UI/StartMenu/StartMenuExclusive/StartMenu.tscn");
+		SignalBus.Instance.PlayerDied += () => ChangeScene(StartMenuScene);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

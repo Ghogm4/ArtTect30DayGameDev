@@ -15,7 +15,7 @@ public partial class ChangeSceneButton : Button
 	private void OnPressed()
 	{
 		if (!string.IsNullOrEmpty(ScenePath))
-			SceneManager.Instance.ChangeScene(ScenePath);
+			SceneManager.Instance.ChangeScenePath(ScenePath);
 		else
 			GD.PrintErr("未设置目标场景路径！");
 	}
