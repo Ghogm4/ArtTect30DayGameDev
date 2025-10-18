@@ -16,6 +16,7 @@ public partial class Boost : RigidBody2D
             return;
         }
         _modifierComponent = component;
+        Info = Info.Duplicate(true) as BoostInfo;
     }
     public void DoBoost(StatComponent statComponent)
     {
