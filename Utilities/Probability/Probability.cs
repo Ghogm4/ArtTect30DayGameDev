@@ -6,13 +6,14 @@ using System.Linq;
 public partial class Probability : RefCounted
 {
     public const int MaxProbabilityConvertedSum = 1000;
+    public const int Tolerance = 20;
     private List<Tuple<int, Action>> _probableActions = new();
     private int _currentProbabilityConvertedSum = 0;
     private RandomNumberGenerator _rng = new();
     public Probability Register(float probability, Action action)
     {
         int converted = ConvertProbability(Mathf.Clamp(probability, 0f, 1f));
-        if (_currentProbabilityConvertedSum + converted > MaxProbabilityConvertedSum)
+        if (_currentProbabilityConvertedSum + converted > MaxProbabilityConvertedSum + Tolerance)
         {
             GD.PushError("Total probability registered to a Probability exceeded 1. Registration failed.");
             return this;

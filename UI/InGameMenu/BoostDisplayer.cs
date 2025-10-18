@@ -28,7 +28,7 @@ public partial class BoostDisplayer : Control
 		Label boostDescriptionLabel = _floatingBoostInfo.GetNode<Label>("%BoostDescription");
 		LabelSettings boostNameLabelSettings = boostNameLabel.LabelSettings;
 		boostNameLabel.Text = Info.Name;
-		boostNameLabelSettings.FontColor = Info.RarityColorMap[Info.BoostRarity];
+		boostNameLabelSettings.FontColor = BoostInfo.RarityColorMap[Info.BoostRarity];
 		boostDescriptionLabel.Text = Info.Description;
 		_floatingBoostInfo.Visible = true;
 	}
