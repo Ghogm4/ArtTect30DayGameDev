@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 public partial class Bird_UniversalState : State
 {
@@ -18,7 +19,7 @@ public partial class Bird_UniversalState : State
         preHealth = (float)_health;
     }
 
-    private void OnHealthChanged()
+    private async void OnHealthChanged()
     {
         GD.Print((float)_health);
         if ((float)_health < preHealth)
@@ -31,12 +32,13 @@ public partial class Bird_UniversalState : State
 
         if ((float)_health <= 0)
         {
-            Die();
+            await Die();
         }
     }
 
-    private void Die()
+    private async Task Die()
     {
+        await ToSignal(GetTree().CreateTimer(0.1f), "timeout");
         _enemy.QueueFree();
     }
     

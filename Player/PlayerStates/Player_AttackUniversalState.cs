@@ -18,8 +18,8 @@ public partial class Player_AttackUniversalState : State
 	{
 		_sprite.AnimationFinished += OnAnimationFinished;
 	}
-    protected override void PhysicsUpdate(double delta)
-    {
+	protected override void PhysicsUpdate(double delta)
+	{
 		if (Input.IsActionJustPressed("Left") || Input.IsActionJustPressed("Right"))
 			AskTransit("Idle");
 		if (Input.IsActionJustPressed("Dash"))

@@ -9,8 +9,10 @@ public partial class EnemyBase : CharacterBody2D
 	[Export] public VarStorage Storage;
 	[Export] public AnimatedSprite2D Sprite;
 	[Export] public StatComponent Stats;
-	[Export] public TextureProgressBar HealthBar; 
+	[Export] public TextureProgressBar HealthBar;
 
+	[Export] public PackedScene FloatingTextScene;
+	
 	[Signal] public delegate void EnterMonitorEventHandler(Node2D body);
 	[Signal] public delegate void EnterChaseEventHandler(Node2D body);
 	[Signal] public delegate void EnterAttackEventHandler(Node2D body);
@@ -19,7 +21,7 @@ public partial class EnemyBase : CharacterBody2D
 	[Signal] public delegate void ExitMonitorEventHandler(Node2D body);
 
 	private StatWrapper _health;
-
+	private float preHealth;
 	public Player player = null;
 	public override void _Ready()
 	{
@@ -33,6 +35,7 @@ public partial class EnemyBase : CharacterBody2D
 		Stats.GetStat("Health").StatChanged += OnHealthChanged;
 
 		_health = new(Stats.GetStat("Health"));
+		preHealth = (float)_health;
 	}
 
 	public void OnMonitorAreaBodyEntered(Node2D body)
@@ -72,18 +75,28 @@ public partial class EnemyBase : CharacterBody2D
 
 	public async void OnHealthChanged()
 	{
+		
 		_health = new(Stats.GetStat("Health"));
+		if ((float)_health < preHealth)
+		{
+			GD.Print("dis");
+			FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
+			AddChild(Text);
+			Text.GlobalPosition = GlobalPosition + new Vector2(0, -20);
+			Text.display((int)(preHealth - (float)_health));
+		}
 		if (HealthBar != null)
 		{
-			double currentValue = HealthBar.Value; // 当前血条值
-			double targetValue = (double)_health;  // 目标血条值
+			double currentValue = HealthBar.Value;
+			double targetValue = (double)_health;
 
-			Tween tween = CreateTween(); // 创建 Tween 动画
-			tween.TweenProperty(HealthBar, "value", targetValue, 0.1f) // 插值到目标值，持续 0.5 秒
+			Tween tween = CreateTween();
+			tween.TweenProperty(HealthBar, "value", targetValue, 0.1f)
 				.SetTrans(Tween.TransitionType.Linear)
 				.SetEase(Tween.EaseType.InOut);
 
-			await ToSignal(tween, "finished"); // 等待动画完成
+			await ToSignal(tween, "finished");
 		}
+		preHealth = (float)_health;
 	}
 }
