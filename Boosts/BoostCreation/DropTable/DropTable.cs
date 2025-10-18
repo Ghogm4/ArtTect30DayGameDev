@@ -27,6 +27,16 @@ public enum BoostCategoryFilter
 [GlobalClass]
 public partial class DropTable : Node2D
 {
+    // 稀有度基础权重
+    private static readonly Dictionary<BoostRarity, float> _baseRarityWeights = new()
+    {
+        { BoostRarity.Common, 0.60f },
+        { BoostRarity.Uncommon, 0.23f },
+        { BoostRarity.Rare, 0.10f },
+        { BoostRarity.Epic, 0.05f },
+        { BoostRarity.Legendary, 0.02f }
+    };
+
     private static HashSet<string> _obtainedOneTimeBoosts = new();
 
     public static void ResetObtainedOneTimeBoosts()
@@ -37,7 +47,7 @@ public partial class DropTable : Node2D
     [ExportGroup("Drop Settings")]
     [Export] public BoostDropMode DropMode = BoostDropMode.Manual;
     [Export] public int TimesToRun = 1;
-    [Export] public bool SkipObtainedOneTimeBoosts = true; // 是否跳过已获得的一次性增益
+    [Export] public bool SkipObtainedOneTimeBoosts = true;
 
     [ExportGroup("Boost Sources")]
     [Export] public bool AutoLoadFromDirectories = true;
@@ -193,18 +203,26 @@ public partial class DropTable : Node2D
     {
         _probability.Register(probability, () =>
         {
+            if (SkipObtainedOneTimeBoosts)
+            {
+                var testBoost = scene.Instantiate<Boost>();
+                bool isOneTimeOnly = testBoost.Info.IsOneTimeOnly;
+                testBoost.QueueFree();
+
+                if (isOneTimeOnly)
+                {
+                    _obtainedOneTimeBoosts.Add(scene.ResourcePath);
+                }
+            }
+
             Boost boost = scene.Instantiate<Boost>();
             boost.GlobalPosition = GlobalPosition;
-
-            if (boost.Info.IsOneTimeOnly)
-                _obtainedOneTimeBoosts.Add(scene.ResourcePath);
 
             GetTree().CurrentScene.CallDeferred(MethodName.AddChild, boost);
 
             float radian = (float)GD.RandRange(-Mathf.Pi * 2 / 3, -Mathf.Pi / 3);
             float force = (float)GD.RandRange(100f, 500f);
             boost.ApplyCentralImpulse(Vector2.Right.Rotated(radian) * force);
-
         });
     }
 
@@ -251,6 +269,18 @@ public partial class DropTable : Node2D
 
     private void RegisterUniformProbabilities()
     {
+        if (DropMode == BoostDropMode.UniformRarity)
+        {
+            RegisterRarityBasedProbabilities();
+        }
+        else if (DropMode == BoostDropMode.UniformCategory)
+        {
+            RegisterCategoryBasedProbabilities();
+        }
+    }
+
+    private void RegisterCategoryBasedProbabilities()
+    {
         var eligibleBoosts = new List<PackedScene>();
 
         foreach (var scene in _allBoosts)
@@ -258,32 +288,74 @@ public partial class DropTable : Node2D
             if (scene == null) continue;
 
             var testBoost = scene.Instantiate<Boost>();
-            if (DropMode == BoostDropMode.UniformRarity && IsBoostEnabled(testBoost) ||
-                DropMode == BoostDropMode.UniformCategory && IsBoostEnabled(testBoost))
+            if (IsBoostEnabled(testBoost))
             {
-                eligibleBoosts.Add(scene);
+                if (!(SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && 
+                    _obtainedOneTimeBoosts.Contains(scene.ResourcePath)))
+                {
+                    eligibleBoosts.Add(scene);
+                }
             }
             testBoost.QueueFree();
         }
 
         if (eligibleBoosts.Count > 0)
         {
-            float uniformProbability = 1.0f / eligibleBoosts.Count;
+            float uniformWeight = 1.0f;
             foreach (var scene in eligibleBoosts)
             {
-                var testBoost = scene.Instantiate<Boost>();
-                if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
-                {
-                    testBoost.QueueFree();
-                    continue;
-                }
-                testBoost.QueueFree();
-                RegisterBoostSpawn(scene, uniformProbability);
+                RegisterBoostSpawn(scene, uniformWeight);
             }
         }
     }
 
-    private void RegisterBoostProbability(PackedScene scene, float probability)
+    private void RegisterRarityBasedProbabilities()
+    {
+        var boostsByRarity = new Dictionary<BoostRarity, List<PackedScene>>();
+
+        // 收集每个稀有度的可用Boost
+        foreach (var scene in _allBoosts)
+        {
+            if (scene == null) continue;
+
+            var testBoost = scene.Instantiate<Boost>();
+            if (!IsBoostEnabled(testBoost))
+            {
+                testBoost.QueueFree();
+                continue;
+            }
+
+            var rarity = testBoost.Info.Rarity;
+            if (!boostsByRarity.ContainsKey(rarity))
+            {
+                boostsByRarity[rarity] = new List<PackedScene>();
+            }
+
+            if (!(SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && 
+                _obtainedOneTimeBoosts.Contains(scene.ResourcePath)))
+            {
+                boostsByRarity[rarity].Add(scene);
+            }
+
+            testBoost.QueueFree();
+        }
+
+        // 注册每个稀有度的Boosts
+        foreach (var rarityGroup in boostsByRarity)
+        {
+            if (rarityGroup.Value.Count == 0) continue;
+            if (!_baseRarityWeights.TryGetValue(rarityGroup.Key, out float baseWeight)) continue;
+
+            // 在该稀有度内平均分配权重
+            float weight = baseWeight;
+            foreach (var scene in rarityGroup.Value)
+            {
+                RegisterBoostSpawn(scene, weight / rarityGroup.Value.Count);
+            }
+        }
+    }
+
+    private void RegisterBoostProbability(PackedScene scene, float weight)
     {
         if (scene == null)
         {
@@ -299,7 +371,7 @@ public partial class DropTable : Node2D
         }
         testBoost.QueueFree();
 
-        RegisterBoostSpawn(scene, probability);
+        RegisterBoostSpawn(scene, weight);
     }
     public void Drop()
     {

@@ -5,26 +5,12 @@ using System.Linq;
 
 public partial class Probability : RefCounted
 {
-    public const int MaxProbabilityConvertedSum = 1000;
-    public const int Tolerance = 20;
-    private List<Tuple<int, Action>> _probableActions = new();
-    private int _currentProbabilityConvertedSum = 0;
+    private List<Tuple<float, Action>> _probableActions = new();
     private RandomNumberGenerator _rng = new();
-    public Probability Register(float probability, Action action)
+    public Probability Register(float weight, Action action)
     {
-        int converted = ConvertProbability(Mathf.Clamp(probability, 0f, 1f));
-        if (_currentProbabilityConvertedSum + converted > MaxProbabilityConvertedSum + Tolerance)
-        {
-            GD.PushError("Total probability registered to a Probability exceeded 1. Registration failed.");
-            return this;
-        }
-        _currentProbabilityConvertedSum += converted;
-        _probableActions.Add(new(converted, action));
+        _probableActions.Add(new(weight, action));
         return this;
-    }
-    public void RegisterCertainAction(Action action)
-    {
-        Register(1, action);
     }
     public void Run()
     {
@@ -34,27 +20,31 @@ public partial class Probability : RefCounted
             return;
         }
         _rng.Randomize();
-        float[] probabilities = _probableActions.Select(x => (float)x.Item1).ToArray();
-        int resultIndex = (int)_rng.RandWeighted(probabilities);
+        float[] weights = _probableActions.Select(x => (float)x.Item1).ToArray();
+        int resultIndex = (int)_rng.RandWeighted(weights);
         _probableActions[resultIndex].Item2?.Invoke();
     }
     public static void Run(params Tuple<float, Action>[] probableActions)
     {
         using Probability probability = new();
+
         foreach (var tuple in probableActions)
-        {
             probability.Register(tuple.Item1, tuple.Item2);
-        }
+        
         probability.Run();
     }
     public static void RunIfElse(float firstProbability, Action first, Action second)
     {
-        using Probability probability = new();
-        probability
-            .Register(firstProbability, first)
-            .Register(1f - firstProbability, second);
-        probability.Run();
+        if (firstProbability < 0.0f || firstProbability > 1.0f)
+        {
+            GD.PushError("RunIfElse: firstProbability must be between 0.0 and 1.0");
+            return;
+        }
+        Run(
+            new Tuple<float, Action>(firstProbability, first),
+            new Tuple<float, Action>(1.0f - firstProbability, second)
+        );
     }
+    
     public static void RunSingle(float probability, Action action) => RunIfElse(probability, action, () => { });
-    public int ConvertProbability(float probability) => Convert.ToInt32(probability * MaxProbabilityConvertedSum);
 }
