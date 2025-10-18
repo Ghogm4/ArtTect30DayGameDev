@@ -70,12 +70,20 @@ public partial class EnemyBase : CharacterBody2D
 
 	}
 
-	public void OnHealthChanged()
+	public async void OnHealthChanged()
 	{
 		_health = new(Stats.GetStat("Health"));
 		if (HealthBar != null)
 		{
-			HealthBar.Value = (float)_health;
+			double currentValue = HealthBar.Value; // 当前血条值
+			double targetValue = (double)_health;  // 目标血条值
+
+			Tween tween = CreateTween(); // 创建 Tween 动画
+			tween.TweenProperty(HealthBar, "value", targetValue, 0.1f) // 插值到目标值，持续 0.5 秒
+				.SetTrans(Tween.TransitionType.Linear)
+				.SetEase(Tween.EaseType.InOut);
+
+			await ToSignal(tween, "finished"); // 等待动画完成
 		}
 	}
 }
