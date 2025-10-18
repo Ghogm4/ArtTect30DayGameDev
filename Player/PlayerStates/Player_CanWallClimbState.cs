@@ -12,7 +12,7 @@ public partial class Player_CanWallClimbState : State
 	}
 	protected override void PhysicsUpdate(double delta)
 	{
-		if (_player.IsOnWallOnly() && Input.IsActionPressed("Climb") && 
+		if (_player.IsOnWallOnly() && Input.IsActionPressed("Climb") && Stats.GetStatValue("CanWallClimb") >= 1f &&
 				(
 					(Input.IsActionPressed("Left") && Storage.GetVariant<bool>("HeadingLeft")) ||
 					(Input.IsActionPressed("Right") && !Storage.GetVariant<bool>("HeadingLeft"))
