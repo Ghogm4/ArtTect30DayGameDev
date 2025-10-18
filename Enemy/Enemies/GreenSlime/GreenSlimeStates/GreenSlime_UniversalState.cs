@@ -20,7 +20,6 @@ public partial class GreenSlime_UniversalState : State
 
     private void OnHealthChanged()
     {
-        GD.Print((float)_health);
         if ((float)_health < preHealth)
         {
             GetHit();
