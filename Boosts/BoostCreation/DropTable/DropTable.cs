@@ -45,7 +45,7 @@ public partial class DropTable : Node2D
     }
 
     [ExportGroup("Drop Settings")]
-    [Export] public BoostDropMode DropMode = BoostDropMode.Manual;
+    [Export] public BoostDropMode DropMode = BoostDropMode.UniformRarity;
     [Export] public int TimesToRun = 1;
     [Export] public bool SkipObtainedOneTimeBoosts = true;
 
@@ -102,7 +102,6 @@ public partial class DropTable : Node2D
         LoadBoosts();
         InitDict();
         InitProbability();
-        Drop();
     }
 
     private void LoadBoosts()
