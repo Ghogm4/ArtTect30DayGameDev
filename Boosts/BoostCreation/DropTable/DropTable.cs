@@ -27,19 +27,27 @@ public enum BoostCategoryFilter
 [GlobalClass]
 public partial class DropTable : Node2D
 {
+    private static HashSet<string> _obtainedOneTimeBoosts = new();
+
+    public static void ResetObtainedOneTimeBoosts()
+    {
+        _obtainedOneTimeBoosts.Clear();
+    }
+
     [ExportGroup("Drop Settings")]
     [Export] public BoostDropMode DropMode = BoostDropMode.Manual;
     [Export] public int TimesToRun = 1;
+    [Export] public bool SkipObtainedOneTimeBoosts = true; // 是否跳过已获得的一次性增益
 
     [ExportGroup("Boost Sources")]
     [Export] public bool AutoLoadFromDirectories = true;
     [Export] public string[] BoostDirectories = { "res://Boosts/Combat", "res://Boosts/Movement", "res://Boosts/General" };
     [Export] public PackedScene[] ManualBoostList = [];  // Optional manual additions
     [Export] public Dictionary ManualProbabilities = new();  // For manual mode
-    
+
     private List<PackedScene> _autoLoadedBoosts = new();
     private List<PackedScene> _allBoosts = new();
-    
+
     [ExportGroup("Rarity Settings")]
     [Export] public bool EnableCommonRarity = true;
     [Export] public bool EnableUncommonRarity = true;
@@ -152,28 +160,52 @@ public partial class DropTable : Node2D
 
     private bool IsBoostEnabled(Boost boost)
     {
-        // Convert BoostRarity to BoostRarityFilter
-        var rarityFilter = boost.Info.Rarity switch
+        // 检查一次性增益
+        if (SkipObtainedOneTimeBoosts && boost.Info.IsOneTimeOnly)
         {
-            BoostRarity.Common => BoostRarityFilter.Common,
-            BoostRarity.Uncommon => BoostRarityFilter.Uncommon,
-            BoostRarity.Rare => BoostRarityFilter.Rare,
-            BoostRarity.Epic => BoostRarityFilter.Epic,
-            BoostRarity.Legendary => BoostRarityFilter.Legendary,
-            _ => BoostRarityFilter.None
+            string boostPath = boost.SceneFilePath;
+            if (!string.IsNullOrEmpty(boostPath) && _obtainedOneTimeBoosts.Contains(boostPath))
+                return false;
+        }
+
+        bool rarityEnabled = boost.Info.Rarity switch
+        {
+            BoostRarity.Common => EnableCommonRarity,
+            BoostRarity.Uncommon => EnableUncommonRarity,
+            BoostRarity.Rare => EnableRareRarity,
+            BoostRarity.Epic => EnableEpicRarity,
+            BoostRarity.Legendary => EnableLegendaryRarity,
+            _ => false
         };
 
-        // Convert BoostCategory to BoostCategoryFilter
-        var categoryFilter = boost.Info.Category switch
+        bool categoryEnabled = boost.Info.Category switch
         {
-            BoostCategory.Combat => BoostCategoryFilter.Combat,
-            BoostCategory.Movement => BoostCategoryFilter.Movement,
-            BoostCategory.General => BoostCategoryFilter.General,
-            _ => BoostCategoryFilter.None
+            BoostCategory.Combat => EnableCombatItems,
+            BoostCategory.Movement => EnableMovementItems,
+            BoostCategory.General => EnableGeneralItems,
+            _ => false
         };
 
-        // Check if both the rarity and category are enabled in their respective filters
-        return RarityFilter.HasFlag(rarityFilter) && CategoryFilter.HasFlag(categoryFilter);
+        return rarityEnabled && categoryEnabled;
+    }
+
+    private void RegisterBoostSpawn(PackedScene scene, float probability)
+    {
+        _probability.Register(probability, () =>
+        {
+            Boost boost = scene.Instantiate<Boost>();
+            boost.GlobalPosition = GlobalPosition;
+
+            if (boost.Info.IsOneTimeOnly)
+                _obtainedOneTimeBoosts.Add(scene.ResourcePath);
+
+            GetTree().CurrentScene.CallDeferred(MethodName.AddChild, boost);
+
+            float radian = (float)GD.RandRange(-Mathf.Pi * 2 / 3, -Mathf.Pi / 3);
+            float force = (float)GD.RandRange(100f, 500f);
+            boost.ApplyCentralImpulse(Vector2.Right.Rotated(radian) * force);
+
+        });
     }
 
     private void InitProbability()
@@ -197,13 +229,16 @@ public partial class DropTable : Node2D
         {
             string key = pair.Key.AsString();
             float probability = pair.Value.AsSingle();
-            
+
             if (_boostDict.TryGetValue(key, out PackedScene scene))
             {
                 var testBoost = scene.Instantiate<Boost>();
                 if (IsBoostEnabled(testBoost))
                 {
-                    RegisterBoostProbability(scene, probability);
+                    if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
+                        continue;
+                    
+                    RegisterBoostSpawn(scene, probability);
                 }
                 testBoost.QueueFree();
             }
@@ -236,26 +271,35 @@ public partial class DropTable : Node2D
             float uniformProbability = 1.0f / eligibleBoosts.Count;
             foreach (var scene in eligibleBoosts)
             {
-                RegisterBoostProbability(scene, uniformProbability);
+                var testBoost = scene.Instantiate<Boost>();
+                if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
+                {
+                    testBoost.QueueFree();
+                    continue;
+                }
+                testBoost.QueueFree();
+                RegisterBoostSpawn(scene, uniformProbability);
             }
         }
     }
 
     private void RegisterBoostProbability(PackedScene scene, float probability)
     {
-        _probability.Register(probability, () =>
+        if (scene == null)
         {
-            Boost boost = scene.Instantiate<Boost>();
-            boost.GlobalPosition = GlobalPosition;
-            Scheduler.Instance.ScheduleAction(2f, () =>
-            {
-                GetTree().CurrentScene.CallDeferred(MethodName.AddChild, boost);
+            GD.PrintErr("DropTable: Attempted to register a null boost scene");
+            return;
+        }
 
-                float radian = (float)GD.RandRange(-Mathf.Pi * 2 / 3, -Mathf.Pi / 3);
-                float force = (float)GD.RandRange(100f, 500f);
-                boost.ApplyCentralImpulse(Vector2.Right.Rotated(radian) * force);
-            }, 0);
-        });
+        var testBoost = scene.Instantiate<Boost>();
+        if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
+        {
+            testBoost.QueueFree();
+            return;
+        }
+        testBoost.QueueFree();
+
+        RegisterBoostSpawn(scene, probability);
     }
     public void Drop()
     {
