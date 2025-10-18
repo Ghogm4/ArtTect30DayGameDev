@@ -2,6 +2,8 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 public partial class MapManager : Node
 {
@@ -71,6 +73,7 @@ public partial class MapManager : Node
 
         SignalBus.Instance.EntranceSignal += OnEntranceChanged;
         InitMaps();
+        StartLevel();
     }
     
     public void OnEntranceChanged(string entrance)
@@ -97,7 +100,13 @@ public partial class MapManager : Node
             GD.Print("No next map found for entrance: " + entrance);
             return;
         }
+
+        if (EnabledMaps.Count > 5)
+        {
+            TargetMap = EndMap;
+        }
         SceneManager.Instance.ChangeScene(TargetMap.Scene);
+        SetPlayerPosition(entrance);
         NowMap = TargetMap;
         GD.Print($"Entrance changed to: {entrance}");
     }
@@ -134,6 +143,7 @@ public partial class MapManager : Node
         EndMap = ChooseMap(EndMaps);
         NowMap = StartMap;
         SceneManager.Instance.ChangeScene(StartMap.Scene);
+        
         StartMap.IsEnabled = true;
         EnabledMaps.Add(StartMap);
     }
@@ -157,6 +167,31 @@ public partial class MapManager : Node
         return null;
     }
 
+    public void SetPlayerPosition(string entrance)
+    {
+        var current = GetTree().CurrentScene;
+        var player = GetTree().GetNodesInGroup("Player").FirstOrDefault() as Player;
+        var baseLevel = current as BaseLevel;
+        switch (entrance)
+        {
+            case "Top":
+                player.GlobalPosition = baseLevel.BottomMarker.GlobalPosition;
+                break;
+            case "Bottom":
+                player.GlobalPosition = baseLevel.TopMarker.GlobalPosition;
+                break;
+            case "Left":
+                player.GlobalPosition = baseLevel.RightMarker.GlobalPosition;
+                break;
+            case "Right":
+                player.GlobalPosition = baseLevel.LeftMarker.GlobalPosition;
+                break;
+            default:
+                GD.PrintErr("Invalid entrance for setting player position: " + entrance);
+                break;
+        }
+
+    }
 
     public List<Map> SortMap(string entrance)
     {
@@ -209,6 +244,7 @@ public partial class MapManager : Node
             Tomap.IsEnabled = true;
             EnabledMaps.Add(Tomap);
         }
+
         switch (entrance)
         {
             case "Top":
@@ -230,6 +266,7 @@ public partial class MapManager : Node
             default:
                 break;
         }
+        
     }
     
     public Map NextMap(Map map, string entrance)

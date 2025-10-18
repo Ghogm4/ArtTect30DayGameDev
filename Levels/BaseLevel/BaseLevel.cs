@@ -19,7 +19,7 @@ public partial class BaseLevel : Node2D
 	[Export] public bool IsStartLevel = false;
 	
 	[Export] public bool IsEndLevel = false;
-	
+	[Export] public Player Player = null;
 
 	[Export] public float RarityWeight = 1.0f;
 
