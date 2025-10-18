@@ -11,6 +11,9 @@ public partial class MapManager : Node
     public List<Map> Maps = null;
     public List<Map> EnabledMaps = null;
 
+    public string Entrance = null;
+
+    public Map NowMap = null;
     public class Map
     {
         public PackedScene Scene;
@@ -55,19 +58,47 @@ public partial class MapManager : Node
     public override void _Ready()
     {
         if (Instance == null)
-		{
-			Instance = this;
-			ProcessMode = ProcessModeEnum.Always;
-		}
-		else
-		{
-			QueueFree();
-		}
+        {
+            Instance = this;
+            ProcessMode = ProcessModeEnum.Always;
+        }
+        else
+        {
+            QueueFree();
+        }
+
+        SignalBus.Instance.EntranceSignal += OnEntranceChanged;
         InitMaps();
+    }
+    
+    public void OnEntranceChanged(string entrance)
+    {
+        Map TargetMap = null;
+        Entrance = entrance;
+        if (NowMap == null)
+        {
+            GD.PrintErr("NowMap is null.");
+            return;
+        }
+        else if (NextMap(NowMap, entrance) != null)
+        {
+            TargetMap = NextMap(NowMap, entrance);
+        }
+        else
+        {
+            GD.Print("No next map found for entrance: " + entrance);
+            return;
+        }
+        SceneManager.Instance.ChangeScene(TargetMap.Scene);
+        GD.Print($"Entrance changed to: {entrance}");
     }
 
     public void InitMaps()
     {
+        foreach (Map map in Maps)
+        {
+            map.IsEnabled = false;
+        }
         Maps = new List<Map>();
         EnabledMaps = new List<Map>();
         foreach (PackedScene scene in MapPool)
@@ -100,7 +131,39 @@ public partial class MapManager : Node
 
     public Map ChooseMap(List<Map> maps)
     {
-        
+        foreach (Map map in maps)
+        {
+
+        }
         return null;
+    }
+
+    public void LoadMap(Map Tomap, Map Frommap)
+    {
+        Tomap.IsEnabled = true;
+        if (!EnabledMaps.Contains(Tomap))
+        {
+            Tomap.IsEnabled = true;
+            EnabledMaps.Add(Tomap);
+        }
+
+
+    }
+    
+    public Map NextMap(Map map, string entrance)
+    {
+        switch (entrance)
+        {
+            case "Top":
+                return map.BottomMap;
+            case "Bottom":
+                return map.TopMap;
+            case "Left":
+                return map.RightMap;
+            case "Right":
+                return map.LeftMap;
+            default:
+                return null;
+        }
     }
 }
