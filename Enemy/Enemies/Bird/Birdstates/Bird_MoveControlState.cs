@@ -59,7 +59,7 @@ public partial class Bird_MoveControlState : State
         if (!_isPreparing && !_isDiving)
         {
             _attackTimer += (float)delta;
-            if (_attackTimer >= AttackCD)
+            if (_attackTimer >= AttackCD + GD.RandRange(-1f, 1f))
             {
                 _isPreparing = true;
                 _prepareTimer = 0f;
@@ -120,6 +120,7 @@ public partial class Bird_MoveControlState : State
             {
                 velocity = velocity.Normalized() * (float)_speed;
             }
+            
             _targetRotation = velocity.Angle();
             Storage.SetVariant("HeadingLeft", velocity.X < 0);
 
