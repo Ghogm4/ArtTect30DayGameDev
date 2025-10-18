@@ -4,21 +4,17 @@ using System.Collections.Generic;
 [GlobalClass]
 public partial class BoostInfo : Resource
 {
-    public enum Rarity
+    public static Dictionary<BoostRarity, Color> RarityColorMap = new()
     {
-        Common = 0,
-        Rare = 1,
-        Epic = 2,
-        Mythical = 3
-    }
-    public static Dictionary<Rarity, Color> RarityColorMap = new()
-    {
-        [Rarity.Common] = Colors.White,
-        [Rarity.Rare] = Colors.Blue,
-        [Rarity.Epic] = Colors.Purple,
-        [Rarity.Mythical] = Colors.Crimson
+        [BoostRarity.Common] = Colors.White,
+        [BoostRarity.Uncommon] = Colors.Green,
+        [BoostRarity.Rare] = Colors.Blue,
+        [BoostRarity.Epic] = Colors.Purple,
+        [BoostRarity.Legendary] = Colors.Orange
     };
-    [Export] public Rarity BoostRarity = Rarity.Common;
+    
+    [Export] public BoostRarity Rarity = BoostRarity.Common;
+    [Export] public BoostCategory Category = BoostCategory.None;
     [Export] public string Name = "";
     [Export] public Texture2D Icon = null;
     [Export] public string Description = "";
