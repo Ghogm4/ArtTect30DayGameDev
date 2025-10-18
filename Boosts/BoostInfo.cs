@@ -19,4 +19,5 @@ public partial class BoostInfo : Resource
     [Export] public Texture2D Icon = null;
     [Export] public string Description = "";
     [Export] public int Amount = 0;
+    [Export] public bool IsOneTimeOnly = false; // 是否为一次性增益（获得后不再出现）
 }
