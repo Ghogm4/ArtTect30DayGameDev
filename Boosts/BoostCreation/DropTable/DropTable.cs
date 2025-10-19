@@ -27,7 +27,9 @@ public enum BoostCategoryFilter
 [GlobalClass]
 public partial class DropTable : Node2D
 {
-    // 稀有度基础权重
+    [ExportGroup("Default Drops")]
+    [Export] public PackedScene[] DefaultDropScenes;
+
     private static readonly Dictionary<BoostRarity, float> _baseRarityWeights = new()
     {
         { BoostRarity.Common, 0.60f },
@@ -39,11 +41,8 @@ public partial class DropTable : Node2D
 
     private static HashSet<string> _obtainedOneTimeBoosts = new();
 
-    public static void ResetObtainedOneTimeBoosts()
-    {
-        _obtainedOneTimeBoosts.Clear();
-    }
-
+    public static void ResetObtainedOneTimeBoosts() => _obtainedOneTimeBoosts.Clear();
+    
     [ExportGroup("Drop Settings")]
     [Export] public BoostDropMode DropMode = BoostDropMode.UniformRarity;
     [Export] public int TimesToRun = 1;
@@ -109,51 +108,50 @@ public partial class DropTable : Node2D
         _autoLoadedBoosts.Clear();
         _allBoosts.Clear();
 
-        if (AutoLoadFromDirectories)
-        {
-            foreach (string directory in BoostDirectories)
-            {
-                using var dir = DirAccess.Open(directory);
-                if (dir == null)
-                {
-                    GD.PrintErr($"Failed to open directory: {directory}");
-                    continue;
-                }
+        DoAutoLoadFromDirectories();
 
-                dir.ListDirBegin();
-                string fileName = dir.GetNext();
-                while (!string.IsNullOrEmpty(fileName))
-                {
-                    if (!dir.CurrentIsDir() && fileName.EndsWith(".tscn"))
-                    {
-                        string fullPath = $"{directory}/{fileName}";
-                        if (ResourceLoader.Load<PackedScene>(fullPath) is PackedScene scene)
-                        {
-                            _autoLoadedBoosts.Add(scene);
-                        }
-                    }
-                    fileName = dir.GetNext();
-                }
-                dir.ListDirEnd();
-            }
-        }
+        DoManualBoostLoading();
 
-        // Add manual boosts
-        if (ManualBoostList != null)
-        {
-            foreach (var scene in ManualBoostList)
-            {
-                if (scene != null)
-                {
-                    _allBoosts.Add(scene);
-                }
-            }
-        }
-
-        // Add auto-loaded boosts
         _allBoosts.AddRange(_autoLoadedBoosts);
     }
+    private void DoAutoLoadFromDirectories()
+    {
+        if (!AutoLoadFromDirectories)
+            return;
 
+        foreach (string directory in BoostDirectories)
+        {
+            using var dir = DirAccess.Open(directory);
+            if (dir == null)
+            {
+                GD.PrintErr($"Failed to open directory: {directory}");
+                continue;
+            }
+
+            dir.ListDirBegin();
+            string fileName = dir.GetNext();
+            while (!string.IsNullOrEmpty(fileName))
+            {
+                if (!dir.CurrentIsDir() && fileName.EndsWith(".tscn"))
+                {
+                    string fullPath = $"{directory}/{fileName}";
+                    if (ResourceLoader.Load<PackedScene>(fullPath) is PackedScene scene)
+                        _autoLoadedBoosts.Add(scene);
+                }
+                fileName = dir.GetNext();
+            }
+            dir.ListDirEnd();
+        }
+    }
+    private void DoManualBoostLoading()
+    {
+        if (ManualBoostList == null || ManualBoostList.Length == 0)
+            return;
+
+        foreach (var scene in ManualBoostList)
+            if (scene != null)
+                _allBoosts.Add(scene);
+    }
     private void InitDict()
     {
         _boostDict.Clear();
@@ -166,10 +164,51 @@ public partial class DropTable : Node2D
             _boostDict[key] = scene;
         }
     }
+    private void InitProbability()
+    {
+        _probability = new Probability();
 
+        if (DropMode == BoostDropMode.Manual)
+            RegisterManualProbabilities();
+        else
+            RegisterUniformProbabilities();
+    }
+    
+    private void RegisterManualProbabilities()
+    {
+        foreach (var pair in ManualProbabilities)
+        {
+            string key = pair.Key.AsString();
+            float probability = pair.Value.AsSingle();
+
+            if (_boostDict.TryGetValue(key, out PackedScene scene))
+            {
+                var testBoost = scene.Instantiate<Boost>();
+                if (IsBoostEnabled(testBoost))
+                {
+                    if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
+                        continue;
+
+                    RegisterBoostSpawn(scene, probability);
+                }
+                testBoost.QueueFree();
+            }
+            else
+            {
+                GD.PushError($"Cannot find the boost named {key}.");
+            }
+        }
+    }
+
+    private void RegisterUniformProbabilities()
+    {
+        if (DropMode == BoostDropMode.UniformRarity)
+            RegisterRarityBasedProbabilities();
+        else if (DropMode == BoostDropMode.UniformCategory)
+            RegisterCategoryBasedProbabilities();
+    }
     private bool IsBoostEnabled(Boost boost)
     {
-        // 检查一次性增益
         if (SkipObtainedOneTimeBoosts && boost.Info.IsOneTimeOnly)
         {
             string boostPath = boost.SceneFilePath;
@@ -209,74 +248,10 @@ public partial class DropTable : Node2D
                 testBoost.QueueFree();
 
                 if (isOneTimeOnly)
-                {
                     _obtainedOneTimeBoosts.Add(scene.ResourcePath);
-                }
             }
-
-            Boost boost = scene.Instantiate<Boost>();
-            boost.GlobalPosition = GlobalPosition;
-
-            GetTree().CurrentScene.CallDeferred(MethodName.AddChild, boost);
-
-            float spread = Mathf.Atan(TimesToRun) / 2;
-            float radian = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
-            float force = 200f;
-            boost.ApplyCentralImpulse(Vector2.Right.Rotated(radian) * force);
+            AddBoostFromPackedSceneToLevel(scene);
         });
-    }
-
-    private void InitProbability()
-    {
-        // Clear existing probability registrations
-        _probability = new Probability();
-
-        if (DropMode == BoostDropMode.Manual)
-        {
-            RegisterManualProbabilities();
-        }
-        else
-        {
-            RegisterUniformProbabilities();
-        }
-    }
-
-    private void RegisterManualProbabilities()
-    {
-        foreach (var pair in ManualProbabilities)
-        {
-            string key = pair.Key.AsString();
-            float probability = pair.Value.AsSingle();
-
-            if (_boostDict.TryGetValue(key, out PackedScene scene))
-            {
-                var testBoost = scene.Instantiate<Boost>();
-                if (IsBoostEnabled(testBoost))
-                {
-                    if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
-                        continue;
-                    
-                    RegisterBoostSpawn(scene, probability);
-                }
-                testBoost.QueueFree();
-            }
-            else
-            {
-                GD.PushError($"Cannot find the boost named {key}.");
-            }
-        }
-    }
-
-    private void RegisterUniformProbabilities()
-    {
-        if (DropMode == BoostDropMode.UniformRarity)
-        {
-            RegisterRarityBasedProbabilities();
-        }
-        else if (DropMode == BoostDropMode.UniformCategory)
-        {
-            RegisterCategoryBasedProbabilities();
-        }
     }
 
     private void RegisterCategoryBasedProbabilities()
@@ -290,11 +265,9 @@ public partial class DropTable : Node2D
             var testBoost = scene.Instantiate<Boost>();
             if (IsBoostEnabled(testBoost))
             {
-                if (!(SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && 
+                if (!(SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly &&
                     _obtainedOneTimeBoosts.Contains(scene.ResourcePath)))
-                {
                     eligibleBoosts.Add(scene);
-                }
             }
             testBoost.QueueFree();
         }
@@ -303,9 +276,7 @@ public partial class DropTable : Node2D
         {
             float uniformWeight = 1.0f;
             foreach (var scene in eligibleBoosts)
-            {
                 RegisterBoostSpawn(scene, uniformWeight);
-            }
         }
     }
 
@@ -327,15 +298,11 @@ public partial class DropTable : Node2D
 
             var rarity = testBoost.Info.Rarity;
             if (!boostsByRarity.ContainsKey(rarity))
-            {
                 boostsByRarity[rarity] = new List<PackedScene>();
-            }
-
-            if (!(SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && 
+            
+            if (!(SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly &&
                 _obtainedOneTimeBoosts.Contains(scene.ResourcePath)))
-            {
                 boostsByRarity[rarity].Add(scene);
-            }
 
             testBoost.QueueFree();
         }
@@ -349,9 +316,7 @@ public partial class DropTable : Node2D
             // 在该稀有度内平均分配权重
             float weight = baseWeight;
             foreach (var scene in rarityGroup.Value)
-            {
                 RegisterBoostSpawn(scene, weight / rarityGroup.Value.Count);
-            }
         }
     }
 
@@ -373,9 +338,86 @@ public partial class DropTable : Node2D
 
         RegisterBoostSpawn(scene, weight);
     }
+
+    private void SpawnDefaultDrop()
+    {
+        if (DefaultDropScenes == null || DefaultDropScenes.Length == 0)
+        {
+            GD.PushError("DropTable: Default drops are not configured!");
+            return;
+        }
+
+        AddBoostFromPackedSceneToLevel(GetRandomDefaultDropScene());
+    }
+    private PackedScene GetRandomDefaultDropScene() => Probability.RunUniformChoose(DefaultDropScenes);
+    private void AddBoostFromPackedSceneToLevel(PackedScene scene)
+    {
+        if (scene == null)
+        {
+            GD.PushError("DropTable: Attempted to add a null boost scene to the scene tree.");
+            return;
+        }
+
+        var boost = scene.Instantiate<Boost>();
+        boost.GlobalPosition = GlobalPosition;
+
+        GetTree().CurrentScene.CallDeferred(MethodName.AddChild, boost);
+
+        float spread = Mathf.Atan(TimesToRun) / 2;
+        float radian = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
+        float force = 200f;
+        boost.ApplyCentralImpulse(Vector2.Right.Rotated(radian) * force);
+    }
+    private bool HasValidDrops()
+    {
+        foreach (var scene in _allBoosts)
+        {
+            if (scene == null) continue;
+
+            var testBoost = scene.Instantiate<Boost>();
+            bool isValid = IsBoostEnabled(testBoost);
+
+            if (isValid && testBoost.Info.IsOneTimeOnly &&
+                _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
+                isValid = false;
+            
+            testBoost.QueueFree();
+
+            if (isValid)
+                return true;
+        }
+        return false;
+    }
+
+    private bool TryRunProbability()
+    {
+        bool success = false;
+        _probability.Register(1.0f, () => success = true);
+        _probability.Run();
+        return success;
+    }
+
     public void Drop()
     {
-        for (int i = 0; i < TimesToRun; i++)
+        int remainingDrops = TimesToRun;
+        int maxAttempts = TimesToRun * 3;
+        int attempts = 0;
+
+        while (remainingDrops > 0 && attempts < maxAttempts)
+        {
+            attempts++;
+
+            if (!HasValidDrops())
+            {
+                SpawnDefaultDrop();
+                remainingDrops--;
+                continue;
+            }
+
+            InitProbability();
             _probability.Run();
+            if (!_probability.IsEmpty)
+                remainingDrops--;
+        }
     }
 }
