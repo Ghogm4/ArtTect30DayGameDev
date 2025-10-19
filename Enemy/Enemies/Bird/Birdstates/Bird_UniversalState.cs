@@ -32,14 +32,8 @@ public partial class Bird_UniversalState : State
 
         if ((float)_health <= 0)
         {
-            await Die();
+            _enemy.Die();
         }
-    }
-
-    private async Task Die()
-    {
-        await ToSignal(GetTree().CreateTimer(0.1f), "timeout");
-        _enemy.QueueFree();
     }
     
     private void GetHit()

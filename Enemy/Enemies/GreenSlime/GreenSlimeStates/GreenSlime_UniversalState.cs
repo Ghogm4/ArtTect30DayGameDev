@@ -30,15 +30,9 @@ public partial class GreenSlime_UniversalState : State
 
         if ((float)_health <= 0)
         {
-            Die();
+            _enemy.Die();
         }
     }
-
-    private void Die()
-    {
-        _enemy.QueueFree();
-    }
-    
     private void GetHit()
     {
         if (_sprite != null)
