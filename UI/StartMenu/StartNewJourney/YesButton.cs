@@ -10,6 +10,7 @@ public partial class YesButton : Button
 			return;
 
 		_isPressedOnce = true;
+		SignalBus.Instance.RegisterSceneChangeStartedAction(() => PlayerHealthBar.Instance.Visible = true, 0);
 		MapManager.Instance.InitMaps();
 		MapManager.Instance.StartLevel();
 	}

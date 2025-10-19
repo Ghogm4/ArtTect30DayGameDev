@@ -16,7 +16,7 @@ public partial class Probability : RefCounted
 	{
 		if (_probableActions.Count == 0)
 		{
-			GD.PushError("Can't run the Probability because there's no probable action.");
+			GD.PushWarning("Can't run the Probability because there's no probable action.");
 			return;
 		}
 		_rng.Randomize();

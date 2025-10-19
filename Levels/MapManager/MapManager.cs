@@ -152,7 +152,7 @@ public partial class MapManager : Node
 		GD.Print($"Initialized {Maps.Count} maps.");
 	}
 
-	public async Task StartLevel()
+	public async void StartLevel()
 	{
 		List<Map> StartMaps = Maps.FindAll(m => m.IsStartLevel);
 		List<Map> EndMaps = Maps.FindAll(m => m.IsEndLevel);
