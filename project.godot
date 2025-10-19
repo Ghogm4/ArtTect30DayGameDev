@@ -27,6 +27,7 @@ AudioManager="*res://AudioManager/AudioManager.cs"
 TextManager="*res://TextManager/TextManager.cs"
 Scheduler="*res://Utilities/Scheduler/Scheduler.cs"
 InGameMenu="*res://UI/InGameMenu/InGameMenu.tscn"
+MapManagerScene="*res://Levels/MapManager/MapManagerScene.tscn"
 
 [display]
 
