@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 public partial class Player_MoveControlState : State
 {
@@ -66,9 +67,15 @@ public partial class Player_MoveControlState : State
 			velocity += new Vector2(_platformVelocity, 0);
 			_wasOnFloor = false;
 		}
-			
 
-		if ((Input.IsActionJustPressed("Jump") && AvailableJumps > 0) || (_willJump && _isOnFloor))
+		if (Input.IsActionPressed("Down") && Input.IsActionJustPressed("Jump") && _isOnFloor)
+			PassThroughPlatform();
+		
+		if (!Input.IsActionPressed("Down") &&
+			(
+				(Input.IsActionJustPressed("Jump") && AvailableJumps > 0) ||
+				(_willJump && _isOnFloor)
+			))
 		{
 			velocity.Y = -Stats.GetStatValue("JumpVelocity");
 			_willJump = false;
@@ -123,10 +130,14 @@ public partial class Player_MoveControlState : State
 		if (direction != 0)
 			Storage.SetVariant("HeadingLeft", direction < 0);
 
-
-		
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
+	}
+	private async void PassThroughPlatform()
+	{
+		_player.SetCollisionMaskValue(5, false);
+		await ToSignal(GetTree().CreateTimer(0.1f), "timeout");
+		_player.SetCollisionMaskValue(5, true);
 	}
 	protected override void Exit()
 	{
