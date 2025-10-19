@@ -13,12 +13,12 @@ public partial class LevelTransitioner : Area2D
 			if (body is Player)
 			{
 				EmitSignal(SignalBus.SignalName.EntranceSignal, Entrance);
-            }
+			}
 				
 		};
 
 		switch (this.Name)
-        {
+		{
 			case "LevelTransitionerTop":
 				Entrance = "Bottom";
 				break;
@@ -34,6 +34,6 @@ public partial class LevelTransitioner : Area2D
 			default:
 				GD.PrintErr($"Unknown LevelTransitioner name: {this.Name}");
 				break;
-        }
+		}
 	}
 }
