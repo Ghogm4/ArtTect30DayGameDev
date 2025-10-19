@@ -388,15 +388,6 @@ public partial class DropTable : Node2D
         }
         return false;
     }
-
-    private bool TryRunProbability()
-    {
-        bool success = false;
-        _probability.Register(1.0f, () => success = true);
-        _probability.Run();
-        return success;
-    }
-
     public void Drop()
     {
         int remainingDrops = TimesToRun;
