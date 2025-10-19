@@ -20,6 +20,7 @@ public partial class MapManager : Node
 	public Map NowMap = null;
 	public Map StartMap = null;
 	public Map EndMap = null;
+	private bool _isEndCreated = false;
 	public class Map
 	{
 		public PackedScene Scene;
@@ -78,7 +79,7 @@ public partial class MapManager : Node
 		// StartLevel();
 	}
 
-	public void OnEntranceChanged(string entrance)
+	public async void OnEntranceChanged(string entrance)
 	{
 		Map TargetMap = null;
 		Entrance = entrance;
@@ -89,28 +90,32 @@ public partial class MapManager : Node
 		}
 		else if (NextMap(NowMap, entrance) != null)
 		{
+			
 			TargetMap = NextMap(NowMap, entrance);
 		}
 		else
 		{
+			GD.Print(NextMap(NowMap, entrance));
 			TargetMap = ChooseMap(SortMap(entrance));
-			LoadMap(TargetMap, NowMap, entrance);
 		}
-
+		if (!_isEndCreated && EnabledMaps.Count > 2)
+		{
+			TargetMap = EndMap;
+			_isEndCreated = true;
+		}
 		if (TargetMap == null)
 		{
 			GD.Print("No next map found for entrance: " + entrance);
 			return;
 		}
-
-		if (EnabledMaps.Count > 5)
-		{
-			TargetMap = EndMap;
-		}
+		LoadMap(TargetMap, NowMap, entrance);
+		
 		SceneManager.Instance.ChangeScene(TargetMap.Scene);
+		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 		SetPlayerPosition(entrance);
 		NowMap = TargetMap;
-		GD.Print($"Entrance changed to: {entrance}");
+		PrintMap(NowMap);
+		
 	}
 
 	public void InitMaps()
@@ -124,6 +129,7 @@ public partial class MapManager : Node
 		}
 		Maps = new List<Map>();
 		EnabledMaps = new List<Map>();
+		_isEndCreated = false;
 		foreach (PackedScene scene in MapPool)
 		{
 			BaseLevel level = scene.Instantiate<BaseLevel>();
@@ -136,6 +142,11 @@ public partial class MapManager : Node
 				level.IsStartLevel,
 				level.IsEndLevel,
 				level.RarityWeight);
+			if (map.IsEndLevel)
+			{
+				EndMap = map;
+				continue;
+			}
 			Maps.Add(map);
 		}
 		GD.Print($"Initialized {Maps.Count} maps.");
@@ -148,6 +159,7 @@ public partial class MapManager : Node
 		StartMap = ChooseMap(StartMaps);
 		EndMap = ChooseMap(EndMaps);
 		NowMap = StartMap;
+		PrintMap(NowMap);
 		SceneManager.Instance.ChangeScene(StartMap.Scene);
 		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 		Node2D StartMarker = GetTree().CurrentScene.GetNode<Node2D>("%MarkerStart");
@@ -262,13 +274,12 @@ public partial class MapManager : Node
 
 	public void LoadMap(Map Tomap, Map Frommap, string entrance)
 	{
-		GD.Print(Tomap.Scene.ResourceName);
+		GD.Print("here");
 		if (!EnabledMaps.Contains(Tomap))
 		{
 			Tomap.IsEnabled = true;
 			EnabledMaps.Add(Tomap);
 		}
-
 		switch (entrance)
 		{
 			case "Top":
@@ -298,15 +309,21 @@ public partial class MapManager : Node
 		switch (entrance)
 		{
 			case "Top":
-				return map.BottomMap;
-			case "Bottom":
 				return map.TopMap;
+			case "Bottom":
+				return map.BottomMap;
 			case "Left":
-				return map.RightMap;
-			case "Right":
 				return map.LeftMap;
+			case "Right":
+				return map.RightMap;
 			default:
+				GD.PrintErr("Invalid entrance for NextMap: " + entrance);
 				return null;
 		}
+	}
+	
+	public void PrintMap(Map map)
+	{
+		GD.Print($"Map: {map.Scene.ResourcePath}, Top: {map.TopMap}, Bottom: {map.BottomMap}, Left: {map.LeftMap}, Right: {map.RightMap}, IsEnabled: {map.IsEnabled}, IsStartLevel: {map.IsStartLevel}, IsEndLevel: {map.IsEndLevel}, RarityWeight: {map.RarityWeight}");
 	}
 }

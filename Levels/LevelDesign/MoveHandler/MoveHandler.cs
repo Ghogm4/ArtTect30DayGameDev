@@ -133,7 +133,7 @@ public partial class MoveHandler : AnimatableBody2D
 		}
 		Vector2 targetPosition = _initialPosition + new Vector2(_xoffset, _yoffset);
 		_tween.TweenProperty(this, "global_position", targetPosition, _duration).SetTrans(_tweenType).SetEase(_easeType);
-		//_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _initialRotation + (_rotationClockwise ? _rotationOffset : -_rotationOffset), _duration).SetTrans(_tweenType).SetEase(_easeType);
+		_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _initialRotation + (_rotationClockwise ? _rotationOffset : -_rotationOffset), _duration).SetTrans(_tweenType).SetEase(_easeType);
 		if (_reverse)
 		{
 			_tween.TweenCallback(Callable.From(() => ReverseMove()));
@@ -143,7 +143,7 @@ public partial class MoveHandler : AnimatableBody2D
 	{
 		_tween = CreateTween();
 		_tween.TweenProperty(this, "global_position", _initialPosition, _duration).SetTrans(_tweenType).SetEase(_easeType);
-		//_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _rotationOffset > 180 ? _initialRotation - 360 : _initialRotation, _duration).SetTrans(_tweenType).SetEase(_easeType);
+		_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _rotationOffset > 180 ? _initialRotation - 360 : _initialRotation, _duration).SetTrans(_tweenType).SetEase(_easeType);
 		_tween.TweenCallback(Callable.From(() => StartMove()));
 	}
 	

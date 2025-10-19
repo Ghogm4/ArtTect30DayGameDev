@@ -13,7 +13,7 @@ public partial class LevelTransitioner : Area2D
 		{
 			if (body is Player && !_isEmitted)
 			{
-				GD.Print("Changed");
+				GD.Print(Entrance);
 				SignalBus.Instance.EmitSignal(SignalBus.SignalName.EntranceSignal, Entrance);
 				_isEmitted = true;
 			}
@@ -23,16 +23,16 @@ public partial class LevelTransitioner : Area2D
 		switch (this.Name)
 		{
 			case "LevelTransitionerTop":
-				Entrance = "Bottom";
-				break;
-			case "LevelTransitionerBottom":
 				Entrance = "Top";
 				break;
+			case "LevelTransitionerBottom":
+				Entrance = "Bottom";
+				break;
 			case "LevelTransitionerLeft":
-				Entrance = "Right";
+				Entrance = "Left";
 				break;
 			case "LevelTransitionerRight":
-				Entrance = "Left";
+				Entrance = "Right";
 				break;
 			default:
 				GD.PrintErr($"Unknown LevelTransitioner name: {this.Name}");
