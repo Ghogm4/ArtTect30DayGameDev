@@ -81,7 +81,7 @@ public partial class EnemyBase : CharacterBody2D
 		{
 			GD.Print("dis");
 			FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
-			AddChild(Text);
+			GetTree().CurrentScene.AddChild(Text);
 			Text.GlobalPosition = GlobalPosition + new Vector2(0, -20);
 			Text.display((int)(preHealth - (float)_health));
 		}
