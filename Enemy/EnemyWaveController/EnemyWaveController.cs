@@ -5,7 +5,7 @@ using System.Linq;
 [GlobalClass]
 public partial class EnemyWaveController : Node
 {
-    [Signal] public delegate void AllEnemiesDefeatedEventHandler();
+    [Signal] public delegate void WaveCompletedEventHandler();
     [Signal] public delegate void AllWavesCompletedEventHandler();
     [Export] public float InitialDelay = 0f;
     [Export] public float TimeBetweenWaves = 2f;
@@ -37,7 +37,7 @@ public partial class EnemyWaveController : Node
     }
     private void OnAllEnemiesDefeated()
     {
-        EmitSignal(SignalName.AllEnemiesDefeated);
+        EmitSignal(SignalName.WaveCompleted);
         if (_currentWaveIndex == _enemyMaps.Count)
         {
             EmitSignal(SignalName.AllWavesCompleted);

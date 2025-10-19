@@ -10,7 +10,7 @@ public partial class NormalAltar : Node2D
 	private bool _isPlayerNearby = false;
 	public override void _Ready()
 	{
-		LinkedEnemyWaveController.AllEnemiesDefeated += () => _isInteractable = true;
+		LinkedEnemyWaveController.AllWavesCompleted += () => _isInteractable = true;
 	}
 	public void OnBodyEntered(Node2D body)
 	{
