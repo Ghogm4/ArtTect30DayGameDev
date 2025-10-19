@@ -105,7 +105,7 @@ public partial class MapManager : Node
 		}
 		if (TargetMap == null)
 		{
-			GD.Print("No next map found for entrance: " + entrance);
+			GD.Print("TargetMap is null.");
 			return;
 		}
 		LoadMap(TargetMap, NowMap, entrance);
@@ -144,8 +144,8 @@ public partial class MapManager : Node
 				level.RarityWeight);
 			if (map.IsEndLevel)
 			{
+				GD.Print("EndMap assigned.");
 				EndMap = map;
-				continue;
 			}
 			Maps.Add(map);
 		}
@@ -234,7 +234,7 @@ public partial class MapManager : Node
 		List<Map> result = new List<Map>();
 		foreach (Map map in Maps)
 		{
-			if (map.IsEnabled == false)
+			if (map.IsEnabled == false && map.IsEndLevel == false)
 			{
 				switch (entrance)
 				{
