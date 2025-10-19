@@ -5,6 +5,7 @@ using System.Linq;
 
 public partial class Probability : RefCounted
 {
+	public bool IsEmpty => _probableActions.Count == 0;
 	private List<Tuple<float, Action>> _probableActions = new();
 	private RandomNumberGenerator _rng = new();
 	public Probability Register(float weight, Action action)
@@ -45,6 +46,27 @@ public partial class Probability : RefCounted
 			new Tuple<float, Action>(1.0f - firstProbability, second)
 		);
 	}
-	
 	public static void RunSingle(float probability, Action action) => RunIfElse(probability, action, () => { });
+	public static void RunUniform(params Action[] actions)
+	{
+		if (actions.Length == 0)
+		{
+			GD.PushWarning("RunUniform: No actions provided.");
+			return;
+		}
+		float uniformProbability = 1.0f / actions.Length;
+		var probableActions = actions.Select(a => new Tuple<float, Action>(uniformProbability, a)).ToArray();
+		Run(probableActions);
+	}
+	public static T RunUniformChoose<T>(params T[] items)
+	{
+		if (items.Length == 0)
+		{
+			GD.PushWarning("RunUniformChoose: No items provided.");
+			return default;
+		}
+		T chosenItem = default;
+		RunUniform(items.Select(item => new Action(() => chosenItem = item)).ToArray());
+		return chosenItem;
+	}
 }
