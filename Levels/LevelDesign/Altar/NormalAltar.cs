@@ -5,8 +5,13 @@ public partial class NormalAltar : Node2D
 {
 	[Export] public Sprite2D AltarSprite;
 	[Export] public DropTable BoostDropTable;
-	private bool _isInteractable = true;
+	[Export] public EnemyWaveController LinkedEnemyWaveController;
+	private bool _isInteractable = false;
 	private bool _isPlayerNearby = false;
+	public override void _Ready()
+	{
+		LinkedEnemyWaveController.AllEnemiesDefeated += () => _isInteractable = true;
+	}
 	public void OnBodyEntered(Node2D body)
 	{
 		if (!body.IsInGroup("Player"))

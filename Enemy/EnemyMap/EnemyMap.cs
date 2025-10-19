@@ -7,14 +7,15 @@ using System.Linq;
 [GlobalClass]
 public partial class EnemyMap : Node
 {
+	[Signal] public delegate void AllEnemiesDefeatedEventHandler();
 	[Export] public PackedScene[] EnemyList = Array.Empty<PackedScene>();
 	private Dictionary<string, PackedScene> EnemyDict = new();
+	private int _enemyCount = 0;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		InitDict();
-		ScanMarkers();
-		
+		_enemyCount = GetChildren().OfType<EnemyMarker>().Count();
 	}
 	
 	public void InitDict()
@@ -29,12 +30,6 @@ public partial class EnemyMap : Node
 			}
 		}
 	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
-	{
-	}
-
 	public void ScanMarkers()
 	{
 		foreach (Node child in GetChildren())
@@ -62,7 +57,8 @@ public partial class EnemyMap : Node
 		if (EnemyDict.ContainsKey(enemyName))
 		{
 			var enemy = EnemyDict[enemyName];
-			var enemyInstance = enemy.Instantiate<Node2D>();
+			var enemyInstance = enemy.Instantiate<EnemyBase>();
+			enemyInstance.OnDied += OnEnemyDied;
 			enemyInstance.Position = position;
 			GetTree().CurrentScene.CallDeferred("add_child", enemyInstance);
 		}
@@ -70,5 +66,11 @@ public partial class EnemyMap : Node
 		{
 			GD.PrintErr($"Enemy '{enemyName}' not found in EnemyDict.");
 		}
+	}
+	private void OnEnemyDied()
+	{
+		_enemyCount--;
+		if (_enemyCount <= 0)
+			EmitSignal(SignalName.AllEnemiesDefeated);
 	}
 }

@@ -19,6 +19,7 @@ public partial class EnemyBase : CharacterBody2D
 	[Signal] public delegate void ExitAttackEventHandler(Node2D body);
 	[Signal] public delegate void ExitChaseEventHandler(Node2D body);
 	[Signal] public delegate void ExitMonitorEventHandler(Node2D body);
+	[Signal] public delegate void OnDiedEventHandler();
 
 	private StatWrapper _health;
 	private float preHealth;
@@ -75,7 +76,7 @@ public partial class EnemyBase : CharacterBody2D
 
 	public async void OnHealthChanged()
 	{
-		
+
 		_health = new(Stats.GetStat("Health"));
 		if ((float)_health < preHealth)
 		{
@@ -98,5 +99,14 @@ public partial class EnemyBase : CharacterBody2D
 			await ToSignal(tween, "finished");
 		}
 		preHealth = (float)_health;
+	}
+	public virtual void Die()
+	{
+		EmitSignal(SignalName.OnDied);
+		OnDeath();
+	}
+	protected virtual void OnDeath()
+	{
+		QueueFree();
 	}
 }
