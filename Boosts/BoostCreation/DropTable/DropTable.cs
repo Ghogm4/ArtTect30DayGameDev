@@ -219,8 +219,9 @@ public partial class DropTable : Node2D
 
             GetTree().CurrentScene.CallDeferred(MethodName.AddChild, boost);
 
-            float radian = (float)GD.RandRange(-Mathf.Pi * 2 / 3, -Mathf.Pi / 3);
-            float force = (float)GD.RandRange(100f, 500f);
+            float spread = Mathf.Atan(TimesToRun) / 2;
+            float radian = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
+            float force = 200f;
             boost.ApplyCentralImpulse(Vector2.Right.Rotated(radian) * force);
         });
     }
