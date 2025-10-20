@@ -5,10 +5,17 @@ using System;
 [Tool]
 public partial class MoveHandler : AnimatableBody2D
 {
+	public enum Mode
+	{
+		Position, Rotation
+	}
+	[Export] public Mode MoveMode = Mode.Position;
 	[Export] public bool Enabled = true;
+	[ExportGroup("Damage Settings")]
 	[Export] public bool CanDoDamage = false;
 	[Export] public int Damage = 1;
 	private float _xoffset = 0f;
+	[ExportGroup("Position Settings")]
 	[Export]
 	public float Xoffset
 	{
@@ -31,6 +38,7 @@ public partial class MoveHandler : AnimatableBody2D
 			QueueRedraw();
 		}
 	}
+	[ExportGroup("Rotation Settings")]
 	private float _rotationOffset = 0f;
 	[Export]
 	public float RotationOffset
@@ -53,6 +61,7 @@ public partial class MoveHandler : AnimatableBody2D
 			QueueRedraw();
 		}
 	}
+	[ExportGroup("Tween Settings")]
 	private float _duration = 1f;
 	[Export]
 	public float Duration
@@ -86,6 +95,7 @@ public partial class MoveHandler : AnimatableBody2D
 			QueueRedraw();
 		}
 	}
+	[ExportGroup("Advanced Settings")]
 	private bool _loop = false;
 	[Export] public bool Loop
 	{
@@ -132,23 +142,36 @@ public partial class MoveHandler : AnimatableBody2D
 		if (!Enabled) return;
 		_tween = CreateTween();
 		if (_loop && !_reverse)
-		{
 			_tween.SetLoops();
-		}
-		Vector2 targetPosition = _initialPosition + new Vector2(_xoffset, _yoffset);
-		_tween.TweenProperty(this, "global_position", targetPosition, _duration).SetTrans(_tweenType).SetEase(_easeType);
-		_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _initialRotation + (_rotationClockwise ? _rotationOffset : -_rotationOffset), _duration).SetTrans(_tweenType).SetEase(_easeType);
-		if (_reverse)
+
+		if (MoveMode == Mode.Rotation)
 		{
-			_tween.TweenCallback(Callable.From(() => ReverseMove()));
+			_tween.TweenProperty(this, "global_rotation_degrees", _initialRotation + (_rotationClockwise ? _rotationOffset : -_rotationOffset), _duration)
+				.SetTrans(_tweenType).SetEase(_easeType);
 		}
+		else
+		{
+			Vector2 targetPosition = _initialPosition + new Vector2(_xoffset, _yoffset);
+			_tween.TweenProperty(this, "global_position", targetPosition, _duration)
+				.SetTrans(_tweenType).SetEase(_easeType);
+		}
+		if (_reverse)
+			_tween.TweenCallback(Callable.From(() => ReverseMove()));
+		
 	}
 	public void ReverseMove()
 	{
 		if (!Enabled) return;
 		_tween = CreateTween();
-		_tween.TweenProperty(this, "global_position", _initialPosition, _duration).SetTrans(_tweenType).SetEase(_easeType);
-		_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _rotationOffset > 180 ? _initialRotation - 360 : _initialRotation, _duration).SetTrans(_tweenType).SetEase(_easeType);
+		if (MoveMode == Mode.Rotation)
+		{
+			_tween.TweenProperty(this, "global_rotation_degrees", _rotationOffset > 180 ? _initialRotation - 360 : _initialRotation, _duration)
+			.SetTrans(_tweenType).SetEase(_easeType);
+		}
+		else
+		{
+			_tween.TweenProperty(this, "global_position", _initialPosition, _duration).SetTrans(_tweenType).SetEase(_easeType);
+		}
 		_tween.TweenCallback(Callable.From(() => StartMove()));
 	}
 	
