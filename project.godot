@@ -21,14 +21,12 @@ config/icon="res://icon.svg"
 SignalBus="*res://Utilities/SignalBus/SignalBus.cs"
 SceneManager="*res://SceneManager/SceneManager.cs"
 GameData="*res://SceneManager/GameData.cs"
-PlayerHealthBar="*res://UI/PlayerHealthBar/PlayerHealthBar.tscn"
 TransitionLayer="*res://SceneManager/TransitionScene/TransitionScene.tscn"
 AudioManager="*res://AudioManager/AudioManager.cs"
 TextManager="*res://TextManager/TextManager.cs"
 Scheduler="*res://Utilities/Scheduler/Scheduler.cs"
-InGameMenu="*res://UI/InGameMenu/InGameMenu.tscn"
-BoostOnObtainDisplay="*res://UI/BoostOnObtainDisplay/BoostOnObtainDisplay.tscn"
 MapManagerScene="*res://Levels/MapManager/MapManagerScene.tscn"
+InGameUi="*res://UI/InGameUI/InGameUI.tscn"
 
 [display]
 
