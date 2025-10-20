@@ -7,6 +7,7 @@ public partial class InGameMenu : CanvasLayer
 	[Export] public PackedScene BoostDisplayerScene;
 	[Export] public VFlowContainer BoostDisplayContainer;
 	[Export] public Control FloatingBoostInfo;
+	[Export] public Control InGameMenuPanel;
 	private Dictionary<string, BoostDisplayer> _boostDisplayers = new();
 	public override void _Ready()
 	{
