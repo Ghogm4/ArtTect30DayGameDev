@@ -80,7 +80,6 @@ public partial class EnemyBase : CharacterBody2D
 		_health = new(Stats.GetStat("Health"));
 		if ((float)_health < preHealth)
 		{
-			GD.Print("dis");
 			FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
 			GetTree().CurrentScene.AddChild(Text);
 			Text.GlobalPosition = GlobalPosition + new Vector2(0, -20);

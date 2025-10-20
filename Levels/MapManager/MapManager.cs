@@ -95,7 +95,6 @@ public partial class MapManager : Node
 		}
 		else
 		{
-			GD.Print(NextMap(NowMap, entrance));
 			TargetMap = ChooseMap(SortMap(entrance));
 		}
 		if (!_isEndCreated && EnabledMaps.Count > 2)
@@ -105,7 +104,6 @@ public partial class MapManager : Node
 		}
 		if (TargetMap == null)
 		{
-			GD.Print("TargetMap is null.");
 			return;
 		}
 		LoadMap(TargetMap, NowMap, entrance);
