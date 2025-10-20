@@ -9,7 +9,6 @@ public partial class EnemyWaveController : Node
     [Signal] public delegate void AllWavesCompletedEventHandler();
     [Export] public float InitialDelay = 0f;
     [Export] public float TimeBetweenWaves = 2f;
-    [Export] public Timer WaveIntervalTimer;
     private float _timer = 0f;
     private List<EnemyMap> _enemyMaps = new();
     private int _currentWaveIndex = 0;
@@ -23,8 +22,6 @@ public partial class EnemyWaveController : Node
             enemyMap.AllEnemiesDefeated += OnAllEnemiesDefeated;
         }
         GetTree().CreateTimer(InitialDelay).Timeout += StartNextWave;
-        WaveIntervalTimer.WaitTime = TimeBetweenWaves;
-        WaveIntervalTimer.Timeout += StartNextWave;
     }
 
     private void StartNextWave()
@@ -43,6 +40,6 @@ public partial class EnemyWaveController : Node
             EmitSignal(SignalName.AllWavesCompleted);
             return;
         }
-        WaveIntervalTimer.Start();
+        GetTree().CreateTimer(TimeBetweenWaves).Timeout += StartNextWave;
     }
 }
