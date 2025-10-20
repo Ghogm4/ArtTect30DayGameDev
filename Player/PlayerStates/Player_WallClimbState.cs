@@ -5,6 +5,11 @@ public partial class Player_WallClimbState : State
 {
 	private AnimatedSprite2D _sprite = null;
 	private Player _player = null;
+	private RayCast2D _raycastBottomLeft = null;
+	private RayCast2D _raycastBottomRight = null;
+	private RayCast2D _raycastTopLeft = null;
+	private RayCast2D _raycastTopRight = null;
+
 	private int AvailableJumps
 	{
 		get => (int)Stats.GetStatValue("AvailableJumps");
@@ -36,7 +41,14 @@ public partial class Player_WallClimbState : State
 	{
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
 		_player = Storage.GetNode<Player>("Player");
+		_raycastBottomLeft = Storage.GetNode<RayCast2D>("RayCastBottomLeft");
+		_raycastBottomRight = Storage.GetNode<RayCast2D>("RayCastBottomRight");
+		_raycastTopLeft = Storage.GetNode<RayCast2D>("RayCastTopLeft");
+		_raycastTopRight = Storage.GetNode<RayCast2D>("RayCastTopRight");
 	}
+	private bool IsTouchingLeftWall() => _raycastBottomLeft.IsColliding() || _raycastTopLeft.IsColliding();
+	private bool IsTouchingRightWall() => _raycastBottomRight.IsColliding() || _raycastTopRight.IsColliding();
+	private bool IsTouchingWall() => IsTouchingLeftWall() || IsTouchingRightWall();
 	protected override void Enter()
 	{
 		if (Input.IsActionPressed("Climb"))
@@ -61,7 +73,7 @@ public partial class Player_WallClimbState : State
 		if ((Input.IsActionJustPressed("Left") && !HeadingLeft) ||
 			(Input.IsActionJustPressed("Right") && HeadingLeft) ||
 			_player.IsOnFloor() ||
-			(!_player.IsOnFloor() && !_player.IsOnWall() && !_player.IsOnCeiling())) 
+			!IsTouchingWall())
 			AskTransit("Idle");
 
 		if (Input.IsActionJustPressed("Jump"))
