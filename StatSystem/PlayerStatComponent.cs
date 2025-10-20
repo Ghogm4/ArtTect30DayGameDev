@@ -10,7 +10,21 @@ public partial class PlayerStatComponent : StatComponent
     {
         if (_initialized) return;
         _initialized = true;
-        AttackActions.Add(component =>
+        
+        using Boost flowerOfSerenity = ResourceLoader.Load<PackedScene>("res://Boosts/Special/FlowerOfSerenity.tscn").Instantiate<Boost>();
+        SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp, flowerOfSerenity.Info, flowerOfSerenity.NeedDisplay);
+    }
+    public override void _Ready()
+    {
+        if (GameData.Instance.StatModifierDict.Count > 0)
+            InitializeStatsWithGameData();
+        SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
+        InitializeOnce();
+        AddInitialAttackAction();
+    }
+    private void AddInitialAttackAction()
+    {
+        Action<StatComponent> initialAttackAction = component =>
         {
             float minDamageMultiplier = GetStatValue("MinDamageMultiplier");
             float maxDamageMultiplier = GetStatValue("MaxDamageMultiplier");
@@ -28,17 +42,10 @@ public partial class PlayerStatComponent : StatComponent
 
             float resultDamage = GetStatValue("Attack") * resultDamageMultiplier * (resultCritDamage / 100f);
             component.GetStat("Health").AddFinal(-resultDamage);
-        });
-        
-        using Boost flowerOfSerenity = ResourceLoader.Load<PackedScene>("res://Boosts/Special/FlowerOfSerenity.tscn").Instantiate<Boost>();
-        SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp, flowerOfSerenity.Info, flowerOfSerenity.NeedDisplay);
-    }
-    public override void _Ready()
-    {
-        if (GameData.Instance.StatModifierDict.Count > 0)
-            InitializeStatsWithGameData();
-        SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
-        InitializeOnce();
+            GD.Print(GetStatValue("Attack"));
+        };
+        AttackActions.Add(initialAttackAction);
+        TreeExiting += () => AttackActions.Remove(initialAttackAction);
     }
     public override void _Process(double delta)
     {
