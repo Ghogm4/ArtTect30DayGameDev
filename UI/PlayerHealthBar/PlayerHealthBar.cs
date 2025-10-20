@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class PlayerHealthBar : CanvasLayer
+public partial class PlayerHealthBar : Control
 {
     public static PlayerHealthBar Instance;
     private Vector2 _textureSize = new Vector2(18, 15);

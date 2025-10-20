@@ -1,13 +1,12 @@
 using Godot;
 using System;
 
-public partial class BoostOnObtainDisplay : CanvasLayer
+public partial class BoostOnObtainDisplay : Control
 {
 	[Export] public Label BoostOnObtainBoostName;
 	[Export] public Label BoostOnObtainBoostDescription;
 	[Export] public TextureRect BoostOnObtainBoostIcon;
 	[Export] public Timer DisplayTimer;
-	[Export] public Control BoostOnObtainDisplayPanel;
 	public const float DisplayDuration = 3f;
 	private Tween tween;
     public override void _Ready()
@@ -17,7 +16,7 @@ public partial class BoostOnObtainDisplay : CanvasLayer
 		{
 			tween?.Kill();
 			tween = CreateTween();
-			tween.TweenProperty(BoostOnObtainDisplayPanel, "modulate:a", 0, 0.5f)
+			tween.TweenProperty(this, "modulate:a", 0, 0.5f)
 				.SetTrans(Tween.TransitionType.Linear)
 				.SetEase(Tween.EaseType.InOut);
 			tween.TweenCallback(Callable.From(() => Visible = false));
@@ -28,7 +27,7 @@ public partial class BoostOnObtainDisplay : CanvasLayer
 	{
 		if (!needDisplay)
 			return;
-		BoostOnObtainDisplayPanel.Modulate = new Color(1, 1, 1, 1);
+		Modulate = new Color(1, 1, 1, 1);
 		tween?.Kill();
 		Visible = true;
 		DisplayTimer.Start(DisplayDuration);

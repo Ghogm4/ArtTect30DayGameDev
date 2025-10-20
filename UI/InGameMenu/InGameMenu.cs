@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class InGameMenu : CanvasLayer
+public partial class InGameMenu : Control
 {
 	[Export] public PackedScene BoostDisplayerScene;
 	[Export] public VFlowContainer BoostDisplayContainer;
@@ -41,7 +41,7 @@ public partial class InGameMenu : CanvasLayer
 			_boostDisplayers[info.Name] = displayer;
 			BoostDisplayContainer.AddChild(displayer);
 			displayer.Owner = this;
-			displayer.GetFloatingBoostInfoNode();
+			displayer.FloatingBoostInfo = FloatingBoostInfo;
 			existingDisplayer = displayer;
 		}
 		existingDisplayer.UpdateDisplay();	

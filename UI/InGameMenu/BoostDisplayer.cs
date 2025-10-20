@@ -4,9 +4,9 @@ using System;
 public partial class BoostDisplayer : Control
 {
 	public BoostInfo Info = null;
+	public Control FloatingBoostInfo = null;
 	private TextureRect _displayRect = null;
 	private Label _boostAmountLabel = null;
-	private Control _floatingBoostInfo = null;
 	public override void _Ready()
 	{
 		_displayRect = GetNode<TextureRect>("DisplayRect");
@@ -14,7 +14,6 @@ public partial class BoostDisplayer : Control
 		MouseEntered += ShowFloatingBoostInfo;
 		MouseExited += HideFloatingBoostInfo;
 	}
-	public void GetFloatingBoostInfoNode() => _floatingBoostInfo = GetNode<Control>("%FloatingBoostInfo");
 	public void UpdateDisplay()
 	{
 		if (Info is null)
@@ -24,16 +23,16 @@ public partial class BoostDisplayer : Control
 	}
 	private void ShowFloatingBoostInfo()
 	{
-		Label boostNameLabel = _floatingBoostInfo.GetNode<Label>("%BoostName");
-		Label boostDescriptionLabel = _floatingBoostInfo.GetNode<Label>("%BoostDescription");
+		Label boostNameLabel = FloatingBoostInfo.GetNode<Label>("%BoostName");
+		Label boostDescriptionLabel = FloatingBoostInfo.GetNode<Label>("%BoostDescription");
 		LabelSettings boostNameLabelSettings = boostNameLabel.LabelSettings;
 		boostNameLabel.Text = Info.Name;
 		boostNameLabelSettings.FontColor = BoostInfo.RarityColorMap[Info.Rarity];
 		boostDescriptionLabel.Text = Info.Description;
-		_floatingBoostInfo.Visible = true;
+		FloatingBoostInfo.Visible = true;
 	}
 	private void HideFloatingBoostInfo()
     {
-        _floatingBoostInfo.Visible = false;
+        FloatingBoostInfo.Visible = false;
     }
 }
