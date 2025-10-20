@@ -28,6 +28,7 @@ TextManager="*res://TextManager/TextManager.cs"
 Scheduler="*res://Utilities/Scheduler/Scheduler.cs"
 InGameMenu="*res://UI/InGameMenu/InGameMenu.tscn"
 BoostOnObtainDisplay="*res://UI/BoostOnObtainDisplay/BoostOnObtainDisplay.tscn"
+MapAlg="*res://Levels/MapManager/MapALG.tscn"
 MapManagerScene="*res://Levels/MapManager/MapManagerScene.tscn"
 
 [display]

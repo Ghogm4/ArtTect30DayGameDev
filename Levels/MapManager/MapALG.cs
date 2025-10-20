@@ -3,13 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 
-public partial class TestMapAlgo : Node2D
+public partial class MapALG : Node2D
 {
-	[Export] public int Width = 7;
-	[Export] public int Height = 5;
+	[Export] public int Width = 4;
+	[Export] public int Height = 3;
 	[Export] public int Depth = 4;
-	[Export] public Vector2 startPos = new Vector2(0, 0);
-
+	[Export] public Vector2 startPos = new Vector2(0, 1);
+	public static MapALG Instance { get; private set; }
+	public enum MapType
+    {
+        T, B, L, R, TB, TL, TR, BL, BR, LR, TBL, TBR, TLR, BLR, TBLR
+    }
 	public class Room
 	{
 		public Tuple<int, int> Position;
@@ -18,7 +22,7 @@ public partial class TestMapAlgo : Node2D
 		public bool LeftExit = false;
 		public bool RightExit = false;
 		public bool IsEnabled = false;
-		
+		public MapType Type;
 		public int getValid()
 		{
 			int count = 0;
@@ -28,6 +32,27 @@ public partial class TestMapAlgo : Node2D
 			if (RightExit) count++;
 			return count;
 		}
+
+		public MapType JudgeMapType()
+		{
+			if (TopExit && BottomExit && LeftExit && RightExit) return MapType.TBLR;
+			else if (TopExit && BottomExit && LeftExit) return MapType.TBL;
+			else if (TopExit && BottomExit && RightExit) return MapType.TBR;
+			else if (TopExit && LeftExit && RightExit) return MapType.TLR;
+			else if (BottomExit && LeftExit && RightExit) return MapType.BLR;
+			else if (TopExit && BottomExit) return MapType.TB;
+			else if (LeftExit && RightExit) return MapType.LR;
+			else if (TopExit && LeftExit) return MapType.TL;
+			else if (TopExit && RightExit) return MapType.TR;
+			else if (BottomExit && LeftExit) return MapType.BL;
+			else if (BottomExit && RightExit) return MapType.BR;
+			else if (TopExit) return MapType.T;
+			else if (BottomExit) return MapType.B;
+			else if (LeftExit) return MapType.L;
+			else if (RightExit) return MapType.R;
+			else return MapType.T;
+		}
+		
 	}
 	public List<Room> Roomlist = new();
 	public List<Room> EndRooms = new();
@@ -44,7 +69,7 @@ public partial class TestMapAlgo : Node2D
 		}
 	}
 
-	public void PrintMap()
+	public void PrintMap(Tuple<int, int> nowPos = null)
 	{
 		List<List<string>> map = new();
 		for (int x = 0; x < 3*Width; x++)
@@ -71,6 +96,10 @@ public partial class TestMapAlgo : Node2D
 					if (x == (int)startPos.X && y == (int)startPos.Y)
 					{
 						map[gx][gy] = "[S]";
+					}
+					if (nowPos != null && x == nowPos.Item1 && y == nowPos.Item2)
+					{
+						map[gx][gy] = "[X]";
 					}
 					if (room.TopExit && gy - 1 >= 0)
 					{
@@ -264,9 +293,18 @@ public partial class TestMapAlgo : Node2D
 	}
 	public override void _Ready()
 	{
-		GD.Print("TestMapAlgo is ready.");
-		InitMap();
-		StartRoom();
-		PrintMap();
+		if (Instance == null)
+        {
+            Instance = this;
+            ProcessMode = ProcessModeEnum.Always;
+        }
+        else
+        {
+            QueueFree();
+        }
+		GD.Print("MapALG is ready.");
+		// InitMap();
+		// StartRoom();
+		// PrintMap();
 	}
 }
