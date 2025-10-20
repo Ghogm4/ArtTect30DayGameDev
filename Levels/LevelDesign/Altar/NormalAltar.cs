@@ -6,17 +6,20 @@ public partial class NormalAltar : Node2D
 	[Export] public Sprite2D AltarSprite;
 	[Export] public DropTable BoostDropTable;
 	[Export] public EnemyWaveController LinkedEnemyWaveController;
-	[Export] public bool NeedToCompleteWaves = false;
+	[Export] public bool NeedToCompleteWaves = true;
+	private bool _isInteractable = false;
 	private bool _isPlayerNearby = false;
 	public override void _Ready()
 	{
-		LinkedEnemyWaveController?.AllWavesCompleted += () => NeedToCompleteWaves = true;
+		LinkedEnemyWaveController?.AllWavesCompleted += () => _isInteractable = true;
+		if (!NeedToCompleteWaves)
+			_isInteractable = true;
 	}
 	public void OnBodyEntered(Node2D body)
 	{
 		if (!body.IsInGroup("Player"))
 			return;
-		if (NeedToCompleteWaves)
+		if (_isInteractable)
 			ToggleWhiteOutline(true);
 		_isPlayerNearby = true;
 	}
@@ -29,10 +32,10 @@ public partial class NormalAltar : Node2D
 	}
 	public override void _Process(double delta)
 	{
-		if (NeedToCompleteWaves && _isPlayerNearby && Input.IsActionJustPressed("Interact"))
+		if (_isInteractable && _isPlayerNearby && Input.IsActionJustPressed("Interact"))
 		{
 			BoostDropTable.Drop();
-			NeedToCompleteWaves = false;
+			_isInteractable = false;
 			ToggleWhiteOutline(false);
 		}
 	}
