@@ -141,6 +141,6 @@ public partial class Player_UniversalState : State
 	}
 	private void EmitHealthStatus()
 	{
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated, (int)_health, (int)_maxHealth, (int)_shield);
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated, (int)_health, (int)_maxHealth, (int)_shield, (int)Stats.GetStatValue("Coin"));
 	}
 }

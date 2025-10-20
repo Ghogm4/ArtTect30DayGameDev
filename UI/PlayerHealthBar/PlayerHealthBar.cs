@@ -8,16 +8,18 @@ public partial class PlayerHealthBar : Control
     [Export] private TextureRect _fullHearts = null;
     [Export] private TextureRect _emptyHearts = null;
     [Export] private TextureRect _shields = null;
+    [Export] private Label _coinAmountLabel = null;
     public override void _Ready()
     {
         Instance = this;
         SignalBus.Instance.PlayerHealthStatusUpdated += Update;
         SignalBus.Instance.PlayerDied += () => Visible = false;
     }
-    public void Update(int health = -1, int maxHealth = -1, int shield = -1)
+    public void Update(int health = -1, int maxHealth = -1, int shield = -1, int coin = -1)
     {
         _fullHearts.Size = new Vector2(_textureSize.X * health, _textureSize.Y);
         _emptyHearts.Size = new Vector2(_textureSize.X * maxHealth, _textureSize.Y);
         _shields.Size = new Vector2(_textureSize.X * shield, _textureSize.Y);
+        _coinAmountLabel.Text = coin.ToString();
     }
 }
