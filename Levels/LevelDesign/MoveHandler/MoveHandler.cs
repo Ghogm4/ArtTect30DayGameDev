@@ -5,6 +5,9 @@ using System;
 [Tool]
 public partial class MoveHandler : AnimatableBody2D
 {
+	[Export] public bool Enabled = true;
+	[Export] public bool CanDoDamage = false;
+	[Export] public int Damage = 1;
 	private float _xoffset = 0f;
 	[Export]
 	public float Xoffset
@@ -126,6 +129,7 @@ public partial class MoveHandler : AnimatableBody2D
 
 	public void StartMove()
 	{
+		if (!Enabled) return;
 		_tween = CreateTween();
 		if (_loop && !_reverse)
 		{
@@ -141,6 +145,7 @@ public partial class MoveHandler : AnimatableBody2D
 	}
 	public void ReverseMove()
 	{
+		if (!Enabled) return;
 		_tween = CreateTween();
 		_tween.TweenProperty(this, "global_position", _initialPosition, _duration).SetTrans(_tweenType).SetEase(_easeType);
 		_tween.Parallel().TweenProperty(this, "global_rotation_degrees", _rotationOffset > 180 ? _initialRotation - 360 : _initialRotation, _duration).SetTrans(_tweenType).SetEase(_easeType);

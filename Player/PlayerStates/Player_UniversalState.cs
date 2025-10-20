@@ -68,9 +68,17 @@ public partial class Player_UniversalState : State
 		for (int collisionIndex = 0; collisionIndex < _player.GetSlideCollisionCount(); collisionIndex++)
 		{
 			KinematicCollision2D collision = _player.GetSlideCollision(collisionIndex);
-			if (!_isInvincible && collision.GetCollider() is ForestSpikeLayer)
+			if (_isInvincible)
+				continue;
+
+			if (collision.GetCollider() is DamagingTileMapLayer damagingLayer)
 			{
-				SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, 1,
+				SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, damagingLayer.Damage,
+					Callable.From<Player>((player) => { }));
+			}
+			else if (collision.GetCollider() is MoveHandler moveHandler && moveHandler.CanDoDamage)
+			{
+				SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, moveHandler.Damage,
 					Callable.From<Player>((player) => { }));
 			}
 		}
