@@ -1,30 +1,23 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 [GlobalClass]
-public partial class MapManager : Node
+public partial class MapManager : Node2D
 {
 	public static MapManager Instance { get; private set; }
 	[Export] public Godot.Collections.Array<PackedScene> MapPool;
 
-	public List<Map> Maps = null;
-	public List<Map> EnabledMaps = null;
-
-	public string Entrance = null;
-
-	public Map NowMap = null;
-	public Map StartMap = null;
-	public Map EndMap = null;
-	private bool _isEndCreated = false;
+	public enum MapType
+	{
+		T, B, L, R, TB, TL, TR, BL, BR, LR, TBL, TBR, TLR, BLR, TBLR
+	}
 	public class Map
 	{
 		public PackedScene Scene;
-		public String SceneFile;
+		public Tuple<int, int> Position;
 		public bool TopExit;
 		public bool BottomExit;
 		public bool LeftExit;
@@ -40,8 +33,10 @@ public partial class MapManager : Node
 		public Map RightMap = null;
 		public Map TopMap = null;
 		public Map BottomMap = null;
+		public MapType Type;
 		public Map(
 			PackedScene scene,
+			Tuple<int, int> position,
 			bool topExit,
 			bool bottomExit,
 			bool leftExit,
@@ -52,6 +47,7 @@ public partial class MapManager : Node
 			)
 		{
 			Scene = scene;
+			Position = position;
 			TopExit = topExit;
 			BottomExit = bottomExit;
 			LeftExit = leftExit;
@@ -59,8 +55,96 @@ public partial class MapManager : Node
 			IsStartLevel = isStartLevel;
 			IsEndLevel = isEndLevel;
 			RarityWeight = rarityWeight;
+			Type = this.JudgeType();
+		}
+		public Map GetMap(string entrance)
+		{
+			return entrance switch
+			{
+				"Top" => TopMap,
+				"Bottom" => BottomMap,
+				"Left" => LeftMap,
+				"Right" => RightMap,
+				_ => null,
+			};
+		}
+		public MapType JudgeType()
+		{
+			if (TopExit && !BottomExit && !LeftExit && !RightExit)
+			{
+				Type = MapType.T;
+			}
+			else if (!TopExit && BottomExit && !LeftExit && !RightExit)
+			{
+				Type = MapType.B;
+			}
+			else if (!TopExit && !BottomExit && LeftExit && !RightExit)
+			{
+				Type = MapType.L;
+			}
+			else if (!TopExit && !BottomExit && !LeftExit && RightExit)
+			{
+				Type = MapType.R;
+			}
+			else if (TopExit && BottomExit && !LeftExit && !RightExit)
+			{
+				Type = MapType.TB;
+			}
+			else if (TopExit && !BottomExit && LeftExit && !RightExit)
+			{
+				Type = MapType.TL;
+			}
+			else if (TopExit && !BottomExit && !LeftExit && RightExit)
+			{
+				Type = MapType.TR;
+			}
+			else if (!TopExit && BottomExit && LeftExit && !RightExit)
+			{
+				Type = MapType.BL;
+			}
+			else if (!TopExit && BottomExit && !LeftExit && RightExit)
+			{
+				Type = MapType.BR;
+			}
+			else if (!TopExit && !BottomExit && LeftExit && RightExit)
+			{
+				Type = MapType.LR;
+			}
+			else if (TopExit && BottomExit && LeftExit && !RightExit)
+			{
+				Type = MapType.TBL;
+			}
+			else if (TopExit && BottomExit && !LeftExit && RightExit)
+			{
+				Type = MapType.TBR;
+			}
+			else if (TopExit && !BottomExit && LeftExit && RightExit)
+			{
+				Type = MapType.TLR;
+			}
+			else if (!TopExit && BottomExit && LeftExit && RightExit)
+			{
+				Type = MapType.BLR;
+			}
+			else if (TopExit && BottomExit && LeftExit && RightExit)
+			{
+				Type = MapType.TBLR;
+			}
+			return Type;
+		}
+		public string GetMapTypeString()
+		{
+			return Type.ToString();
 		}
 	}
+	public List<Map> Maps = null;
+	public List<Map> EnabledMaps = new List<Map>();
+	public List<Map> EndNodeMaps = new List<Map>();
+	public string Entrance = null;
+	public Map NowMap = null;
+	public Map StartMap = null;
+	public Map EndMap = null;
+	private bool _isEndCreated = false;
 
 	public override void _Ready()
 	{
@@ -75,116 +159,23 @@ public partial class MapManager : Node
 		}
 
 		SignalBus.Instance.EntranceSignal += OnEntranceChanged;
-		// InitMaps();
-		// StartLevel();
 	}
+
 
 	public async void OnEntranceChanged(string entrance)
 	{
-		Map TargetMap = null;
+		Map TargetMap = NowMap.GetMap(entrance);
 		Entrance = entrance;
-		if (NowMap == null)
-		{
-			GD.PrintErr("NowMap is null.");
-			return;
-		}
-		else if (NextMap(NowMap, entrance) != null)
-		{
-			
-			TargetMap = NextMap(NowMap, entrance);
-		}
-		else
-		{
-			TargetMap = ChooseMap(SortMap(entrance));
-		}
-		if (!_isEndCreated && EnabledMaps.Count > 2)
-		{
-			TargetMap = EndMap;
-			_isEndCreated = true;
-		}
 		if (TargetMap == null)
 		{
+			GD.PrintErr("TargetMap is null.");
 			return;
 		}
-		LoadMap(TargetMap, NowMap, entrance);
-		
 		SceneManager.Instance.ChangeScene(TargetMap.Scene);
 		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 		SetPlayerPosition(entrance);
 		NowMap = TargetMap;
-		PrintMap(NowMap);
-		
-	}
-
-	public void InitMaps()
-	{
-		if (Maps != null)
-		{
-			foreach (Map map in Maps)
-			{
-				map.IsEnabled = false;
-			}
-		}
-		Maps = new List<Map>();
-		EnabledMaps = new List<Map>();
-		_isEndCreated = false;
-		foreach (PackedScene scene in MapPool)
-		{
-			BaseLevel level = scene.Instantiate<BaseLevel>();
-			Map map = new Map(
-				scene,
-				level.TopExit,
-				level.BottomExit,
-				level.LeftExit,
-				level.RightExit,
-				level.IsStartLevel,
-				level.IsEndLevel,
-				level.RarityWeight);
-			if (map.IsEndLevel)
-			{
-				GD.Print("EndMap assigned.");
-				EndMap = map;
-			}
-			Maps.Add(map);
-		}
-		GD.Print($"Initialized {Maps.Count} maps.");
-	}
-
-	public async void StartLevel()
-	{
-		List<Map> StartMaps = Maps.FindAll(m => m.IsStartLevel);
-		List<Map> EndMaps = Maps.FindAll(m => m.IsEndLevel);
-		StartMap = ChooseMap(StartMaps);
-		EndMap = ChooseMap(EndMaps);
-		NowMap = StartMap;
-		PrintMap(NowMap);
-		SceneManager.Instance.ChangeScene(StartMap.Scene);
-		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
-		Node2D StartMarker = GetTree().CurrentScene.GetNode<Node2D>("%MarkerStart");
-		Player player = GetTree().GetNodesInGroup("Player").FirstOrDefault() as Player;
-		player.GlobalPosition = StartMarker.GlobalPosition;
-		StartMap.IsEnabled = true;
-		EnabledMaps.Add(StartMap);
-		GD.Print(EnabledMaps.Count);
-	}
-
-	public Map ChooseMap(List<Map> maps)
-	{
-		float total = 0f;
-		foreach (Map map in maps)
-		{
-			total += map.RarityWeight;
-		}
-		float pick = GD.Randf() * total;
-		foreach (Map map in maps)
-		{
-			pick -= map.RarityWeight;
-			if (pick <= 0f)
-			{
-				return map;
-			}
-		}
-		return null;
+		MapALG.Instance.PrintMap(NowMap.Position);
 	}
 
 	public void SetPlayerPosition(string entrance)
@@ -197,7 +188,7 @@ public partial class MapManager : Node
 			CallDeferred(nameof(SetPlayerPosition), entrance);
 			return;
 		}
-		
+
 		switch (entrance)
 		{
 			case "Top":
@@ -224,104 +215,178 @@ public partial class MapManager : Node
 				GD.PrintErr("Invalid entrance for setting player position: " + entrance);
 				break;
 		}
-
+	}
+	public Map SearchMap(MapType type)
+	{
+		GD.Print("Searching for map of type: " + type.ToString());
+		List<Map> filteredMaps = Maps.Where(m => m.Type == type && !m.IsEnabled && !m.IsEndLevel).ToList();
+		if (filteredMaps.Count > 0)
+		{
+			Random random = new Random();
+			int index = random.Next(filteredMaps.Count);
+			return filteredMaps[index];
+		}
+		return null;
 	}
 
-	public List<Map> SortMap(string entrance)
+	public void InitMaps()
 	{
-		List<Map> result = new List<Map>();
-		foreach (Map map in Maps)
+		if (Maps != null)
 		{
-			if (map.IsEnabled == false && map.IsEndLevel == false)
+			foreach (Map map in Maps)
 			{
-				switch (entrance)
-				{
-					case "Top":
-						if (map.BottomExit)
-						{
-							result.Add(map);
-						}
-						break;
-					case "Bottom":
-						if (map.TopExit)
-						{
-							result.Add(map);
-						}
-						break;
-					case "Left":
-						if (map.RightExit)
-						{
-							result.Add(map);
-						}
-						break;
-					case "Right":
-						if (map.LeftExit)
-						{
-							result.Add(map);
-						}
-						break;
-					default:
-						return new List<Map> { };
-				}
+				map.IsEnabled = false;
 			}
 		}
-		return result;
-	}
-
-
-
-	public void LoadMap(Map Tomap, Map Frommap, string entrance)
-	{
-		GD.Print("here");
-		if (!EnabledMaps.Contains(Tomap))
+		Maps = new List<Map>();
+		EnabledMaps = new List<Map>();
+		foreach (PackedScene scene in MapPool)
 		{
-			Tomap.IsEnabled = true;
-			EnabledMaps.Add(Tomap);
-		}
-		switch (entrance)
-		{
-			case "Top":
-				Frommap.TopMap = Tomap;
-				Tomap.BottomMap = Frommap;
-				break;
-			case "Bottom":
-				Frommap.BottomMap = Tomap;
-				Tomap.TopMap = Frommap;
-				break;
-			case "Left":
-				Frommap.LeftMap = Tomap;
-				Tomap.RightMap = Frommap;
-				break;
-			case "Right":
-				Frommap.RightMap = Tomap;
-				Tomap.LeftMap = Frommap;
-				break;
-			default:
-				break;
+			var mapLevel = scene.Instantiate() as BaseLevel;
+			if (mapLevel == null)
+			{
+				GD.PrintErr("MapLevel is null.");
+				continue;
+			}
+			Map newMap = new Map(
+				scene,
+				null,
+				mapLevel.TopExit,
+				mapLevel.BottomExit,
+				mapLevel.LeftExit,
+				mapLevel.RightExit,
+				mapLevel.IsStartLevel,
+				mapLevel.IsEndLevel,
+				mapLevel.RarityWeight
+				);
+			Maps.Add(newMap);
+			if (newMap.IsStartLevel)
+			{
+				StartMap = newMap;
+			}
+			if (newMap.IsEndLevel)
+			{
+				EndMap = newMap;
+			}
+			GD.Print("Loaded map: " + scene.ResourcePath);
 		}
 
+		MapALG.Instance.InitMap();
+		MapALG.Instance.StartRoom();
+		MapALG.Instance.PrintMap();
+		ApplyMap();
 	}
+	public async Task StartLevel()
+	{
+		NowMap = StartMap;
+		SceneManager.Instance.ChangeScene(NowMap.Scene);
+		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
+		SetPlayerPosition("Start");
+	}
+	public void ApplyMap()
+	{
+		var assigned = new Dictionary<Tuple<int, int>, Map>();
+		var rng = new Random();
 
-	public Map NextMap(Map map, string entrance)
-	{
-		switch (entrance)
+		foreach (var room in MapALG.Instance.Roomlist)
 		{
-			case "Top":
-				return map.TopMap;
-			case "Bottom":
-				return map.BottomMap;
-			case "Left":
-				return map.LeftMap;
-			case "Right":
-				return map.RightMap;
-			default:
-				GD.PrintErr("Invalid entrance for NextMap: " + entrance);
-				return null;
+			if (!room.IsEnabled) continue;
+			var roomTypeName = room.JudgeMapType().ToString();
+			MapType desiredType = (MapType)Enum.Parse(typeof(MapType), roomTypeName);
+			Map chosen = SearchMap(desiredType);
+			if (chosen == null)
+			{
+				GD.PrintErr("No available map found for type: " + roomTypeName);
+				continue;
+			}
+			if (room.Position.Item1 == (int)MapALG.Instance.startPos.X && room.Position.Item2 == (int)MapALG.Instance.startPos.Y)
+			{
+				chosen = StartMap;
+			}
+			chosen.IsEnabled = true;
+			chosen.Position = room.Position;
+			assigned[room.Position] = chosen;
+			EnabledMaps.Add(chosen);
 		}
-	}
-	
-	public void PrintMap(Map map)
-	{
-		GD.Print($"Map: {map.Scene.ResourcePath}, Top: {map.TopMap}, Bottom: {map.BottomMap}, Left: {map.LeftMap}, Right: {map.RightMap}, IsEnabled: {map.IsEnabled}, IsStartLevel: {map.IsStartLevel}, IsEndLevel: {map.IsEndLevel}, RarityWeight: {map.RarityWeight}");
+
+		foreach (var kv in assigned)
+		{
+			var room = MapALG.Instance.Get(kv.Key.Item1, kv.Key.Item2);
+			var map = kv.Value;
+			if (room.TopExit)
+			{
+				var key = new Tuple<int, int>(room.Position.Item1, room.Position.Item2 - 1);
+				if (assigned.ContainsKey(key))
+				{
+					map.TopMap = assigned[key];
+					assigned[key].BottomMap = map;
+					GD.Print("Connected", map.Position, "top to", assigned[key].Position);
+				}
+			}
+			if (room.BottomExit)
+			{
+				var key = new Tuple<int, int>(room.Position.Item1, room.Position.Item2 + 1);
+				if (assigned.ContainsKey(key))
+				{
+					map.BottomMap = assigned[key];
+					assigned[key].TopMap = map;
+					GD.Print("Connected", map.Position, "bottom to", assigned[key].Position);
+				}
+			}
+			if (room.LeftExit)
+			{
+				var key = new Tuple<int, int>(room.Position.Item1 - 1, room.Position.Item2);
+				if (assigned.ContainsKey(key))
+				{
+					map.LeftMap = assigned[key];
+					assigned[key].RightMap = map;
+					GD.Print("Connected", map.Position, "left to", assigned[key].Position);
+				}
+			}
+			if (room.RightExit)
+			{
+				var key = new Tuple<int, int>(room.Position.Item1 + 1, room.Position.Item2);
+				if (assigned.ContainsKey(key))
+				{
+					map.RightMap = assigned[key];
+					assigned[key].LeftMap = map;
+					GD.Print("Connected", map.Position, "right to", assigned[key].Position);
+				}
+			}
+			
+			if (room.getValid() == 1 && !EndNodeMaps.Contains(map) && map != StartMap)
+			{
+				EndNodeMaps.Add(map);
+			}
+		}
+		var sp = new Tuple<int,int>((int)MapALG.Instance.startPos.X, (int)MapALG.Instance.startPos.Y);
+		if (assigned.TryGetValue(sp, out var sMap))
+		{
+			StartMap = sMap;
+			StartMap.IsStartLevel = true;
+			NowMap = StartMap;
+		}
+
+		int index = rng.Next(EndNodeMaps.Count);
+		if (EndNodeMaps[index].TopMap != null)
+		{
+			EndNodeMaps[index].TopMap.BottomMap = EndMap;
+			EndMap.TopMap = EndNodeMaps[index];
+		}
+		else if (EndNodeMaps[index].BottomMap != null)
+		{
+			EndNodeMaps[index].BottomMap.TopMap = EndMap;
+			EndMap.BottomMap = EndNodeMaps[index];
+		}
+		else if (EndNodeMaps[index].LeftMap != null)
+		{
+			EndNodeMaps[index].LeftMap.RightMap = EndMap;
+			EndMap.LeftMap = EndNodeMaps[index];
+		}
+		else if (EndNodeMaps[index].RightMap != null)
+		{
+			EndNodeMaps[index].RightMap.LeftMap = EndMap;
+			EndMap.RightMap = EndNodeMaps[index];
+		}
 	}
 }
