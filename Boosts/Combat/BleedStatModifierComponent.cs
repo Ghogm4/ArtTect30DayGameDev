@@ -8,18 +8,15 @@ public partial class BleedStatModifierComponent : StatModifierComponent
 		PlayerStatComponent playerStats = statComponent as PlayerStatComponent;
 		playerStats?.AttackActions.Add((StatComponent enemyStats, PlayerStatComponent ps) =>
 		{
-			float bleedDamage = ps.GetStatValue("Attack");
-			float bleedDuration = 5f;
-			WeakReference<StatComponent> enemyRef = new(enemyStats);
+			float bleedDamage = Mathf.Ceil(ps.GetStatValue("Attack") * ps.GetStatValue("BleedDamageMultiplier"));
+			float bleedDuration = ps.GetStatValue("BleedDuration");
+			float bleedInterval = ps.GetStatValue("BleedInterval");
 			Action applyBleed = () =>
 			{
-				if (enemyRef.TryGetTarget(out StatComponent enemy))
-				{
-					if (IsInstanceValid(enemy))
-					enemy.GetStat("Health").AddFinal(-bleedDamage);
-				}
+				if (IsInstanceValid(enemyStats))
+					enemyStats.GetStat("Health").AddFinal(-bleedDamage);
 			};
-			IntervalTrigger bleedTrigger = new(0, 0.5f, bleedDuration, false, applyBleed);
+			IntervalTrigger bleedTrigger = new(0, bleedInterval, bleedDuration, false, applyBleed);
 			IntervalTriggerTicker.Instance.RegisterTrigger(bleedTrigger);
 		});
     }
