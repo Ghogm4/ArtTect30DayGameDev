@@ -15,7 +15,9 @@ public enum BoostCategory
     None = 0,
     Combat = 1,
     Movement = 2,
-    General = 3
+    General = 3,
+    Survival = 4,
+    Hybrid = 5
 }
 
 public enum BoostDropMode

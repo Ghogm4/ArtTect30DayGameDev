@@ -4,7 +4,8 @@ using System.Collections.Generic;
 public partial class PlayerStatComponent : StatComponent
 {
     public List<Action<StatComponent, PlayerStatComponent>> AttackActions = new();
-    public List<IntervalTrigger> IntervalTriggers = new();
+    public List<IntervalTrigger> PassiveSkills = new();
+    public List<Action<PlayerStatComponent, Vector2>> OnEnemyDeathActions = new();
     private ref bool _initialized => ref GameData.Instance.PlayerStatComponentInitialized;
     public void InitializeOnce()
     {
@@ -12,6 +13,20 @@ public partial class PlayerStatComponent : StatComponent
         _initialized = true;
         InitializeDefaultAttackAction();
         InitializeDefaultBoost();
+    }
+    public override void _Ready()
+    {
+        if (GameData.Instance.StatModifierDict.Count > 0)
+            InitializeStatsWithGameData();
+        SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
+        SignalBus.Instance.EnemyDied += TriggerOnEnemyDeathActions;
+        InitializeOnce();
+        GD.Print(OnEnemyDeathActions.Count);
+    }
+    private void TriggerOnEnemyDeathActions(Vector2 enemyDeathPos)
+    {
+        foreach (var action in OnEnemyDeathActions)
+            action?.Invoke(this, enemyDeathPos);
     }
     private void InitializeDefaultAttackAction()
     {
@@ -30,10 +45,12 @@ public partial class PlayerStatComponent : StatComponent
             {
                 resultCritDamage = critDamage;
             });
-            float attackFinalMultiplier = playerStats.GetStatValue("AttackFinalMultiplier");
-            float resultDamage = playerStats.GetStatValue("Attack") * resultDamageMultiplier * attackFinalMultiplier * (resultCritDamage / 100f);
+            float attack = playerStats.GetStatValue("Attack");
+            float attackBase = playerStats.GetStatValue("AttackBase");
+            float attackMult = playerStats.GetStatValue("AttackMult");
+            float attackFinal = playerStats.GetStatValue("AttackFinal");
+            float resultDamage = ((attack + attackBase) * attackMult + attackFinal) * resultDamageMultiplier * (resultCritDamage / 100f);
             component.GetStat("Health").AddFinal(-resultDamage);
-            GD.Print(playerStats.GetStatValue("Attack"));
         };
         AttackActions.Add(initialAttackAction);
     }
@@ -42,16 +59,9 @@ public partial class PlayerStatComponent : StatComponent
         using Boost flowerOfSerenity = ResourceLoader.Load<PackedScene>("res://Boosts/Special/FlowerOfSerenity.tscn").Instantiate<Boost>();
         SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp, flowerOfSerenity.Info, flowerOfSerenity.NeedDisplay);
     }
-    public override void _Ready()
-    {
-        if (GameData.Instance.StatModifierDict.Count > 0)
-            InitializeStatsWithGameData();
-        SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
-        InitializeOnce();
-    }
     public override void _Process(double delta)
     {
-        foreach (var trigger in IntervalTriggers)
+        foreach (var trigger in PassiveSkills)
             trigger.Tick(delta);
     }
     public void SaveStatModifiersToGameData()
@@ -59,8 +69,9 @@ public partial class PlayerStatComponent : StatComponent
         GameData.Instance.StatModifierDict.Clear();
         foreach (var stat in Stats.Values)
             GameData.Instance.StatModifierDict[stat.Name] = stat.CreateModifierResources();
-        GameData.Instance.PlayerSpecialActions = AttackActions;
-        GameData.Instance.PlayerIntervalTriggers = IntervalTriggers;
+        GameData.Instance.PlayerAttackActions = AttackActions;
+        GameData.Instance.PlayerPassiveSkills = PassiveSkills;
+        GameData.Instance.PlayerOnEnemyDeathActions = OnEnemyDeathActions;
     }
     public void InitializeStatsWithGameData()
     {
@@ -68,12 +79,14 @@ public partial class PlayerStatComponent : StatComponent
             foreach (var modifierResource in pair.Value)
                 AddModifier(pair.Key, modifierResource.CreateModifier(this));
 
-        AttackActions = GameData.Instance.PlayerSpecialActions;
-        IntervalTriggers = GameData.Instance.PlayerIntervalTriggers;
+        AttackActions = GameData.Instance.PlayerAttackActions;
+        PassiveSkills = GameData.Instance.PlayerPassiveSkills;
+        OnEnemyDeathActions = GameData.Instance.PlayerOnEnemyDeathActions;
     }
     private void OnSceneChangeStarted()
     {
         SaveStatModifiersToGameData();
+        SignalBus.Instance.EnemyDied -= TriggerOnEnemyDeathActions;
         QueueFree();
     }
 }

@@ -108,6 +108,7 @@ public partial class EnemyBase : CharacterBody2D
 		await OnDeath();
 		DropCoin();
 		EmitSignal(SignalName.Died);
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.EnemyDied, GlobalPosition);
 		QueueFree();
 	}
 	public void GetHit()

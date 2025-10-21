@@ -22,7 +22,9 @@ public enum BoostCategoryFilter
     Combat = 1 << 0,
     Movement = 1 << 1,
     General = 1 << 2,
-    All = Combat | Movement | General
+    Survival = 1 << 3,
+    Hybrid = 1 << 4,
+    All = Combat | Movement | General | Survival | Hybrid
 }
 [GlobalClass]
 public partial class DropTable : Node2D
@@ -42,7 +44,7 @@ public partial class DropTable : Node2D
     private static HashSet<string> _obtainedOneTimeBoosts = new();
 
     public static void ResetObtainedOneTimeBoosts() => _obtainedOneTimeBoosts.Clear();
-    
+
     [ExportGroup("Drop Settings")]
     [Export] public BoostDropMode DropMode = BoostDropMode.UniformRarity;
     [Export] public int TimesToRun = 1;
@@ -50,7 +52,11 @@ public partial class DropTable : Node2D
 
     [ExportGroup("Boost Sources")]
     [Export] public bool AutoLoadFromDirectories = true;
-    [Export] public string[] BoostDirectories = { "res://Boosts/Combat", "res://Boosts/Movement", "res://Boosts/General" };
+    [Export]
+    public string[] BoostDirectories =
+    {
+        "res://Boosts/Combat", "res://Boosts/Movement", "res://Boosts/General", "res://Boosts/Survival", "res://Boosts/Hybrid"
+    };
     [Export] public PackedScene[] ManualBoostList = [];  // Optional manual additions
     [Export] public Dictionary ManualProbabilities = new();  // For manual mode
 
@@ -68,6 +74,8 @@ public partial class DropTable : Node2D
     [Export] public bool EnableCombatItems = true;
     [Export] public bool EnableMovementItems = true;
     [Export] public bool EnableGeneralItems = true;
+    [Export] public bool EnableSurvivalItems = true;
+    [Export] public bool EnableHybridItems = true;
 
     private BoostRarityFilter RarityFilter
     {
@@ -91,6 +99,8 @@ public partial class DropTable : Node2D
             if (EnableCombatItems) filter |= BoostCategoryFilter.Combat;
             if (EnableMovementItems) filter |= BoostCategoryFilter.Movement;
             if (EnableGeneralItems) filter |= BoostCategoryFilter.General;
+            if (EnableSurvivalItems) filter |= BoostCategoryFilter.Survival;
+            if (EnableHybridItems) filter |= BoostCategoryFilter.Hybrid;
             return filter;
         }
     }
@@ -173,7 +183,7 @@ public partial class DropTable : Node2D
         else
             RegisterUniformProbabilities();
     }
-    
+
     private void RegisterManualProbabilities()
     {
         foreach (var pair in ManualProbabilities)
@@ -231,6 +241,8 @@ public partial class DropTable : Node2D
             BoostCategory.Combat => EnableCombatItems,
             BoostCategory.Movement => EnableMovementItems,
             BoostCategory.General => EnableGeneralItems,
+            BoostCategory.Survival => EnableSurvivalItems,
+            BoostCategory.Hybrid => EnableHybridItems,
             _ => false
         };
 
@@ -299,7 +311,7 @@ public partial class DropTable : Node2D
             var rarity = testBoost.Info.Rarity;
             if (!boostsByRarity.ContainsKey(rarity))
                 boostsByRarity[rarity] = new List<PackedScene>();
-            
+
             if (!(SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly &&
                 _obtainedOneTimeBoosts.Contains(scene.ResourcePath)))
                 boostsByRarity[rarity].Add(scene);
@@ -380,7 +392,7 @@ public partial class DropTable : Node2D
             if (isValid && testBoost.Info.IsOneTimeOnly &&
                 _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
                 isValid = false;
-            
+
             testBoost.QueueFree();
 
             if (isValid)
