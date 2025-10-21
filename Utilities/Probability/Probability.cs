@@ -36,11 +36,7 @@ public partial class Probability : RefCounted
 	}
 	public static void RunIfElse(float firstProbability, Action first, Action second)
 	{
-		if (firstProbability < 0.0f || firstProbability > 1.0f)
-		{
-			GD.PushError("RunIfElse: firstProbability must be between 0.0 and 1.0");
-			return;
-		}
+		firstProbability = Mathf.Clamp(firstProbability, 0f, 1f);
 		Run(
 			new Tuple<float, Action>(firstProbability, first),
 			new Tuple<float, Action>(1.0f - firstProbability, second)

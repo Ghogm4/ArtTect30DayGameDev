@@ -38,7 +38,7 @@ public partial class Player_AttackUniversalState : State
 				StatComponent enemyStats = enemy.GetNode<StatComponent>("StatComponent");
 				PlayerStatComponent playerStats = Stats as PlayerStatComponent;
 				foreach (var attackAction in playerStats.AttackActions)
-					attackAction?.Invoke(enemyStats);
+					attackAction?.Invoke(enemyStats, Stats as PlayerStatComponent);
 			}
 	}
 }

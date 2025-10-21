@@ -52,7 +52,7 @@ public partial class Player_DashAttackState : State
 				StatComponent enemyStats = enemy.GetNode<StatComponent>("StatComponent");
 				PlayerStatComponent PlayerStats = Stats as PlayerStatComponent;
 				foreach (var attackAction in PlayerStats.AttackActions)
-					attackAction?.Invoke(enemyStats);
+					attackAction?.Invoke(enemyStats, Stats as PlayerStatComponent);
 			}
 	}
 	protected override void Exit()
