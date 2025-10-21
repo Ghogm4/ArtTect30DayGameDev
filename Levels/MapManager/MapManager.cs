@@ -9,7 +9,8 @@ public partial class MapManager : Node2D
 {
 	public static MapManager Instance { get; private set; }
 	[Export] public Godot.Collections.Array<PackedScene> MapPool;
-
+	[Signal] public delegate void MapGeneratedEventHandler();
+	[Signal] public delegate void MapChangedEventHandler();
 	public enum MapType
 	{
 		T, B, L, R, TB, TL, TR, BL, BR, LR, TBL, TBR, TLR, BLR, TBLR
@@ -34,6 +35,7 @@ public partial class MapManager : Node2D
 		public Map TopMap = null;
 		public Map BottomMap = null;
 		public MapType Type;
+		public bool IsDiscovered = false;
 		public Map(
 			PackedScene scene,
 			Tuple<int, int> position,
@@ -175,6 +177,11 @@ public partial class MapManager : Node2D
 		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 		SetPlayerPosition(entrance);
 		NowMap = TargetMap;
+		if (!NowMap.IsDiscovered)
+		{
+			NowMap.IsDiscovered = true;
+		}
+		EmitSignal(SignalName.MapChanged);
 		MapALG.Instance.PrintMap(NowMap.Position);
 	}
 
@@ -219,7 +226,7 @@ public partial class MapManager : Node2D
 	public Map SearchMap(MapType type)
 	{
 		GD.Print("Searching for map of type: " + type.ToString());
-		List<Map> filteredMaps = Maps.Where(m => m.Type == type && !m.IsEnabled && !m.IsEndLevel).ToList();
+		List<Map> filteredMaps = Maps.Where(m => m.Type == type && !m.IsEnabled && !m.IsEndLevel && !m.IsStartLevel).ToList();
 		if (filteredMaps.Count > 0)
 		{
 			Random random = new Random();
@@ -275,10 +282,13 @@ public partial class MapManager : Node2D
 		MapALG.Instance.StartRoom();
 		MapALG.Instance.PrintMap();
 		ApplyMap();
+		EmitSignal(SignalName.MapGenerated);
 	}
 	public async Task StartLevel()
 	{
 		NowMap = StartMap;
+		StartMap.IsDiscovered = true;
+		EmitSignal(SignalName.MapChanged);
 		SceneManager.Instance.ChangeScene(NowMap.Scene);
 		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 		SetPlayerPosition("Start");
@@ -353,13 +363,13 @@ public partial class MapManager : Node2D
 					GD.Print("Connected", map.Position, "right to", assigned[key].Position);
 				}
 			}
-			
+
 			if (room.getValid() == 1 && !EndNodeMaps.Contains(map) && map != StartMap)
 			{
 				EndNodeMaps.Add(map);
 			}
 		}
-		var sp = new Tuple<int,int>((int)MapALG.Instance.startPos.X, (int)MapALG.Instance.startPos.Y);
+		var sp = new Tuple<int, int>((int)MapALG.Instance.startPos.X, (int)MapALG.Instance.startPos.Y);
 		if (assigned.TryGetValue(sp, out var sMap))
 		{
 			StartMap = sMap;
@@ -368,25 +378,34 @@ public partial class MapManager : Node2D
 		}
 
 		int index = rng.Next(EndNodeMaps.Count);
-		if (EndNodeMaps[index].TopMap != null)
+		Map node = EndNodeMaps[index];
+
+		EndMap.Position = node.Position;
+		EndMap.TopExit = node.TopExit;
+		EndMap.BottomExit = node.BottomExit;
+		EndMap.LeftExit = node.LeftExit;
+		EndMap.RightExit = node.RightExit;
+		EndMap.TopMap = node.TopMap;
+		EndMap.BottomMap = node.BottomMap;
+		EndMap.LeftMap = node.LeftMap;
+		EndMap.RightMap = node.RightMap;
+		EndMap.IsEnabled = true;
+		if (!EnabledMaps.Contains(EndMap)) EnabledMaps.Add(EndMap);
+
+		foreach (var map in EnabledMaps)
 		{
-			EndNodeMaps[index].TopMap.BottomMap = EndMap;
-			EndMap.TopMap = EndNodeMaps[index];
+			if (map.TopMap == node) map.TopMap = EndMap;
+			if (map.BottomMap == node) map.BottomMap = EndMap;
+			if (map.LeftMap == node) map.LeftMap = EndMap;
+			if (map.RightMap == node) map.RightMap = EndMap;
 		}
-		else if (EndNodeMaps[index].BottomMap != null)
-		{
-			EndNodeMaps[index].BottomMap.TopMap = EndMap;
-			EndMap.BottomMap = EndNodeMaps[index];
-		}
-		else if (EndNodeMaps[index].LeftMap != null)
-		{
-			EndNodeMaps[index].LeftMap.RightMap = EndMap;
-			EndMap.LeftMap = EndNodeMaps[index];
-		}
-		else if (EndNodeMaps[index].RightMap != null)
-		{
-			EndNodeMaps[index].RightMap.LeftMap = EndMap;
-			EndMap.RightMap = EndNodeMaps[index];
-		}
+
+		node.IsEnabled = false;
+		EnabledMaps.Remove(node);
+	}
+	
+	public Map GetMapAtPosition(Tuple<int, int> position)
+	{
+		return EnabledMaps.FirstOrDefault(m => m.Position != null && m.Position.Item1 == position.Item1 && m.Position.Item2 == position.Item2);
 	}
 }
