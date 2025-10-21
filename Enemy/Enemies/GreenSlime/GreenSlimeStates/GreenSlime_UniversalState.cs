@@ -7,48 +7,10 @@ public partial class GreenSlime_UniversalState : State
     private StatWrapper _health;
     private AnimatedSprite2D _sprite;
 
-    private float preHealth;
     protected override void ReadyBehavior()
     {
         _enemy = Storage.GetNode<EnemyBase>("Enemy");
         _health = new(Stats.GetStat("Health"));
         _sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
-
-        Stats.GetStat("Health").StatChanged += OnHealthChanged;
-        preHealth = (float)_health;
     }
-
-    private void OnHealthChanged()
-    {
-        if ((float)_health < preHealth)
-        {
-            GetHit();
-            GD.Print("Green Slime got hit!");
-        }
-        preHealth = (float)_health;
-
-
-        if ((float)_health <= 0)
-        {
-            _enemy.Die();
-        }
-    }
-    private void GetHit()
-    {
-        if (_sprite != null)
-        {
-            Tween _tween = _enemy.CreateTween();
-            _tween.TweenProperty(
-                _sprite, "modulate", 
-                new Color(1, 0.5f, 0.5f), 
-                0.1f
-            ).SetTrans(Tween.TransitionType.Linear).SetEase(Tween.EaseType.InOut);
-                _tween.TweenProperty(
-                _sprite, "modulate", 
-                new Color(1, 1, 1), 
-                0.3f
-            ).SetTrans(Tween.TransitionType.Linear).SetEase(Tween.EaseType.InOut);
-        }
-    }
-
 }

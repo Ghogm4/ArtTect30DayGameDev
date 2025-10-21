@@ -26,7 +26,7 @@ public partial class Player_UniversalState : State
 		};
 		InitializeSignals();
 		InitializeWrappers();
-		EmitHealthStatus();
+		EmitHealthStatus(0, 0);
 	}
 	private void InitializeSignals()
 	{
@@ -100,7 +100,7 @@ public partial class Player_UniversalState : State
 
 		_health -= remainingDamage;
 		behavior.Call(_player);
-		EmitHealthStatus();
+		EmitHealthStatus(0, 0);
 
 		if (_health <= 0)
 		{
@@ -139,7 +139,7 @@ public partial class Player_UniversalState : State
 		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 0.5f, 0.1f);
 		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 1, 0.1f);
 	}
-	private void EmitHealthStatus()
+	private void EmitHealthStatus(float oldValue, float newValue)
 	{
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated, (int)_health, (int)_maxHealth, (int)_shield, (int)Stats.GetStatValue("Coin"));
 	}

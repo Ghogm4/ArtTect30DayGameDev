@@ -12,7 +12,7 @@ public partial class BoostOnObtainDisplay : Control
     public override void _Ready()
     {
 		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerBoostPickedUp, Callable.From<BoostInfo, bool>(DisplayBoost));
-		DisplayTimer.Timeout += async () =>
+		DisplayTimer.Timeout += () =>
 		{
 			tween?.Kill();
 			tween = CreateTween();

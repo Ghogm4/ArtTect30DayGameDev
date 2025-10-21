@@ -58,7 +58,7 @@ public partial class EnemyMap : Node
 		{
 			var enemy = EnemyDict[enemyName];
 			var enemyInstance = enemy.Instantiate<EnemyBase>();
-			enemyInstance.OnDied += OnEnemyDied;
+			enemyInstance.Died += OnEnemyDied;
 			enemyInstance.Position = position;
 			GetTree().CurrentScene.CallDeferred("add_child", enemyInstance);
 		}

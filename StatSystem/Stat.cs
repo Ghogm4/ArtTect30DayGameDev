@@ -4,7 +4,7 @@ using System.Collections.Generic;
 [GlobalClass]
 public partial class Stat : Resource
 {
-    [Signal] public delegate void StatChangedEventHandler();
+    [Signal] public delegate void StatChangedEventHandler(float oldValue, float newValue);
     [Export] public string Name = string.Empty;
     [Export] public float BaseValue { get; private set; } = 0f;
     // Enable this for frequently modified stats to merge all normal modifiers into the three types when the count exceeds threshold
@@ -25,11 +25,11 @@ public partial class Stat : Resource
     private float _cachedValue = -1f;
     private bool _needRefresh = true;
     private List<StatModifier> _modifiers = new();
-    public void Calculate()
+    public void Calculate(float referencedStatOldValue = 0, float referencedStatNewValue = 0)
     {
         if (Mergeable && _normalModifierCount > NormalModifierThreshold)
             MergeNormalModifiers();
-
+        float oldValue = _cachedValue;
         float baseAdd = 0f;
         float mult = 1f;
         float finalAdd = 0f;
@@ -50,7 +50,7 @@ public partial class Stat : Resource
         }
         _cachedValue = (BaseValue + baseAdd) * mult + finalAdd;
         _needRefresh = false;
-        EmitSignal(SignalName.StatChanged);
+        EmitSignal(SignalName.StatChanged, oldValue, _cachedValue);
     }
     public void MergeNormalModifiers()
     {

@@ -1,8 +1,17 @@
 using Godot;
 using System;
-
+using System.Threading.Tasks;
 public partial class EnemyBase : CharacterBody2D
 {
+	[ExportGroup("Coin Settings")]
+	[Export] public int MinCoinDrop = 10;
+	[Export] public int MaxCoinDrop = 50;
+	[Export] public float CoinDropRate = 0.5f;
+	[ExportGroup("Soul Settings")]
+	[Export] public int MinSoulDrop = 5;
+	[Export] public int MaxSoulDrop = 20;
+	[Export] public float SoulDropRate = 0.3f;
+	[ExportGroup("Components")]
 	[Export] public Area2D MonitorArea;
 	[Export] public Area2D AttackArea;
 	[Export] public Area2D ChaseArea;
@@ -10,19 +19,17 @@ public partial class EnemyBase : CharacterBody2D
 	[Export] public AnimatedSprite2D Sprite;
 	[Export] public StatComponent Stats;
 	[Export] public TextureProgressBar HealthBar;
-
 	[Export] public PackedScene FloatingTextScene;
-	
+
 	[Signal] public delegate void EnterMonitorEventHandler(Node2D body);
 	[Signal] public delegate void EnterChaseEventHandler(Node2D body);
 	[Signal] public delegate void EnterAttackEventHandler(Node2D body);
 	[Signal] public delegate void ExitAttackEventHandler(Node2D body);
 	[Signal] public delegate void ExitChaseEventHandler(Node2D body);
 	[Signal] public delegate void ExitMonitorEventHandler(Node2D body);
-	[Signal] public delegate void OnDiedEventHandler();
+	[Signal] public delegate void DiedEventHandler();
+	[Signal] public delegate void DyingEventHandler();
 
-	private StatWrapper _health;
-	private float preHealth;
 	public Player player = null;
 	public override void _Ready()
 	{
@@ -35,10 +42,8 @@ public partial class EnemyBase : CharacterBody2D
 
 		Stats.GetStat("Health").StatChanged += OnHealthChanged;
 
-		_health = new(Stats.GetStat("Health"));
-		preHealth = (float)_health;
-		HealthBar.MaxValue = (double)_health;
-		HealthBar.Value = (double)_health;
+		HealthBar.MaxValue = Stats.GetStatValue("Health");
+		HealthBar.Value = HealthBar.MaxValue;
 	}
 
 	public void OnMonitorAreaBodyEntered(Node2D body)
@@ -71,43 +76,60 @@ public partial class EnemyBase : CharacterBody2D
 		MoveAndSlide();
 	}
 
-	public virtual void CustomBehaviour(Player player)
+	public void OnHealthChanged(float oldValue, float newValue)
 	{
-
-	}
-
-	public async void OnHealthChanged()
-	{
-
-		_health = new(Stats.GetStat("Health"));
-		if ((float)_health < preHealth)
+		if (newValue < oldValue)
 		{
 			FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
 			GetTree().CurrentScene.AddChild(Text);
 			Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-5, 5), GD.RandRange(-30, -15));
-			Text.display((int)(preHealth - (float)_health));
+			Text.display((int)(oldValue - newValue));
+
+			GetHit();
 		}
+		if (newValue <= 0)
+			Die();
+
 		if (HealthBar != null)
-		{
-			double currentValue = HealthBar.Value;
-			double targetValue = (double)_health;
-
-			Tween tween = CreateTween();
-			tween.TweenProperty(HealthBar, "value", targetValue, 0.1f)
-				.SetTrans(Tween.TransitionType.Linear)
-				.SetEase(Tween.EaseType.InOut);
-
-			await ToSignal(tween, "finished");
-		}
-		preHealth = (float)_health;
+			UpdateHealthBar(newValue);
 	}
-	public virtual void Die()
+	private void UpdateHealthBar(float newValue)
 	{
-		EmitSignal(SignalName.OnDied);
-		OnDeath();
+		Tween tween = CreateTween();
+		tween.TweenProperty(HealthBar, "value", newValue, 0.1f)
+			.SetTrans(Tween.TransitionType.Linear)
+			.SetEase(Tween.EaseType.InOut);
 	}
-	protected virtual void OnDeath()
+	public async void Die()
 	{
+		EmitSignal(SignalName.Dying);
+		await OnDeath();
+		EmitSignal(SignalName.Died);
 		QueueFree();
+	}
+	public void GetHit()
+	{
+		OnHit();
+		Flash();
+	}
+	protected virtual async Task OnDeath() => await Task.Delay(0);
+	protected virtual void OnHit() {}
+	public virtual void CustomBehaviour(Player player) { }
+	private void Flash()
+	{
+		if (Sprite == null)
+			return;
+
+		Tween _tween = CreateTween();
+		_tween.TweenProperty(
+			Sprite, "modulate",
+			new Color(1, 0.5f, 0.5f),
+			0.1f
+		).SetTrans(Tween.TransitionType.Linear).SetEase(Tween.EaseType.InOut);
+		_tween.TweenProperty(
+			Sprite, "modulate",
+			new Color(1, 1, 1),
+			0.3f
+		).SetTrans(Tween.TransitionType.Linear).SetEase(Tween.EaseType.InOut);
 	}
 }
