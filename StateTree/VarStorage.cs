@@ -9,7 +9,7 @@ public partial class VarStorage : Node
     [Export] private Dictionary<string, Variant> _initialVariantStorage = new();
     private Dictionary<string, Variant> _variantStorage = new();
     // 存储节点的引用
-    [Export] private Dictionary<string, Node2D> _nodeStorage = new();
+    [Export] private Dictionary<string, Node> _nodeStorage = new();
     public override void _Ready()
     {
         foreach (var pair in _initialVariantStorage)
@@ -17,10 +17,10 @@ public partial class VarStorage : Node
     }
     // 注册变量和节点
     public void RegisterVariant<[MustBeVariant] T>(string varName, Variant variant) => _variantStorage.Add(varName, variant);
-    public void RegisterNode<T>(string varName, Node2D node2D) where T : Node2D => _nodeStorage.Add(varName, node2D);
+    public void RegisterNode<T>(string varName, T node) where T : Node => _nodeStorage.Add(varName, node);
     // 获取变量与节点
     public T GetVariant<[MustBeVariant] T>(string varName) => _variantStorage[varName].As<T>();
-    public T GetNode<T>(string varName) where T : Node2D => (T)_nodeStorage[varName];
+    public T GetNode<T>(string varName) where T : Node => (T)_nodeStorage[varName];
     // 设置变量
     public void SetVariant(string varName, Variant variant) => _variantStorage[varName] = variant;
     // 移除变量与节点

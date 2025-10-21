@@ -81,7 +81,7 @@ public partial class EnemyBase : CharacterBody2D
 		if (newValue < oldValue)
 		{
 			FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
-			GetTree().CurrentScene.AddChild(Text);
+			GetTree().CurrentScene?.AddChild(Text);
 			Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-5, 5), GD.RandRange(-30, -15));
 			Text.display((int)(oldValue - newValue));
 

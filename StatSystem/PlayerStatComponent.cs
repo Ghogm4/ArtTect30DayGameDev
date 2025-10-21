@@ -30,8 +30,8 @@ public partial class PlayerStatComponent : StatComponent
             {
                 resultCritDamage = critDamage;
             });
-
-            float resultDamage = playerStats.GetStatValue("Attack") * resultDamageMultiplier * (resultCritDamage / 100f);
+            float attackFinalMultiplier = playerStats.GetStatValue("AttackFinalMultiplier");
+            float resultDamage = playerStats.GetStatValue("Attack") * resultDamageMultiplier * attackFinalMultiplier * (resultCritDamage / 100f);
             component.GetStat("Health").AddFinal(-resultDamage);
             GD.Print(playerStats.GetStatValue("Attack"));
         };
