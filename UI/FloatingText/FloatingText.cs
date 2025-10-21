@@ -22,7 +22,6 @@ public partial class FloatingText : Node2D
 
 	public void display(float damage)
 	{
-		GD.Print("1");
 		if (position_tween != null && position_tween.IsRunning())
 		{
 			position_tween.Stop();
@@ -56,7 +55,7 @@ public partial class FloatingText : Node2D
 
 		position_tween.TweenProperty(
 			this, "position",
-			Position + new Vector2(0, -5f),
+			Position + new Vector2(GD.RandRange(-4, 4), -5f),
 			0.2f
 		).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
 

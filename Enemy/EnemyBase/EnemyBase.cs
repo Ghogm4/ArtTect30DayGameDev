@@ -37,6 +37,8 @@ public partial class EnemyBase : CharacterBody2D
 
 		_health = new(Stats.GetStat("Health"));
 		preHealth = (float)_health;
+		HealthBar.MaxValue = (double)_health;
+		HealthBar.Value = (double)_health;
 	}
 
 	public void OnMonitorAreaBodyEntered(Node2D body)
@@ -82,7 +84,7 @@ public partial class EnemyBase : CharacterBody2D
 		{
 			FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
 			GetTree().CurrentScene.AddChild(Text);
-			Text.GlobalPosition = GlobalPosition + new Vector2(0, -20);
+			Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-5, 5), GD.RandRange(-30, -15));
 			Text.display((int)(preHealth - (float)_health));
 		}
 		if (HealthBar != null)
