@@ -33,6 +33,7 @@ public partial class Player_UniversalState : State
 		Stats.GetStat("Health").StatChanged += EmitHealthStatus;
 		Stats.GetStat("MaxHealth").StatChanged += EmitHealthStatus;
 		Stats.GetStat("Shield").StatChanged += EmitHealthStatus;
+		Stats.GetStat("Coin").StatChanged += EmitHealthStatus;
 		SignalBus.Instance.PlayerHit += OnPlayerHit;
 		SignalBus.Instance.RegisterSceneChangeStartedAction(() => SignalBus.Instance.PlayerHit -= OnPlayerHit, SignalBus.Priority.Super);
 	}
@@ -58,18 +59,18 @@ public partial class Player_UniversalState : State
 			_attackArea.Scale = -Vector2.One;
 		else
 			_attackArea.Scale = Vector2.One;
-			
+
 		if (_sprite.Animation == "Die")
 		{
 			_sprite.Modulate = Colors.White;
 			_invincibilityTween?.Kill();
 			return;
 		}
+		if (_isInvincible)
+			return;
 		for (int collisionIndex = 0; collisionIndex < _player.GetSlideCollisionCount(); collisionIndex++)
 		{
 			KinematicCollision2D collision = _player.GetSlideCollision(collisionIndex);
-			if (_isInvincible)
-				continue;
 
 			if (collision.GetCollider() is DamagingTileMapLayer damagingLayer)
 			{

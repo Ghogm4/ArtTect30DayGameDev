@@ -80,12 +80,14 @@ public partial class EnemyBase : CharacterBody2D
 	{
 		if (newValue < oldValue)
 		{
-			FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
-			GetTree().CurrentScene?.AddChild(Text);
-			Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-5, 5), GD.RandRange(-30, -15));
-			Text.display((int)(oldValue - newValue));
-
 			GetHit();
+			if (IsInsideTree())
+			{
+				FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
+				GetTree()?.CurrentScene?.AddChild(Text);
+				Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-5, 5), GD.RandRange(-30, -15));
+				Text.display((int)(oldValue - newValue));
+			}
 		}
 		if (newValue <= 0)
 			Die();
@@ -104,6 +106,7 @@ public partial class EnemyBase : CharacterBody2D
 	{
 		EmitSignal(SignalName.Dying);
 		await OnDeath();
+		DropCoin();
 		EmitSignal(SignalName.Died);
 		QueueFree();
 	}
@@ -115,6 +118,35 @@ public partial class EnemyBase : CharacterBody2D
 	protected virtual async Task OnDeath() => await Task.Delay(0);
 	protected virtual void OnHit() {}
 	public virtual void CustomBehaviour(Player player) { }
+	private void DropCoin()
+    {
+		bool willDrop = false;
+		Probability.RunIfElse(CoinDropRate, () => willDrop = true, () => { });
+		if (!willDrop)
+			return;
+		int coinsToDrop = GD.RandRange(MinCoinDrop, MaxCoinDrop);
+		int coinOnGroundAmount = (int)Mathf.Log(coinsToDrop) * 2 + 1;
+		int coinsInCoinBoost = coinsToDrop / coinOnGroundAmount;
+		int remainder = coinsToDrop % coinOnGroundAmount;
+		float spread = Mathf.Pi / 6;
+		float force = 200f;
+		for (int i = 0; i <= coinOnGroundAmount; i++)
+		{
+			float direction = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
+			Boost coin = ResourceLoader.Load<PackedScene>("res://Boosts/Special/Coin.tscn").Instantiate<Boost>();
+			if (i == coinOnGroundAmount)
+				coin.Info.Amount = remainder;
+			else
+				coin.Info.Amount = coinsInCoinBoost;
+
+			if (IsInsideTree())
+			{
+				coin.Position = Position;
+				GetTree()?.CurrentScene?.AddChild(coin);
+				coin.ApplyCentralImpulse(Vector2.Right.Rotated(direction) * force);
+			}
+		}
+    }
 	private void Flash()
 	{
 		if (Sprite == null)
