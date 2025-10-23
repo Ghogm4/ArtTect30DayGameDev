@@ -31,6 +31,7 @@ public partial class EnemyBase : CharacterBody2D
 	[Signal] public delegate void DyingEventHandler();
 
 	public Player player = null;
+	private bool _isDead = false;
 	public override void _Ready()
 	{
 		MonitorArea.BodyEntered += OnMonitorAreaBodyEntered;
@@ -78,6 +79,7 @@ public partial class EnemyBase : CharacterBody2D
 
 	public void OnHealthChanged(float oldValue, float newValue)
 	{
+		if (_isDead) return;
 		if (newValue < oldValue)
 		{
 			GetHit();
@@ -90,7 +92,10 @@ public partial class EnemyBase : CharacterBody2D
 			}
 		}
 		if (newValue <= 0)
+		{
 			Die();
+			_isDead = true;
+		}
 
 		if (HealthBar != null)
 			UpdateHealthBar(newValue);

@@ -4,7 +4,7 @@ using System;
 public partial class PlayerHealthBar : Control
 {
     public static PlayerHealthBar Instance;
-    private Vector2 _textureSize = new Vector2(18, 15);
+    private Vector2 _textureSize = new Vector2(18, 16);
     [Export] private TextureRect _fullHearts = null;
     [Export] private TextureRect _emptyHearts = null;
     [Export] private TextureRect _shields = null;

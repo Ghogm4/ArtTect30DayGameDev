@@ -13,7 +13,6 @@ public partial class NurseStatModifierComponent : StatModifierComponent
 				0.1f,
 				() =>
 				{
-					GD.Print("E");
 					if (!IsInstanceValid(ps)) return;
 					Boost healthPotion = ResourceLoader.Load<PackedScene>("res://Boosts/General/HealthPotion.tscn").Instantiate<Boost>();
 					ps.GetTree()?.CurrentScene?.AddChild(healthPotion);
