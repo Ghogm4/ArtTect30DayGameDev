@@ -16,12 +16,12 @@ public partial class PlayerStatComponent : StatComponent
     }
     public override void _Ready()
     {
+        base._Ready();
         if (GameData.Instance.StatModifierDict.Count > 0)
             InitializeStatsWithGameData();
         SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
         SignalBus.Instance.EnemyDied += TriggerOnEnemyDeathActions;
         InitializeOnce();
-        GD.Print(OnEnemyDeathActions.Count);
     }
     private void TriggerOnEnemyDeathActions(Vector2 enemyDeathPos)
     {

@@ -6,7 +6,37 @@ using System.Collections.Generic;
 public partial class StatComponent : Node
 {
 	[Export] public Godot.Collections.Dictionary<string, Stat> Stats = new();
+	public override void _Ready()
+	{
+		foreach (var stat in Stats.Values)
+		{
+			string minVal = stat.MinValue;
+			string maxVal = stat.MaxValue;
+			InitializeStatLimit(stat, minVal, true);
+			InitializeStatLimit(stat, maxVal, false);
+		}
+	}
+	private void InitializeStatLimit(Stat stat, string limitVal, bool processMin)
+	{
+		if (string.IsNullOrEmpty(limitVal))
+        {
+            if (processMin)
+				stat.MinLimit.ValueProvider = () => int.MinValue;
+			else
+				stat.MaxLimit.ValueProvider = () => int.MaxValue;
+			return;
+        }
+		Func<float> valueProvider;
+		if (int.TryParse(limitVal, out int constLimit))
+			valueProvider = () => constLimit;
+		else
+			valueProvider = () => GetStat(limitVal)?.FinalValue ?? 0f;
 
+		if (processMin)
+			stat.MinLimit.ValueProvider = valueProvider;
+		else
+			stat.MaxLimit.ValueProvider = valueProvider;
+	}
 	public Stat GetStat(string statName)
 	{
 		if (Stats.ContainsKey(statName))

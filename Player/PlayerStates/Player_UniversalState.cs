@@ -53,7 +53,7 @@ public partial class Player_UniversalState : State
 		else
 			_sprite.FlipH = false;
 
-		if (Input.IsActionJustPressed("Use") && Stats.IsStatValueApprox("CanUseHealthPotion", 1f))
+		if (Input.IsActionJustPressed("Use") && Stats.IsStatValueApprox("CanUseHealthPotion", 1f) && Stats.GetStatValue("HealthPotionAmount") > 0)
 			UseHealthPotion();
 	}
 	private void UseHealthPotion()
