@@ -17,7 +17,9 @@ public partial class NurseStatModifierComponent : StatModifierComponent
 					Boost healthPotion = ResourceLoader.Load<PackedScene>("res://Boosts/General/HealthPotion.tscn").Instantiate<Boost>();
 					ps.GetTree()?.CurrentScene?.AddChild(healthPotion);
 					healthPotion.Position = pos;
-					healthPotion.ApplyCentralImpulse(Vector2.Up * 200f);
+					float spread = Mathf.Pi / 6;
+					float direction = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
+					healthPotion.ApplyCentralImpulse(Vector2.Right.Rotated(direction) * 200f);
                 }
 			)
 		);

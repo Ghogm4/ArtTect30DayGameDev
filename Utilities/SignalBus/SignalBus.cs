@@ -6,7 +6,7 @@ using System.Linq;
 public partial class SignalBus : Node
 {
     [Signal] public delegate void PlayerHitEventHandler(int damage, Callable customBehavior);
-    [Signal] public delegate void PlayerHealthStatusUpdatedEventHandler(int health, int maxHealth, int shield, int coin);
+    [Signal] public delegate void PlayerHealthStatusUpdatedEventHandler(int health, int maxHealth, int shield, int coin, int healthPotion);
     [Signal] public delegate void PlayerDiedEventHandler();
     [Signal] public delegate void ShowTextEventHandler();
     [Signal] public delegate void WaitAdvanceEventHandler();
@@ -14,6 +14,7 @@ public partial class SignalBus : Node
     [Signal] public delegate void PlayerBoostPickedUpEventHandler(BoostInfo info, bool needDisplay);
     [Signal] public delegate void EntranceSignalEventHandler(string entrance);
     [Signal] public delegate void EnemyDiedEventHandler(Vector2 enemyDeathPos);
+    [Signal] public delegate void PlayerHealthPotionUsedEventHandler(int cooldownSeconds);
     public static SignalBus Instance { get; private set; }
     public enum Priority
     {

@@ -36,10 +36,24 @@ public partial class StatComponent : Node
 		else
 			GD.PushError($"Stat '{statName}' not found in StatComponent.");
 	}
-	public void AddBuff(string statName, StatModifier modifier, float duration = 1f)
+	public void AddBuff(string statName, StatModifier modifier, float duration = 1f, bool clearOnSceneChange = true)
 	{
 		AddModifier(statName, modifier);
-		Scheduler.Instance.ScheduleAction(duration, () => RemoveModifier(statName, modifier), 10, true);
+		if (this is not PlayerStatComponent)
+		{
+			Scheduler.Instance.ScheduleAction(duration, () => RemoveModifier(statName, modifier), 10, true);
+			return;
+		}
+
+		if (clearOnSceneChange)
+			Scheduler.Instance.ScheduleAction(duration, () => RemoveModifier(statName, modifier), 10, true);
+		else
+			Scheduler.Instance.ScheduleAction(duration, () =>
+			{
+				PlayerStatComponent playerStats = Scheduler.Instance.GetTree().GetFirstNodeInGroup("Player").GetNode<PlayerStatComponent>("StatComponent");
+				playerStats.AddModifier(statName, modifier.CreateResource(statName).CreateModifier(playerStats, true));
+				GD.Print("E");
+			}, 10, false);
 	}
 	public void RemoveModifier(string statName, StatModifier modifier)
 	{

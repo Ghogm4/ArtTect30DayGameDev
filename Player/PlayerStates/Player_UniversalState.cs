@@ -34,6 +34,7 @@ public partial class Player_UniversalState : State
 		Stats.GetStat("MaxHealth").StatChanged += EmitHealthStatus;
 		Stats.GetStat("Shield").StatChanged += EmitHealthStatus;
 		Stats.GetStat("Coin").StatChanged += EmitHealthStatus;
+		Stats.GetStat("HealthPotionAmount").StatChanged += EmitHealthStatus;
 		SignalBus.Instance.PlayerHit += OnPlayerHit;
 		SignalBus.Instance.RegisterSceneChangeStartedAction(() => SignalBus.Instance.PlayerHit -= OnPlayerHit, SignalBus.Priority.Super);
 	}
@@ -47,10 +48,20 @@ public partial class Player_UniversalState : State
 	protected override void FrameUpdate(double delta)
 	{
 		bool headingLeft = Storage.GetVariant<bool>("HeadingLeft");
-		if (headingLeft) 
+		if (headingLeft)
 			_sprite.FlipH = true;
 		else
 			_sprite.FlipH = false;
+
+		if (Input.IsActionJustPressed("Use") && Stats.IsStatValueApprox("CanUseHealthPotion", 1f))
+			UseHealthPotion();
+	}
+	private void UseHealthPotion()
+	{
+		Stats.AddFinal("HealthPotionAmount", -1);
+		_health++;
+		Stats.AddBuff("CanUseHealthPotion", new(StatModifier.OperationType.FinalAdd, -1f), Stats.GetStatValue("HealthPotionCooldown"), false);
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthPotionUsed, Stats.GetStatValue("HealthPotionCooldown"));
 	}
 	protected override void PhysicsUpdate(double delta)
 	{
@@ -101,7 +112,7 @@ public partial class Player_UniversalState : State
 
 		_health -= remainingDamage;
 		behavior.Call(_player);
-		EmitHealthStatus(0, 0);
+		EmitHealthStatus();
 
 		if (_health <= 0)
 		{
@@ -140,8 +151,9 @@ public partial class Player_UniversalState : State
 		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 0.5f, 0.1f);
 		_invincibilityTween.TweenProperty(_sprite, "modulate:a", 1, 0.1f);
 	}
-	private void EmitHealthStatus(float oldValue, float newValue)
+	private void EmitHealthStatus(float oldValue = 0, float newValue = 0)
 	{
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated, (int)_health, (int)_maxHealth, (int)_shield, (int)Stats.GetStatValue("Coin"));
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated,
+		(int)_health, (int)_maxHealth, (int)_shield, (int)Stats.GetStatValue("Coin"), (int)Stats.GetStatValue("HealthPotionAmount"));
 	}
 }

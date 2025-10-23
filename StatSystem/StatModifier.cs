@@ -44,6 +44,18 @@ public partial class StatModifier : RefCounted
 			Value = Mathf.IsZeroApprox(Value) ? 0 : 1f / Value;
 		return this;
 	}
+	public StatModifierResource CreateResource(string targetStatName)
+    {
+		StatModifierResource resource = new();
+		resource.Type = Type;
+		resource.Value = _value;
+		resource.TargetStatName = targetStatName;
+		if (ReferencedStat == null)
+			return resource;
+		resource.ReferencedStatName = ReferencedStat.Name;
+		resource.ReferencedPercentage = _referencedPercentage;
+		return resource;
+    }
 	public class Factory
 	{
 		public static StatModifier BaseAdd(float value) => new(OperationType.BaseAdd, value);

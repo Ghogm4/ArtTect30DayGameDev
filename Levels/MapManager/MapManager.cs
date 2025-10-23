@@ -284,7 +284,7 @@ public partial class MapManager : Node2D
 		ApplyMap();
 		EmitSignal(SignalName.MapGenerated);
 	}
-	public async Task StartLevel()
+	public async void StartLevel()
 	{
 		NowMap = StartMap;
 		StartMap.IsDiscovered = true;
