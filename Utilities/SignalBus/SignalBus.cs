@@ -15,6 +15,7 @@ public partial class SignalBus : Node
     [Signal] public delegate void EntranceSignalEventHandler(string entrance);
     [Signal] public delegate void EnemyDiedEventHandler(Vector2 enemyDeathPos);
     [Signal] public delegate void PlayerHealthPotionUsedEventHandler(int cooldownSeconds);
+    [Signal] public delegate void PlayerStatResetRequestedEventHandler();
     public static SignalBus Instance { get; private set; }
     public enum Priority
     {

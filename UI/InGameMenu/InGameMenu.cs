@@ -13,6 +13,7 @@ public partial class InGameMenu : Control
 	{
 		Visible = false;
 		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerBoostPickedUp, Callable.From<BoostInfo, bool>(AddBoost));
+		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerStatResetRequested, Callable.From(ResetMenu));
 	}
 	public override void _Process(double delta)
 	{
@@ -44,6 +45,12 @@ public partial class InGameMenu : Control
 			displayer.FloatingBoostInfo = FloatingBoostInfo;
 			existingDisplayer = displayer;
 		}
-		existingDisplayer.UpdateDisplay();	
+		existingDisplayer.UpdateDisplay();
+	}
+	public void ResetMenu()
+	{
+		foreach (var displayer in _boostDisplayers.Values)
+			displayer.QueueFree();
+		_boostDisplayers.Clear();
 	}
 }

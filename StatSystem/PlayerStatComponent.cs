@@ -21,6 +21,7 @@ public partial class PlayerStatComponent : StatComponent
             InitializeStatsWithGameData();
         SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
         SignalBus.Instance.EnemyDied += TriggerOnEnemyDeathActions;
+        SignalBus.Instance.PlayerStatResetRequested += ResetStats;
         InitializeOnce();
     }
     private void TriggerOnEnemyDeathActions(Vector2 enemyDeathPos)
@@ -72,6 +73,11 @@ public partial class PlayerStatComponent : StatComponent
         GameData.Instance.PlayerAttackActions = AttackActions;
         GameData.Instance.PlayerPassiveSkills = PassiveSkills;
         GameData.Instance.PlayerOnEnemyDeathActions = OnEnemyDeathActions;
+    }
+    public override void ResetStats()
+    {
+        base.ResetStats();
+        GameData.Instance.Reset();
     }
     public void InitializeStatsWithGameData()
     {

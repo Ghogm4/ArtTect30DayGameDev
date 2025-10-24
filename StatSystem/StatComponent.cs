@@ -81,8 +81,7 @@ public partial class StatComponent : Node
 			Scheduler.Instance.ScheduleAction(duration, () =>
 			{
 				PlayerStatComponent playerStats = Scheduler.Instance.GetTree().GetFirstNodeInGroup("Player").GetNode<PlayerStatComponent>("StatComponent");
-				playerStats.AddModifier(statName, modifier.CreateResource(statName).CreateModifier(playerStats, true));
-				GD.Print("E");
+				playerStats?.AddModifier(statName, modifier.CreateResource(statName).CreateModifier(playerStats, true));
 			}, 10, false);
 	}
 	public void RemoveModifier(string statName, StatModifier modifier)
@@ -96,6 +95,11 @@ public partial class StatComponent : Node
 		else
 			GD.PushError($"Stat '{statName}' not found in StatComponent.");
 	}
+	public virtual void ResetStats()
+    {
+        foreach (var stat in Stats.Values)
+			stat.Reset();
+    }
 	public void AddBase(string statName, float value) => GetStat(statName)?.AddBase(value);
 	public void Mult(string statName, float multiplier) => GetStat(statName)?.Mult(multiplier);
 	public void AddFinal(string statName, float value) => GetStat(statName)?.AddFinal(value);

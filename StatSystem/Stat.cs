@@ -57,7 +57,7 @@ public partial class Stat : Resource
         }
 
         float _calculatedValue = (BaseValue + baseAdd) * mult + finalAdd;
-
+        
         bool _isLastAddedModifierValid =
         HandleCalculationExceedMinValidation(_calculatedValue, baseAdd, mult) &&
         HandleCalculationExceedMaxValidation(_calculatedValue, baseAdd, mult);
@@ -173,6 +173,13 @@ public partial class Stat : Resource
             Calculate();
         if (modifier.ReferencedStat == null)
             _normalModifierCount++;
+    }
+    public void Reset()
+    {
+        _modifiers.Clear();
+        Calculate();
+        _normalModifierCount = 0;
+        _lastAddedModifier = null;
     }
     private bool IsUselessModifier(StatModifier modifier)
     {
