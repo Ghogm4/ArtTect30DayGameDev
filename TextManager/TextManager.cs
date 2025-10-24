@@ -95,7 +95,7 @@ public partial class TextManager : Node
 		ProfileLeft.Texture = ResourceLoader.Load<Texture2D>(line.Profile);
 		DialogueTextLabel.Text = line.Text;
 		DialogueTextLabel.VisibleRatio = 0f;
-		tween.TweenProperty(DialogueTextLabel, "visible_ratio", 1f, 2f);
+		tween.TweenProperty(DialogueTextLabel, "visible_ratio", 1f, line.Text.Length * 0.035f);
 
 		while (true)
 		{

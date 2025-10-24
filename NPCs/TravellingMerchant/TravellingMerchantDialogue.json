@@ -4,7 +4,13 @@
             "Id": "1",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/TravellingMerchantPortrait.png",
-            "Text": "Offer me your shiny coins, traveller, and I shall provide you with treasures untold."
+            "Text": "Greetings, traveller."
+        },
+        {
+            "Id": "2",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/TravellingMerchantPortrait.png",
+            "Text": "Offer me your shiny coins, and I shall provide you with treasures untold."
         }
     ]
 }
