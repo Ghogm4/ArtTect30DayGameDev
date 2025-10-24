@@ -1,0 +1,10 @@
+{
+    "TravellingMerchant":[
+        {
+            "Id": "1",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/TravellingMerchantPortrait.png",
+            "Text": "Offer me your shiny coins, traveller, and I shall provide you with treasures untold."
+        }
+    ]
+}

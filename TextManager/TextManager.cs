@@ -9,16 +9,11 @@ public partial class TextManager : Node
 {
 	public static TextManager Instance { get; private set; }
 
-
-	public const string Path = "res://TextManager/TextScene.tscn";
-
+	public Control DialoguePanel;
 	public TextureRect ProfileLeft;
 	public TextureRect ProfileRight;
-	public ColorRect BoxLeft;
-	public ColorRect BoxRight;
-	public RichTextLabel TextlabelLeft;
-	public RichTextLabel TextlabelRight;
-	
+	public Label DialogueTextLabel;
+	private bool _isTextShowing = false;
 	[Serializable]
 	public class DialogueLine
 	{
@@ -44,101 +39,87 @@ public partial class TextManager : Node
 			QueueFree();
 		}
 
-		SignalBus.Instance.ShowText += ShowText;
-		SignalBus.Instance.WaitAdvance += WaitAdvance;
+		GetTextSceneNodes();
 	}
-	
+	public void StartDialogue()
+	{
+		if (_isTextShowing)
+			return;
+		Index = 0;
+		ShowText();
+	}
+	private void GetTextSceneNodes()
+	{
+		TextScene textScene = TextScene.Instance;
+		ProfileLeft = textScene.GetNode<TextureRect>("%LeftsideProfile");
+		ProfileRight = textScene.GetNode<TextureRect>("%RightsideProfile");
+		DialogueTextLabel = textScene.GetNode<Label>("%DialogueTextLabel");
+		DialoguePanel = textScene.GetNode<Control>("%DialoguePanel");
+	}
 	public void LoadLines(string path, string scene)
 	{
 		var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
 		var jsonText = file.GetAsText();
 		file.Close();
-		GD.Print(jsonText);
 		var json = JsonSerializer.Deserialize<Dictionary<string, DialogueLine[]>>(jsonText);
 		Lines = json[scene];
-		GD.Print(Lines[0].Text);
 	}
 
-	public void LoadTextScene()
+	private async void ShowText()
 	{
-		var sceneRoot = GetTree().CurrentScene;
-		var textScene = GD.Load<PackedScene>(Path);
-		sceneRoot.AddChild(textScene.Instantiate());
-		ProfileLeft = sceneRoot.GetNode<CanvasLayer>("TextScene").GetNode<Node>("Leftside").GetNode<MarginContainer>("MarginContainer").GetNode<TextureRect>("Profile");
-		ProfileRight = sceneRoot.GetNode<CanvasLayer>("TextScene").GetNode<Node>("Rightside").GetNode<MarginContainer>("MarginContainer").GetNode<TextureRect>("Profile");
-		TextlabelLeft = sceneRoot.GetNode<CanvasLayer>("TextScene").GetNode<Node>("Leftside").GetNode<BoxContainer>("BoxContainer").GetNode<ColorRect>("ColorRect").GetNode<RichTextLabel>("Text");
-		TextlabelRight = sceneRoot.GetNode<CanvasLayer>("TextScene").GetNode<Node>("Rightside").GetNode<BoxContainer>("BoxContainer").GetNode<ColorRect>("ColorRect").GetNode<RichTextLabel>("Text");
-		BoxLeft = sceneRoot.GetNode<CanvasLayer>("TextScene").GetNode<Node>("Leftside").GetNode<BoxContainer>("BoxContainer").GetNode<ColorRect>("ColorRect");
-		BoxRight = sceneRoot.GetNode<CanvasLayer>("TextScene").GetNode<Node>("Rightside").GetNode<BoxContainer>("BoxContainer").GetNode<ColorRect>("ColorRect");
-	}
+		if (Lines is null)
+			return;
 
-	public async void ShowText()
-	{
-
-		if (Lines == null || Index >= Lines.Length)
+		if (Index >= Lines.Length)
 		{
-			SignalBus.Instance.EmitSignal(SignalBus.SignalName.WaitAdvance);
+			TextScene.Instance.Visible = false;
+			_isTextShowing = false;
+			return;
 		}
+
+		_isTextShowing = true;
+		TextScene.Instance.Visible = true;
 		var line = Lines[Index];
-		GD.Print("Showing line: " + line.Text);
 		Tween tween = CreateTween();
-		GD.Print(line.Profile);
 		if (line.Side == "Left")
 		{
-			GD.Print(ProfileLeft.Name);
-			ProfileLeft.Texture = GD.Load<Texture2D>(line.Profile);
-			TextlabelLeft.Text = line.Text;
-			TextlabelLeft.VisibleRatio = 0f;
 			ProfileLeft.Visible = true;
-			BoxLeft.Visible = true;
 			ProfileRight.Visible = false;
-			BoxRight.Visible = false;
-
-			tween.TweenProperty(TextlabelLeft, "visible_ratio", 1f, 2f);
-
 		}
 		else if (line.Side == "Right")
 		{
-			ProfileRight.Texture = GD.Load<Texture2D>(line.Profile);
-			TextlabelRight.Text = line.Text;
-			TextlabelRight.VisibleRatio = 0f;
 			ProfileRight.Visible = true;
-			BoxRight.Visible = true;
 			ProfileLeft.Visible = false;
-			BoxLeft.Visible = false;
-
-			tween.TweenProperty(TextlabelRight, "visible_ratio", 1f, 2f);
 		}
+
+		ProfileLeft.Texture = ResourceLoader.Load<Texture2D>(line.Profile);
+		DialogueTextLabel.Text = line.Text;
+		DialogueTextLabel.VisibleRatio = 0f;
+		tween.TweenProperty(DialogueTextLabel, "visible_ratio", 1f, 2f);
+
 		while (true)
 		{
 			if (Input.IsActionJustPressed("ui_accept") || Input.IsMouseButtonPressed(MouseButton.Left))
 			{
-				GD.Print("Skipping text animation");
 				tween.Kill();
-				TextlabelRight.VisibleRatio = 1f;
-				TextlabelLeft.VisibleRatio = 1f;
+				DialogueTextLabel.VisibleRatio = 1f;
 
 				while (Input.IsActionPressed("ui_accept") || Input.IsMouseButtonPressed(MouseButton.Left))
-				{
 					await ToSignal(GetTree(), "process_frame");
-				}
 
-				await ToSignal(GetTree().CreateTimer(0.1f), "timeout");
+				await ToSignal(GetTree().CreateTimer(0.1f), SceneTreeTimer.SignalName.Timeout);
 				break;
 			}
-			else if (TextlabelRight.VisibleRatio >= 0.999f && line.Side == "Right" || TextlabelLeft.VisibleRatio >= 0.999f && line.Side == "Left")
+			else if (DialogueTextLabel.VisibleRatio >= 0.999f)
 			{
-				
-				GD.Print("Text animation completed");
 				break;
 			}
-			await ToSignal(GetTree(), "process_frame");
+			await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 		}
 
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.WaitAdvance);
-
+		WaitAdvance();
 	}
-	
+
 	public async void WaitAdvance()
 	{
 		while (true)
@@ -146,22 +127,19 @@ public partial class TextManager : Node
 			if (Input.IsActionJustPressed("ui_accept") || Input.IsMouseButtonPressed(MouseButton.Left))
 			{
 				while (Input.IsActionPressed("ui_accept") || Input.IsMouseButtonPressed(MouseButton.Left))
-				{
-					await ToSignal(GetTree(), "process_frame");
-				}
-				await ToSignal(GetTree().CreateTimer(0.1f), "timeout");
+					await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+
+				await ToSignal(GetTree().CreateTimer(0.1f), SceneTreeTimer.SignalName.Timeout);
 				break;
 			}
-			await ToSignal(GetTree(), "process_frame");
+			await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 			if (Index >= Lines.Length)
 			{
-				var sceneRoot = GetTree().CurrentScene;
-				var textScene = sceneRoot.GetNode<CanvasLayer>("TextScene");
-				textScene.QueueFree();
+				TextScene.Instance.Visible = false;
 				break;
 			}
 		}
 		Index++;
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.ShowText);
+		ShowText();
 	}
 }
