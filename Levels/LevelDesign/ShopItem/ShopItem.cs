@@ -1,0 +1,157 @@
+using Godot;
+using System;
+using System.Collections.Generic;
+
+public partial class ShopItem : Node2D
+{
+	[Export] public int BasePrice = 75;
+	[Export] public DropTable ItemDropTable;
+	[Export] public Sprite2D ItemSprite;
+	[Export] public Sprite2D DisplayBaseSprite;
+	[Export] public Label PriceTag;
+	[Export] public HBoxContainer PriceContainer;
+	private Vector2 _itemSpriteOriginalPosition;
+	private float _timeElapsed = 0f;
+	private float _hoverAmplitude = 5f;
+	private float _hoverFrequency = 2f;
+	private Boost _hoveringBoost = null;
+	private bool _isPurchased = false;
+	private int _purchasedTimes = 0;
+	private static readonly Dictionary<BoostRarity, float> BoostRarityBasedPriceMinFactorDict = new()
+	{
+		[BoostRarity.Common] = (float)BoostRarityBasedPriceMinFactor.Common / 100f,
+		[BoostRarity.Uncommon] = (float)BoostRarityBasedPriceMinFactor.Uncommon / 100f,
+		[BoostRarity.Rare] = (float)BoostRarityBasedPriceMinFactor.Rare / 100f,
+		[BoostRarity.Epic] = (float)BoostRarityBasedPriceMinFactor.Epic / 100f,
+		[BoostRarity.Legendary] = (float)BoostRarityBasedPriceMinFactor.Legendary / 100f
+	};
+	private static readonly Dictionary<BoostRarity, float> BoostRarityBasedPriceMaxFactorDict = new()
+	{
+		[BoostRarity.Common] = (float)BoostRarityBasedPriceMaxFactor.Common / 100f,
+		[BoostRarity.Uncommon] = (float)BoostRarityBasedPriceMaxFactor.Uncommon / 100f,
+		[BoostRarity.Rare] = (float)BoostRarityBasedPriceMaxFactor.Rare / 100f,
+		[BoostRarity.Epic] = (float)BoostRarityBasedPriceMaxFactor.Epic / 100f,
+		[BoostRarity.Legendary] = (float)BoostRarityBasedPriceMaxFactor.Legendary / 100f
+	};
+	private float GetRandomizedPrice(BoostRarity boostRarity)
+	{
+		float minFactor = BoostRarityBasedPriceMinFactorDict[boostRarity];
+		float maxFactor = BoostRarityBasedPriceMaxFactorDict[boostRarity];
+		return BasePrice * (float)GD.RandRange(minFactor, maxFactor);
+	}
+	private int Price => Convert.ToInt32((1f + 0.2f * _purchasedTimes) * (_hoveringBoost?.Info.Rarity switch
+	{
+		BoostRarity.Common => (int)GetRandomizedPrice(BoostRarity.Common),
+		BoostRarity.Uncommon => (int)GetRandomizedPrice(BoostRarity.Uncommon),
+		BoostRarity.Rare => (int)GetRandomizedPrice(BoostRarity.Rare),
+		BoostRarity.Epic => (int)GetRandomizedPrice(BoostRarity.Epic),
+		BoostRarity.Legendary => (int)GetRandomizedPrice(BoostRarity.Legendary),
+		_ => BasePrice
+	}));
+	private int _finalPrice = 0;
+	public override void _Ready()
+	{
+		Refresh();
+		_itemSpriteOriginalPosition = ItemSprite.Position;
+	}
+
+	public void Refresh()
+	{
+		if (_hoveringBoost != null && IsInstanceValid(_hoveringBoost))
+			_hoveringBoost.QueueFree();
+		
+		RunItemDropTable();
+		GetDroppedBoost();
+		ResetDisplayState();
+		TogglePurchase(false);
+		SetPrice();
+	}
+	private void RunItemDropTable()
+	{
+		ItemDropTable.DroppedBoosts.Clear();
+		ItemDropTable.IsBoostPickable = false;
+		ItemDropTable.Drop();
+	}
+	private void GetDroppedBoost()
+	{
+		if (ItemDropTable.DroppedBoosts.Count > 0)
+		{
+			_hoveringBoost = ItemDropTable.DroppedBoosts[0];
+			_hoveringBoost.Visible = false;
+		}
+	}
+	private void ResetDisplayState()
+	{
+		_timeElapsed = 0f;
+		ItemSprite.Texture = _hoveringBoost?.Info.Icon;
+		ItemSprite.Visible = true;
+		PriceContainer.Visible = true;
+	}
+	private void TogglePurchase(bool purchased)
+	{
+		_isPurchased = purchased;
+	}
+	private void SetPrice()
+	{
+		_finalPrice = Price;
+		PriceTag.Text = _finalPrice.ToString();
+	}
+	private bool _isPlayerNearby = false;
+	public void OnBodyEntered(Node2D body)
+	{
+		if (!body.IsInGroup("Player") || _isPurchased)
+			return;
+		ToggleWhiteOutline(true);
+		_isPlayerNearby = true;
+	}
+	public void OnBodyExited(Node2D body)
+	{
+		if (!body.IsInGroup("Player") || _isPurchased)
+			return;
+		ToggleWhiteOutline(false);
+		_isPlayerNearby = false;
+	}
+	private int GetPlayerCoin()
+	{
+		Player player = GetTree().GetFirstNodeInGroup("Player") as Player;
+		if (player is null) return -1;
+		return (int)player.GetNode<PlayerStatComponent>("StatComponent").GetStatValue("Coin");
+	}
+	public override void _Process(double delta)
+	{
+		if (Input.IsActionJustPressed("Use")) Refresh();
+		_timeElapsed += (float)delta;
+		float hoverOffset = _hoverAmplitude * Mathf.Sin(_hoverFrequency * _timeElapsed);
+		ItemSprite.Position = _itemSpriteOriginalPosition + Vector2.Up * hoverOffset;
+		if (_isPlayerNearby && Input.IsActionJustPressed("Interact") && !_isPurchased && GetPlayerCoin() >= _finalPrice)
+		{
+			ToggleWhiteOutline(false);
+			EnableBoostPickup();
+			HandleDisplayAfterPurchase();
+			TogglePurchase(true);
+			SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerPurchased, _finalPrice);
+			_purchasedTimes++;
+		}
+	}
+	private void HandleDisplayAfterPurchase()
+    {
+		ItemSprite.Visible = false;
+		PriceContainer.Visible = false;
+    }
+	private void EnableBoostPickup()
+	{
+		if (_hoveringBoost != null && IsInstanceValid(_hoveringBoost))
+		{
+			_hoveringBoost.Visible = true;
+			_hoveringBoost.GlobalPosition = ItemSprite.GlobalPosition;
+			_hoveringBoost.Pickable = true;
+		}
+	}
+	private void ToggleWhiteOutline(bool enabled)
+	{
+		ShaderMaterial itemMaterial = ItemSprite.Material as ShaderMaterial;
+		ShaderMaterial displayBaseMaterial = DisplayBaseSprite.Material as ShaderMaterial;
+		itemMaterial.SetShaderParameter("outline_enabled", enabled);
+		displayBaseMaterial.SetShaderParameter("outline_enabled", enabled);
+	}
+}

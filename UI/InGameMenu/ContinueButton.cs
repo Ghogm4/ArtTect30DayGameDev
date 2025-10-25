@@ -5,7 +5,7 @@ public partial class ContinueButton : ResponsiveButton
 {
 	public override void OnPressed()
 	{
-		CanvasLayer root = Owner as CanvasLayer;
-		root.Visible = false;
+		Control InGameMenu = GetNode<Control>("%InGameMenu");
+		InGameMenu.Visible = false;
 	}
 }

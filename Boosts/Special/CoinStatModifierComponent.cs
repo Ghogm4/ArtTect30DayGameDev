@@ -12,7 +12,7 @@ public partial class CoinStatModifierComponent : StatModifierComponent
 		if (boost == null)
 			return;
 		int coinCount = boost.Info.Amount;
-		statComponent.AddFinal("Coin", coinCount);
+		statComponent.AddFinal("Coin", coinCount * statComponent.GetStatValue("CoinMultiplier"));
 		_modified = true;
     }
 }

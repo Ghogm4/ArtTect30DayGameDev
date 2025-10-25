@@ -31,7 +31,7 @@ public partial class DropTable : Node2D
 {
     [ExportGroup("Default Drops")]
     [Export] public PackedScene[] DefaultDropScenes;
-
+    public List<Boost> DroppedBoosts = new();
     private static readonly Dictionary<BoostRarity, float> _baseRarityWeights = new()
     {
         { BoostRarity.Common, 0.60f },
@@ -41,9 +41,9 @@ public partial class DropTable : Node2D
         { BoostRarity.Legendary, 0.02f }
     };
 
-    private static HashSet<string> _obtainedOneTimeBoosts = new();
+    public static HashSet<string> ObtainedOneTimeBoosts = new();
 
-    public static void ResetObtainedOneTimeBoosts() => _obtainedOneTimeBoosts.Clear();
+    public static void ResetObtainedOneTimeBoosts() => ObtainedOneTimeBoosts.Clear();
 
     [ExportGroup("Drop Settings")]
     [Export] public BoostDropMode DropMode = BoostDropMode.UniformRarity;
@@ -104,6 +104,7 @@ public partial class DropTable : Node2D
             return filter;
         }
     }
+    public bool IsBoostPickable = true;
     private Dictionary<string, PackedScene> _boostDict = [];
     private Probability _probability = new();
     public override void _Ready()
@@ -196,7 +197,7 @@ public partial class DropTable : Node2D
                 var testBoost = scene.Instantiate<Boost>();
                 if (IsBoostEnabled(testBoost))
                 {
-                    if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
+                    if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && ObtainedOneTimeBoosts.Contains(scene.ResourcePath))
                         continue;
 
                     RegisterBoostSpawn(scene, probability);
@@ -222,7 +223,7 @@ public partial class DropTable : Node2D
         if (SkipObtainedOneTimeBoosts && boost.Info.IsOneTimeOnly)
         {
             string boostPath = boost.SceneFilePath;
-            if (!string.IsNullOrEmpty(boostPath) && _obtainedOneTimeBoosts.Contains(boostPath))
+            if (!string.IsNullOrEmpty(boostPath) && ObtainedOneTimeBoosts.Contains(boostPath))
                 return false;
         }
 
@@ -258,9 +259,6 @@ public partial class DropTable : Node2D
                 var testBoost = scene.Instantiate<Boost>();
                 bool isOneTimeOnly = testBoost.Info.IsOneTimeOnly;
                 testBoost.QueueFree();
-
-                if (isOneTimeOnly)
-                    _obtainedOneTimeBoosts.Add(scene.ResourcePath);
             }
             AddBoostFromPackedSceneToLevel(scene);
         });
@@ -278,7 +276,7 @@ public partial class DropTable : Node2D
             if (IsBoostEnabled(testBoost))
             {
                 if (!(SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly &&
-                    _obtainedOneTimeBoosts.Contains(scene.ResourcePath)))
+                    ObtainedOneTimeBoosts.Contains(scene.ResourcePath)))
                     eligibleBoosts.Add(scene);
             }
             testBoost.QueueFree();
@@ -313,7 +311,7 @@ public partial class DropTable : Node2D
                 boostsByRarity[rarity] = new List<PackedScene>();
 
             if (!(SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly &&
-                _obtainedOneTimeBoosts.Contains(scene.ResourcePath)))
+                ObtainedOneTimeBoosts.Contains(scene.ResourcePath)))
                 boostsByRarity[rarity].Add(scene);
 
             testBoost.QueueFree();
@@ -341,7 +339,7 @@ public partial class DropTable : Node2D
         }
 
         var testBoost = scene.Instantiate<Boost>();
-        if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
+        if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly && ObtainedOneTimeBoosts.Contains(scene.ResourcePath))
         {
             testBoost.QueueFree();
             return;
@@ -372,6 +370,8 @@ public partial class DropTable : Node2D
 
         var boost = scene.Instantiate<Boost>();
         boost.GlobalPosition = GlobalPosition;
+        DroppedBoosts.Add(boost);
+        boost.Pickable = IsBoostPickable;
 
         GetTree().CurrentScene.CallDeferred(MethodName.AddChild, boost);
 
@@ -390,7 +390,7 @@ public partial class DropTable : Node2D
             bool isValid = IsBoostEnabled(testBoost);
 
             if (isValid && testBoost.Info.IsOneTimeOnly &&
-                _obtainedOneTimeBoosts.Contains(scene.ResourcePath))
+                ObtainedOneTimeBoosts.Contains(scene.ResourcePath))
                 isValid = false;
 
             testBoost.QueueFree();

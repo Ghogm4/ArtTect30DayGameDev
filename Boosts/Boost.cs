@@ -6,6 +6,15 @@ public partial class Boost : RigidBody2D
 {
     [Export] public BoostInfo Info = null;
     [Export] public bool NeedDisplay = true;
+    public bool Pickable
+    {
+        get => field;
+        set
+        {
+            field = value;
+            SignalBus.Instance.EmitSignal(SignalBus.SignalName.BoostPickableFieldChanged, value);
+        }
+    } = true;
     private StatModifierComponent _modifierComponent = null;
     public override void _Ready()
     {
@@ -23,5 +32,6 @@ public partial class Boost : RigidBody2D
         int amount = Info.Amount;
         for (int i = 0; i < amount; i++)
             _modifierComponent.ModifyStatComponent(statComponent);
+        DropTable.ObtainedOneTimeBoosts.Add(SceneFilePath);
     }
 }

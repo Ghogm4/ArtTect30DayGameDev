@@ -19,13 +19,13 @@ public partial class StatComponent : Node
 	private void InitializeStatLimit(Stat stat, string limitVal, bool processMin)
 	{
 		if (string.IsNullOrEmpty(limitVal))
-        {
-            if (processMin)
+		{
+			if (processMin)
 				stat.MinLimit.ValueProvider = () => int.MinValue;
 			else
 				stat.MaxLimit.ValueProvider = () => int.MaxValue;
 			return;
-        }
+		}
 		Func<float> valueProvider;
 		if (int.TryParse(limitVal, out int constLimit))
 			valueProvider = () => constLimit;
@@ -96,10 +96,10 @@ public partial class StatComponent : Node
 			GD.PushError($"Stat '{statName}' not found in StatComponent.");
 	}
 	public virtual void ResetStats()
-    {
-        foreach (var stat in Stats.Values)
+	{
+		foreach (var stat in Stats.Values)
 			stat.Reset();
-    }
+	}
 	public void AddBase(string statName, float value) => GetStat(statName)?.AddBase(value);
 	public void Mult(string statName, float multiplier) => GetStat(statName)?.Mult(multiplier);
 	public void AddFinal(string statName, float value) => GetStat(statName)?.AddFinal(value);

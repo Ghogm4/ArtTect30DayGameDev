@@ -22,6 +22,8 @@ public partial class PlayerStatComponent : StatComponent
         SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
         SignalBus.Instance.EnemyDied += TriggerOnEnemyDeathActions;
         SignalBus.Instance.PlayerStatResetRequested += ResetStats;
+        SignalBus.Instance.PlayerPurchased += (int price) => AddFinal("Coin", -price);
+        AddFinal("AvailableDashes", GetStatValue("MaxDash") - GetStatValue("AvailableDashes"));
         InitializeOnce();
     }
     private void TriggerOnEnemyDeathActions(Vector2 enemyDeathPos)
