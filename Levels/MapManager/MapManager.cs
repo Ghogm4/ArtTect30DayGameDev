@@ -11,134 +11,6 @@ public partial class MapManager : Node2D
 	[Export] public Godot.Collections.Array<PackedScene> MapPool;
 	[Signal] public delegate void MapGeneratedEventHandler();
 	[Signal] public delegate void MapChangedEventHandler();
-	public enum MapType
-	{
-		T, B, L, R, TB, TL, TR, BL, BR, LR, TBL, TBR, TLR, BLR, TBLR
-	}
-	public class Map
-	{
-		public PackedScene Scene;
-		public Tuple<int, int> Position;
-		public bool TopExit;
-		public bool BottomExit;
-		public bool LeftExit;
-		public bool RightExit;
-
-		public bool IsEnabled = false;
-		public bool IsStartLevel = false;
-		public bool IsEndLevel = false;
-
-		public float RarityWeight = 1.0f;
-
-		public Map LeftMap = null;
-		public Map RightMap = null;
-		public Map TopMap = null;
-		public Map BottomMap = null;
-		public MapType Type;
-		public bool IsDiscovered = false;
-		public Map(
-			PackedScene scene,
-			Tuple<int, int> position,
-			bool topExit,
-			bool bottomExit,
-			bool leftExit,
-			bool rightExit,
-			bool isStartLevel = false,
-			bool isEndLevel = false,
-			float rarityWeight = 1.0f
-			)
-		{
-			Scene = scene;
-			Position = position;
-			TopExit = topExit;
-			BottomExit = bottomExit;
-			LeftExit = leftExit;
-			RightExit = rightExit;
-			IsStartLevel = isStartLevel;
-			IsEndLevel = isEndLevel;
-			RarityWeight = rarityWeight;
-			Type = this.JudgeType();
-		}
-		public Map GetMap(string entrance)
-		{
-			return entrance switch
-			{
-				"Top" => TopMap,
-				"Bottom" => BottomMap,
-				"Left" => LeftMap,
-				"Right" => RightMap,
-				_ => null,
-			};
-		}
-		public MapType JudgeType()
-		{
-			if (TopExit && !BottomExit && !LeftExit && !RightExit)
-			{
-				Type = MapType.T;
-			}
-			else if (!TopExit && BottomExit && !LeftExit && !RightExit)
-			{
-				Type = MapType.B;
-			}
-			else if (!TopExit && !BottomExit && LeftExit && !RightExit)
-			{
-				Type = MapType.L;
-			}
-			else if (!TopExit && !BottomExit && !LeftExit && RightExit)
-			{
-				Type = MapType.R;
-			}
-			else if (TopExit && BottomExit && !LeftExit && !RightExit)
-			{
-				Type = MapType.TB;
-			}
-			else if (TopExit && !BottomExit && LeftExit && !RightExit)
-			{
-				Type = MapType.TL;
-			}
-			else if (TopExit && !BottomExit && !LeftExit && RightExit)
-			{
-				Type = MapType.TR;
-			}
-			else if (!TopExit && BottomExit && LeftExit && !RightExit)
-			{
-				Type = MapType.BL;
-			}
-			else if (!TopExit && BottomExit && !LeftExit && RightExit)
-			{
-				Type = MapType.BR;
-			}
-			else if (!TopExit && !BottomExit && LeftExit && RightExit)
-			{
-				Type = MapType.LR;
-			}
-			else if (TopExit && BottomExit && LeftExit && !RightExit)
-			{
-				Type = MapType.TBL;
-			}
-			else if (TopExit && BottomExit && !LeftExit && RightExit)
-			{
-				Type = MapType.TBR;
-			}
-			else if (TopExit && !BottomExit && LeftExit && RightExit)
-			{
-				Type = MapType.TLR;
-			}
-			else if (!TopExit && BottomExit && LeftExit && RightExit)
-			{
-				Type = MapType.BLR;
-			}
-			else if (TopExit && BottomExit && LeftExit && RightExit)
-			{
-				Type = MapType.TBLR;
-			}
-			return Type;
-		}
-		public string GetMapTypeString()
-		{
-			return Type.ToString();
-		}
-	}
 	public List<Map> Maps = null;
 	public List<Map> EnabledMaps = new List<Map>();
 	public List<Map> EndNodeMaps = new List<Map>();
@@ -249,7 +121,7 @@ public partial class MapManager : Node2D
 		EnabledMaps = new List<Map>();
 		foreach (PackedScene scene in MapPool)
 		{
-			var mapLevel = scene.Instantiate() as BaseLevel;
+			var mapLevel = scene.Instantiate<BaseLevel>();
 			if (mapLevel == null)
 			{
 				GD.PrintErr("MapLevel is null.");
@@ -257,7 +129,7 @@ public partial class MapManager : Node2D
 			}
 			Map newMap = new Map(
 				scene,
-				null,
+				Vector2I.Left,
 				mapLevel.TopExit,
 				mapLevel.BottomExit,
 				mapLevel.LeftExit,
@@ -295,24 +167,22 @@ public partial class MapManager : Node2D
 	}
 	public void ApplyMap()
 	{
-		var assigned = new Dictionary<Tuple<int, int>, Map>();
+		var assigned = new Dictionary<Vector2I, Map>();
 		var rng = new Random();
 
 		foreach (var room in MapALG.Instance.Roomlist)
 		{
 			if (!room.IsEnabled) continue;
-			var roomTypeName = room.JudgeMapType().ToString();
-			MapType desiredType = (MapType)Enum.Parse(typeof(MapType), roomTypeName);
+			MapType desiredType = room.JudgeMapType();
 			Map chosen = SearchMap(desiredType);
 			if (chosen == null)
 			{
-				GD.PrintErr("No available map found for type: " + roomTypeName);
+				GD.PrintErr("No available map found for type: " + desiredType.ToString());
 				continue;
 			}
-			if (room.Position.Item1 == (int)MapALG.Instance.startPos.X && room.Position.Item2 == (int)MapALG.Instance.startPos.Y)
-			{
+			if (room.Position == MapALG.Instance.startPos)
 				chosen = StartMap;
-			}
+			
 			chosen.IsEnabled = true;
 			chosen.Position = room.Position;
 			assigned[room.Position] = chosen;
@@ -321,11 +191,11 @@ public partial class MapManager : Node2D
 
 		foreach (var kv in assigned)
 		{
-			var room = MapALG.Instance.Get(kv.Key.Item1, kv.Key.Item2);
+			var room = MapALG.Instance.GetMapAtPosition(kv.Key.X, kv.Key.Y);
 			var map = kv.Value;
 			if (room.TopExit)
 			{
-				var key = new Tuple<int, int>(room.Position.Item1, room.Position.Item2 - 1);
+				var key = new Vector2I(room.Position.X, room.Position.Y - 1);
 				if (assigned.ContainsKey(key))
 				{
 					map.TopMap = assigned[key];
@@ -335,7 +205,7 @@ public partial class MapManager : Node2D
 			}
 			if (room.BottomExit)
 			{
-				var key = new Tuple<int, int>(room.Position.Item1, room.Position.Item2 + 1);
+				var key = new Vector2I(room.Position.X, room.Position.Y + 1);
 				if (assigned.ContainsKey(key))
 				{
 					map.BottomMap = assigned[key];
@@ -345,7 +215,7 @@ public partial class MapManager : Node2D
 			}
 			if (room.LeftExit)
 			{
-				var key = new Tuple<int, int>(room.Position.Item1 - 1, room.Position.Item2);
+				var key = new Vector2I(room.Position.X - 1, room.Position.Y);
 				if (assigned.ContainsKey(key))
 				{
 					map.LeftMap = assigned[key];
@@ -355,7 +225,7 @@ public partial class MapManager : Node2D
 			}
 			if (room.RightExit)
 			{
-				var key = new Tuple<int, int>(room.Position.Item1 + 1, room.Position.Item2);
+				var key = new Vector2I(room.Position.X + 1, room.Position.Y);
 				if (assigned.ContainsKey(key))
 				{
 					map.RightMap = assigned[key];
@@ -364,12 +234,12 @@ public partial class MapManager : Node2D
 				}
 			}
 
-			if (room.getValid() == 1 && !EndNodeMaps.Contains(map) && map != StartMap)
+			if (room.GetExitCount() == 1 && !EndNodeMaps.Contains(map) && map != StartMap)
 			{
 				EndNodeMaps.Add(map);
 			}
 		}
-		var sp = new Tuple<int, int>((int)MapALG.Instance.startPos.X, (int)MapALG.Instance.startPos.Y);
+		Vector2I sp = new((int)MapALG.Instance.startPos.X, (int)MapALG.Instance.startPos.Y);
 		if (assigned.TryGetValue(sp, out var sMap))
 		{
 			StartMap = sMap;
@@ -403,9 +273,9 @@ public partial class MapManager : Node2D
 		node.IsEnabled = false;
 		EnabledMaps.Remove(node);
 	}
-	
-	public Map GetMapAtPosition(Tuple<int, int> position)
+
+	public Map GetMapAtPosition(Vector2I position)
 	{
-		return EnabledMaps.FirstOrDefault(m => m.Position != null && m.Position.Item1 == position.Item1 && m.Position.Item2 == position.Item2);
+		return EnabledMaps.FirstOrDefault(m => m.Position == position);
 	}
 }

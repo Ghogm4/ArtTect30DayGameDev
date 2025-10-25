@@ -1,22 +1,11 @@
 using Godot;
 using System;
-using System.Security.Cryptography.X509Certificates;
+using System.Collections.Generic;
 
 public partial class SubMap : Control
 {
-	[Export] public TextureRect Room00 = null;
-	[Export] public TextureRect Room10 = null;
-	[Export] public TextureRect Room20 = null;
-	[Export] public TextureRect Room30 = null;
-	[Export] public TextureRect Room01 = null;
-	[Export] public TextureRect Room11 = null;
-	[Export] public TextureRect Room21 = null;
-	[Export] public TextureRect Room31 = null;
-	[Export] public TextureRect Room02 = null;
-	[Export] public TextureRect Room12 = null;
-	[Export] public TextureRect Room22 = null;
-	[Export] public TextureRect Room32 = null;
-
+	private Dictionary<Vector2I, TextureRect> _roomTextureRects = new();
+	[Export] public Panel SubMapPanel = null;
 	[Export] public Texture2D RoomT;
 	[Export] public Texture2D RoomB;
 	[Export] public Texture2D RoomL;
@@ -32,14 +21,15 @@ public partial class SubMap : Control
 	[Export] public Texture2D RoomTLR;
 	[Export] public Texture2D RoomBLR;
 	[Export] public Texture2D RoomTBLR;
-
-	[Export] public Control HighlightRoom;
+	[Export] public TextureRect HighlightRoom;
+	private Vector2 _subMapPanelSize;
 	public override void _Ready()
 	{
 		MapManager.Instance.Connect(MapManager.SignalName.MapGenerated, Callable.From(OnMapGenerated));
 		MapManager.Instance.Connect(MapManager.SignalName.MapChanged, Callable.From(OnMapChanged));
-		this.GetNode<CanvasLayer>("CanvasLayer").Visible = false;
+		Visible = false;
 		HighlightAnimation();
+		_subMapPanelSize = SubMapPanel.Size;
 	}
 	public void HighlightAnimation()
 	{
@@ -48,129 +38,83 @@ public partial class SubMap : Control
 		tween.TweenProperty(HighlightRoom, "modulate:a", 0.2f, 0.5f).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
 		tween.TweenProperty(HighlightRoom, "modulate:a", 0.8f, 0.5f).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
 	}
-	public void SetHighlightRoom(MapManager.Map map)
+	public void SetHighlightRoomPosition(Map map)
 	{
-		Vector2 position = new Vector2();
-		position.X = map.Position.Item1 * 64;
-		position.Y = map.Position.Item2 * 48;
+		Vector2 position = new();
+		position.X = map.Position.X * _subMapPanelSize.X / MapALG.Instance.Width;
+		position.Y = map.Position.Y * _subMapPanelSize.Y / MapALG.Instance.Height;
 		HighlightRoom.Position = position;
+		HighlightRoom.Size = _subMapPanelSize / new Vector2(MapALG.Instance.Width, MapALG.Instance.Height);
 	}
 	public override void _Process(double delta)
 	{
 		if (Input.IsActionJustPressed("ToggleSubMap"))
-			this.GetNode<CanvasLayer>("CanvasLayer").Visible = true;
+			Visible = true;
 		if (Input.IsActionJustReleased("ToggleSubMap"))
-			this.GetNode<CanvasLayer>("CanvasLayer").Visible = false;
+			Visible = false;
 	}
 	private void OnMapGenerated()
 	{
 		GD.Print("Map generated!");
+		_roomTextureRects.Clear();
+
+		Vector2 roomSize = _subMapPanelSize / new Vector2(MapALG.Instance.Width, MapALG.Instance.Height);
+		foreach (var room in MapALG.Instance.Roomlist)
+		{
+			var roomRect = new TextureRect();
+			_roomTextureRects[room.Position] = roomRect;
+			SubMapPanel.AddChild(roomRect);
+			roomRect.Size = roomSize;
+			roomRect.Position = new Vector2(room.Position.X * roomSize.X, room.Position.Y * roomSize.Y);
+		}
 		DrawMap();
 	}
 	public void OnMapChanged()
 	{
 		GD.Print("Map changed!");
 		DrawMap();
-		SetHighlightRoom(MapManager.Instance.NowMap);
-		
+		SetHighlightRoomPosition(MapManager.Instance.NowMap);
 	}
 	public void DrawMap()
 	{
 		foreach (var room in MapALG.Instance.Roomlist)
 		{
-			MapManager.Map map = MapManager.Instance.GetMapAtPosition(room.Position);
+			Map map = MapManager.Instance.GetMapAtPosition(room.Position);
 			if (!room.IsEnabled) continue;
+
 			Texture2D roomTexture = GetRoomTexture(room);
-			TextureRect position = GetPosition(room);
-			position.Texture = roomTexture;
-			if (!map.IsDiscovered) position.Visible = false;
-			else position.Visible = true;
+			TextureRect roomTextureRect = GetRoomTextureRect(room);
+			roomTextureRect.Texture = roomTexture;
+
+			if (!map.IsDiscovered) roomTextureRect.Visible = false;
+			else roomTextureRect.Visible = true;
 		}
 	}
-	public Texture2D GetRoomTexture(MapALG.Room room)
+	public Texture2D GetRoomTexture(Map room)
 	{
-		switch (room.JudgeMapType())
+		return room.JudgeMapType() switch
 		{
-			case MapALG.MapType.T:
-				return RoomT;
-			case MapALG.MapType.B:
-				return RoomB;
-			case MapALG.MapType.L:
-				return RoomL;
-			case MapALG.MapType.R:
-				return RoomR;
-			case MapALG.MapType.TL:
-				return RoomTL;
-			case MapALG.MapType.TR:
-				return RoomTR;
-			case MapALG.MapType.BL:
-				return RoomBL;
-			case MapALG.MapType.BR:
-				return RoomBR;
-			case MapALG.MapType.TB:
-				return RoomTB;
-			case MapALG.MapType.LR:
-				return RoomLR;
-			case MapALG.MapType.TBL:
-				return RoomTBL;
-			case MapALG.MapType.TBR:
-				return RoomTBR;
-			case MapALG.MapType.TLR:
-				return RoomTLR;
-			case MapALG.MapType.BLR:
-				return RoomBLR;
-			case MapALG.MapType.TBLR:
-				return RoomTBLR;
-			default:
-				throw new ArgumentOutOfRangeException();
-		}
+			MapType.T => RoomT,
+			MapType.B => RoomB,
+			MapType.L => RoomL,
+			MapType.R => RoomR,
+			MapType.TL => RoomTL,
+			MapType.TR => RoomTR,
+			MapType.BL => RoomBL,
+			MapType.BR => RoomBR,
+			MapType.TB => RoomTB,
+			MapType.LR => RoomLR,
+			MapType.TBL => RoomTBL,
+			MapType.TBR => RoomTBR,
+			MapType.TLR => RoomTLR,
+			MapType.BLR => RoomBLR,
+			MapType.TBLR => RoomTBLR,
+			_ => RoomTBLR,
+		};
 	}
 
-	public TextureRect GetPosition(MapALG.Room room)
+	public TextureRect GetRoomTextureRect(Map room)
 	{
-		int x = room.Position.Item1;
-		int y = room.Position.Item2;
-		if (x == 0 && y == 0) return Room00;
-		else if (x == 1 && y == 0) return Room10;
-		else if (x == 2 && y == 0) return Room20;
-		else if (x == 3 && y == 0) return Room30;
-		else if (x == 0 && y == 1) return Room01;
-		else if (x == 1 && y == 1) return Room11;
-		else if (x == 2 && y == 1) return Room21;
-		else if (x == 3 && y == 1) return Room31;
-		else if (x == 0 && y == 2) return Room02;
-		else if (x == 1 && y == 2) return Room12;
-		else if (x == 2 && y == 2) return Room22;
-		else if (x == 3 && y == 2) return Room32;
-		else
-		{
-			GD.PrintErr($"SubMap: No TextureRect for room at ({room.Position.Item1},{room.Position.Item2})");
-			return null;
-		}
-
-	}
-	
-	public TextureRect GetPositionMap(MapManager.Map map)
-	{
-		int x = map.Position.Item1;
-		int y = map.Position.Item2;
-		if (x == 0 && y == 0) return Room00;
-		else if (x == 1 && y == 0) return Room10;
-		else if (x == 2 && y == 0) return Room20;
-		else if (x == 3 && y == 0) return Room30;
-		else if (x == 0 && y == 1) return Room01;
-		else if (x == 1 && y == 1) return Room11;
-		else if (x == 2 && y == 1) return Room21;
-		else if (x == 3 && y == 1) return Room31;
-		else if (x == 0 && y == 2) return Room02;
-		else if (x == 1 && y == 2) return Room12;
-		else if (x == 2 && y == 2) return Room22;
-		else if (x == 3 && y == 2) return Room32;
-		else
-		{
-			GD.PrintErr($"SubMap: No TextureRect for room at ({map.Position.Item1},{map.Position.Item2})");
-			return null;
-		}
-
+		return _roomTextureRects.GetValueOrDefault(room.Position);
 	}
 }
