@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 public partial class LevelTransitioner : Area2D
 {
 	public PackedScene TargetLevel = null;
-	[Export] public string Entrance = null;
+	public string Entrance = null;
 	private bool _isEmitted = false;
 	public override void _Ready()
 	{
@@ -20,7 +20,7 @@ public partial class LevelTransitioner : Area2D
 				
 		};
 
-		switch (this.Name)
+		switch (Name)
 		{
 			case "LevelTransitionerTop":
 				Entrance = "Top";
@@ -35,7 +35,7 @@ public partial class LevelTransitioner : Area2D
 				Entrance = "Right";
 				break;
 			default:
-				GD.PrintErr($"Unknown LevelTransitioner name: {this.Name}");
+				GD.PrintErr($"Unknown LevelTransitioner name: {Name}");
 				break;
 		}
 	}

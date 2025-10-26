@@ -1,8 +1,9 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-
-public partial class ShopItem : Node2D
+using System.Threading.Tasks;
+using GodotDictionary = Godot.Collections.Dictionary;
+public partial class ShopItem : Node2D, ISavable
 {
 	[Export] public int BasePrice = 75;
 	[Export] public DropTable ItemDropTable;
@@ -10,6 +11,7 @@ public partial class ShopItem : Node2D
 	[Export] public Sprite2D DisplayBaseSprite;
 	[Export] public Label PriceTag;
 	[Export] public HBoxContainer PriceContainer;
+	public string UniqueID => Name;
 	private Vector2 _itemSpriteOriginalPosition;
 	private float _timeElapsed = 0f;
 	private float _hoverAmplitude = 5f;
@@ -17,6 +19,8 @@ public partial class ShopItem : Node2D
 	private Boost _hoveringBoost = null;
 	private bool _isPurchased = false;
 	private int _purchasedTimes = 0;
+	private string _itemSceneFilePath = "";
+	private bool _isFirstEntering = true;
 	private static readonly Dictionary<BoostRarity, float> BoostRarityBasedPriceMinFactorDict = new()
 	{
 		[BoostRarity.Common] = (float)BoostRarityBasedPriceMinFactor.Common / 100f,
@@ -49,17 +53,33 @@ public partial class ShopItem : Node2D
 		_ => BasePrice
 	}));
 	private int _finalPrice = 0;
-	public override void _Ready()
+	public override async void _Ready()
 	{
-		Refresh();
 		_itemSpriteOriginalPosition = ItemSprite.Position;
+		await ToSignal(GetTree().CurrentScene, Node.SignalName.Ready);
+		if (_isFirstEntering)
+		{
+			Refresh();
+			_isFirstEntering = false;
+			GD.Print($"ShopItem {UniqueID} is first entering, performed initial refresh.");
+		}
+		else if (!_isPurchased && !string.IsNullOrEmpty(_itemSceneFilePath))
+		{
+			_hoveringBoost = ResourceLoader.Load<PackedScene>(_itemSceneFilePath).Instantiate<Boost>();
+			_hoveringBoost.Visible = false;
+			_hoveringBoost.Pickable = false;
+			_hoveringBoost.GlobalPosition = ItemSprite.GlobalPosition;
+			GetTree().CurrentScene.AddChild(_hoveringBoost);
+			PriceTag.Text = _finalPrice.ToString();
+			ResetDisplayState();
+		}
 	}
 
 	public void Refresh()
 	{
 		if (_hoveringBoost != null && IsInstanceValid(_hoveringBoost))
 			_hoveringBoost.QueueFree();
-		
+
 		RunItemDropTable();
 		GetDroppedBoost();
 		ResetDisplayState();
@@ -78,6 +98,7 @@ public partial class ShopItem : Node2D
 		{
 			_hoveringBoost = ItemDropTable.DroppedBoosts[0];
 			_hoveringBoost.Visible = false;
+			_itemSceneFilePath = _hoveringBoost.SceneFilePath;
 		}
 	}
 	private void ResetDisplayState()
@@ -134,10 +155,10 @@ public partial class ShopItem : Node2D
 		}
 	}
 	private void HandleDisplayAfterPurchase()
-    {
+	{
 		ItemSprite.Visible = false;
 		PriceContainer.Visible = false;
-    }
+	}
 	private void EnableBoostPickup()
 	{
 		if (_hoveringBoost != null && IsInstanceValid(_hoveringBoost))
@@ -145,6 +166,8 @@ public partial class ShopItem : Node2D
 			_hoveringBoost.Visible = true;
 			_hoveringBoost.GlobalPosition = ItemSprite.GlobalPosition;
 			_hoveringBoost.Pickable = true;
+
+			_hoveringBoost.TreeExiting += () => _hoveringBoost = null;
 		}
 	}
 	private void ToggleWhiteOutline(bool enabled)
@@ -153,5 +176,33 @@ public partial class ShopItem : Node2D
 		ShaderMaterial displayBaseMaterial = DisplayBaseSprite.Material as ShaderMaterial;
 		itemMaterial.SetShaderParameter("outline_enabled", enabled);
 		displayBaseMaterial.SetShaderParameter("outline_enabled", enabled);
+	}
+	public GodotDictionary SaveState()
+	{
+		return new()
+		{
+			["IsPurchased"] = _isPurchased,
+			["PurchasedTimes"] = _purchasedTimes,
+			["CurrentPrice"] = _finalPrice,
+			// 安全地使用已保存的路径，而不是访问可能已销毁的对象
+			["ItemSceneFilePath"] = _itemSceneFilePath,
+			["IsFirstEntering"] = _isFirstEntering
+		};
+	}
+	public void LoadState(GodotDictionary state)
+	{
+		if (state?.TryGetValue("IsPurchased", out var isPurchased) ?? false)
+			_isPurchased = (bool)isPurchased;
+		if (state?.TryGetValue("PurchasedTimes", out var purchasedTimes) ?? false)
+			_purchasedTimes = (int)purchasedTimes;
+		if (state?.TryGetValue("CurrentPrice", out var currentPrice) ?? false)
+			_finalPrice = (int)currentPrice;
+		if (state?.TryGetValue("ItemSceneFilePath", out var itemSceneFilePath) ?? false)
+			_itemSceneFilePath = (string)itemSceneFilePath;
+		if (state?.TryGetValue("IsFirstEntering", out var isFirstEntering) ?? false)
+			_isFirstEntering = (bool)isFirstEntering;
+		GD.Print($"ShopItem {UniqueID} loaded state: IsPurchased = {_isPurchased}, PurchasedTimes = {_purchasedTimes}");
+		if (_isPurchased)
+			HandleDisplayAfterPurchase();
 	}
 }

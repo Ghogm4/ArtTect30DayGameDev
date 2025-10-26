@@ -2,7 +2,6 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 [GlobalClass]
 public partial class MapManager : Node2D
@@ -19,7 +18,6 @@ public partial class MapManager : Node2D
 	public Map StartMap = null;
 	public Map EndMap = null;
 	private bool _isEndCreated = false;
-
 	public override void _Ready()
 	{
 		if (Instance == null)
@@ -34,8 +32,6 @@ public partial class MapManager : Node2D
 
 		SignalBus.Instance.EntranceSignal += OnEntranceChanged;
 	}
-
-
 	public async void OnEntranceChanged(string entrance)
 	{
 		Map TargetMap = NowMap.GetMap(entrance);
@@ -45,14 +41,15 @@ public partial class MapManager : Node2D
 			GD.PrintErr("TargetMap is null.");
 			return;
 		}
+		NowMap = TargetMap;
 		SceneManager.Instance.ChangeScene(TargetMap.Scene);
 		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
+
 		SetPlayerPosition(entrance);
 		NowMap = TargetMap;
 		if (!NowMap.IsDiscovered)
-		{
 			NowMap.IsDiscovered = true;
-		}
+		
 		EmitSignal(SignalName.MapChanged);
 		MapALG.Instance.PrintMap(NowMap.Position);
 	}
@@ -64,30 +61,30 @@ public partial class MapManager : Node2D
 		var baseLevel = current as BaseLevel;
 		if (current == null || player == null || baseLevel == null)
 		{
-			CallDeferred(nameof(SetPlayerPosition), entrance);
+			CallDeferred(MethodName.SetPlayerPosition, entrance);
 			return;
 		}
 
 		switch (entrance)
 		{
 			case "Top":
-				if (baseLevel.BottomMarker == null) { CallDeferred(nameof(SetPlayerPosition), entrance); return; }
+				if (baseLevel.BottomMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
 				player.GlobalPosition = baseLevel.BottomMarker.GlobalPosition;
 				break;
 			case "Bottom":
-				if (baseLevel.TopMarker == null) { CallDeferred(nameof(SetPlayerPosition), entrance); return; }
+				if (baseLevel.TopMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
 				player.GlobalPosition = baseLevel.TopMarker.GlobalPosition;
 				break;
 			case "Left":
-				if (baseLevel.RightMarker == null) { CallDeferred(nameof(SetPlayerPosition), entrance); return; }
+				if (baseLevel.RightMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
 				player.GlobalPosition = baseLevel.RightMarker.GlobalPosition;
 				break;
 			case "Right":
-				if (baseLevel.LeftMarker == null) { CallDeferred(nameof(SetPlayerPosition), entrance); return; }
+				if (baseLevel.LeftMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
 				player.GlobalPosition = baseLevel.LeftMarker.GlobalPosition;
 				break;
 			case "Start":
-				if (baseLevel.StartMarker == null) { CallDeferred(nameof(SetPlayerPosition), entrance); return; }
+				if (baseLevel.StartMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
 				player.GlobalPosition = baseLevel.StartMarker.GlobalPosition;
 				break;
 			default:
@@ -111,12 +108,8 @@ public partial class MapManager : Node2D
 	public void InitMaps()
 	{
 		if (Maps != null)
-		{
-			foreach (Map map in Maps)
-			{
-				map.IsEnabled = false;
-			}
-		}
+			Maps.ForEach(map => map.IsEnabled = false);
+		
 		Maps = new List<Map>();
 		EnabledMaps = new List<Map>();
 		foreach (PackedScene scene in MapPool)
@@ -140,13 +133,10 @@ public partial class MapManager : Node2D
 				);
 			Maps.Add(newMap);
 			if (newMap.IsStartLevel)
-			{
 				StartMap = newMap;
-			}
 			if (newMap.IsEndLevel)
-			{
 				EndMap = newMap;
-			}
+
 			GD.Print("Loaded map: " + scene.ResourcePath);
 		}
 
@@ -168,7 +158,6 @@ public partial class MapManager : Node2D
 	public void ApplyMap()
 	{
 		var assigned = new Dictionary<Vector2I, Map>();
-		var rng = new Random();
 
 		foreach (var room in MapALG.Instance.Roomlist)
 		{
@@ -189,10 +178,10 @@ public partial class MapManager : Node2D
 			EnabledMaps.Add(chosen);
 		}
 
-		foreach (var kv in assigned)
+		foreach (var pair in assigned)
 		{
-			var room = MapALG.Instance.GetMapAtPosition(kv.Key.X, kv.Key.Y);
-			var map = kv.Value;
+			var room = MapALG.Instance.GetMapAtPosition(pair.Key);
+			var map = pair.Value;
 			if (room.TopExit)
 			{
 				var key = new Vector2I(room.Position.X, room.Position.Y - 1);
@@ -200,7 +189,7 @@ public partial class MapManager : Node2D
 				{
 					map.TopMap = assigned[key];
 					assigned[key].BottomMap = map;
-					GD.Print("Connected", map.Position, "top to", assigned[key].Position);
+					GD.Print("Connected ", map.Position, " top to", assigned[key].Position);
 				}
 			}
 			if (room.BottomExit)
@@ -210,7 +199,7 @@ public partial class MapManager : Node2D
 				{
 					map.BottomMap = assigned[key];
 					assigned[key].TopMap = map;
-					GD.Print("Connected", map.Position, "bottom to", assigned[key].Position);
+					GD.Print("Connected ", map.Position, " bottom to", assigned[key].Position);
 				}
 			}
 			if (room.LeftExit)
@@ -220,7 +209,7 @@ public partial class MapManager : Node2D
 				{
 					map.LeftMap = assigned[key];
 					assigned[key].RightMap = map;
-					GD.Print("Connected", map.Position, "left to", assigned[key].Position);
+					GD.Print("Connected ", map.Position, " left to", assigned[key].Position);
 				}
 			}
 			if (room.RightExit)
@@ -230,7 +219,7 @@ public partial class MapManager : Node2D
 				{
 					map.RightMap = assigned[key];
 					assigned[key].LeftMap = map;
-					GD.Print("Connected", map.Position, "right to", assigned[key].Position);
+					GD.Print("Connected ", map.Position, " right to", assigned[key].Position);
 				}
 			}
 
@@ -239,14 +228,14 @@ public partial class MapManager : Node2D
 				EndNodeMaps.Add(map);
 			}
 		}
-		Vector2I sp = new((int)MapALG.Instance.startPos.X, (int)MapALG.Instance.startPos.Y);
-		if (assigned.TryGetValue(sp, out var sMap))
+		Vector2I sp = new(MapALG.Instance.startPos.X, MapALG.Instance.startPos.Y);
+		if (assigned.TryGetValue(sp, out var startMap))
 		{
-			StartMap = sMap;
+			StartMap = startMap;
 			StartMap.IsStartLevel = true;
 			NowMap = StartMap;
 		}
-
+		var rng = new Random();
 		int index = rng.Next(EndNodeMaps.Count);
 		Map node = EndNodeMaps[index];
 

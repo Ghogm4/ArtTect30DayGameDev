@@ -53,6 +53,7 @@ public partial class SignalBus : Node
     /*
     Registered Actions / Priority:
         Disconnect the method OnPlayerHit in Player_UniversalState from PlayerHit signal, 30
+        Save current level state in BaseLevel when scene change starts, 10
         Player buff removal, 10
         Finalize all dash recovery timers, 10
         Transfer stat modifiers of player's StatComponent into GameData's StatModifierDict, 0

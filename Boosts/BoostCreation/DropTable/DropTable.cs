@@ -47,7 +47,28 @@ public partial class DropTable : Node2D
 
     [ExportGroup("Drop Settings")]
     [Export] public BoostDropMode DropMode = BoostDropMode.UniformRarity;
-    [Export] public int TimesToRun = 1;
+    [Export] public int MinTimesToRun = 1;
+    [Export] public int MaxTimesToRun = 2;
+    private int _timesToRun = 0;
+    private int TimesToRun
+    {
+        get
+        {
+            int denominator = (int)Mathf.Pow(2, MaxTimesToRun) - 1;
+            int result = MinTimesToRun;
+            GD.Print(result);
+            using Probability pb = new();
+            for (int i = MinTimesToRun; i <= MaxTimesToRun; i++)
+            {
+                int j = i;
+                int power = MaxTimesToRun - i;
+                int weight = (int)Mathf.Pow(2, power);
+                pb.Register((float)weight / denominator, () => { result = j; });
+            }
+            pb.Run();
+            return result;
+        }
+    }
     [Export] public bool SkipObtainedOneTimeBoosts = true;
 
     [ExportGroup("Boost Sources")]
@@ -375,7 +396,7 @@ public partial class DropTable : Node2D
 
         GetTree().CurrentScene.CallDeferred(MethodName.AddChild, boost);
 
-        float spread = Mathf.Atan(TimesToRun) / 2;
+        float spread = Mathf.Atan(_timesToRun) / 2;
         float radian = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
         float force = 200f;
         boost.ApplyCentralImpulse(Vector2.Right.Rotated(radian) * force);
@@ -402,8 +423,9 @@ public partial class DropTable : Node2D
     }
     public void Drop()
     {
-        int remainingDrops = TimesToRun;
-        int maxAttempts = TimesToRun * 3;
+        _timesToRun = TimesToRun;
+        int remainingDrops = _timesToRun;
+        int maxAttempts = _timesToRun * 3;
         int attempts = 0;
 
         while (remainingDrops > 0 && attempts < maxAttempts)

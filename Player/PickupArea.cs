@@ -8,10 +8,11 @@ public partial class PickupArea : Area2D
 	{
 		BodyEntered += OnBodyEntered;
 		SignalBus.Instance.BoostPickableFieldChanged += OnBoostPickableFieldChanged;
-		SignalBus.Instance.RegisterSceneChangeStartedAction(() =>
-		{
-			SignalBus.Instance.BoostPickableFieldChanged -= OnBoostPickableFieldChanged;
-		}, SignalBus.Priority.Low);
+	}
+	public override void _ExitTree()
+	{
+		BodyEntered -= OnBodyEntered;
+		SignalBus.Instance.BoostPickableFieldChanged -= OnBoostPickableFieldChanged;
 	}
 	public void OnBodyEntered(Node2D body)
 	{
