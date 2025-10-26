@@ -1,10 +1,11 @@
 using Godot;
 using System;
 using System.Collections;
-using System.Collections.Generic; // Make sure this is included
+using System.Collections.Generic;
 
 public partial class BaseLevel : Node2D
 {
+	[Signal] public delegate void LevelInitializedEventHandler();
     [Export] public bool TopExit = false;
     [Export] public bool BottomExit = false;
     [Export] public bool LeftExit = false;
@@ -22,17 +23,12 @@ public partial class BaseLevel : Node2D
     [Export] public bool IsEndLevel = false;
     [Export] public Player Player = null;
 
-    [Export] public float RarityWeight = 1.0f;
-    public Vector2I MapPosition = Vector2I.Left;
+	[Export] public float RarityWeight = 1.0f;
+    public Vector2I MapPosition { get; private set; } = Vector2I.Left;
+
     public override void _Ready()
     {
         SignalBus.Instance.RegisterSceneChangeStartedAction(OnSceneChangeStarted, SignalBus.Priority.Medium);
-        MapPosition = MapManager.Instance.NowMap.Position;
-        GD.Print("BaseLevel _Ready: Loading state for level at position " + MapPosition);
-        
-        FindAndProcessSavables(this, (savable) => {
-            savable.LoadState(GameData.Instance.LoadObjectState(MapPosition, savable.UniqueID));
-        });
     }
 
     public override void _ExitTree()
@@ -40,14 +36,30 @@ public partial class BaseLevel : Node2D
         SignalBus.Instance.RemoveSceneChangeStartedAction(OnSceneChangeStarted);
     }
 
-    private void OnSceneChangeStarted()
+    public void InitializeLevel(Vector2I position)
     {
-        GD.Print("BaseLevel OnSceneChangeStarted: Saving state for level at position " + MapPosition);
+        MapPosition = position;
+		GD.Print($"BaseLevel {MapPosition} initialized.");
+
 		FindAndProcessSavables(this, (savable) =>
 		{
-			GameData.Instance.SaveObjectState(MapPosition, savable.UniqueID, savable.SaveState());
+			var state = GameData.Instance.LoadObjectState(MapPosition, savable.UniqueID);
+			if (state != null)
+				savable.LoadState(state);
 		});
-		SignalBus.Instance.RemoveSceneChangeStartedAction(OnSceneChangeStarted);
+		EmitSignal(SignalName.LevelInitialized);
+    }
+
+    private void OnSceneChangeStarted()
+    {
+        GD.Print($"BaseLevel {MapPosition}: Saving state...");
+        FindAndProcessSavables(this, (savable) => {
+            var state = savable.SaveState();
+            if (state != null)
+            {
+                GameData.Instance.SaveObjectState(MapPosition, savable.UniqueID, state);
+            }
+        });
     }
 
     private void FindAndProcessSavables(Node startNode, Action<ISavable> action)

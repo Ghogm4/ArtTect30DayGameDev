@@ -11,7 +11,6 @@ public partial class YesButton : Button
 			return;
 
 		_isPressedOnce = true;
-		SignalBus.Instance.RegisterSceneChangeStartedAction(() => PlayerHealthBar.Instance.Visible = true, 0);
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerStatResetRequested);
 		MapManager.Instance.InitMaps();
 		MapManager.Instance.StartLevel();

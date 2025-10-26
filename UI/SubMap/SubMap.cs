@@ -29,7 +29,7 @@ public partial class SubMap : Control
 		MapManager.Instance.Connect(MapManager.SignalName.MapChanged, Callable.From(OnMapChanged));
 		Visible = false;
 		HighlightAnimation();
-		_subMapPanelSize = SubMapPanel.Size;
+		_subMapPanelSize = new Vector2(SubMapPanel.Size.X, SubMapPanel.Size.Y);
 	}
 	public void HighlightAnimation()
 	{
@@ -44,6 +44,7 @@ public partial class SubMap : Control
 		position.X = map.Position.X * _subMapPanelSize.X / MapALG.Instance.Width;
 		position.Y = map.Position.Y * _subMapPanelSize.Y / MapALG.Instance.Height;
 		HighlightRoom.Position = position;
+		HighlightRoom.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
 		HighlightRoom.Size = _subMapPanelSize / new Vector2(MapALG.Instance.Width, MapALG.Instance.Height);
 	}
 	public override void _Process(double delta)
@@ -62,6 +63,7 @@ public partial class SubMap : Control
 		foreach (var room in MapALG.Instance.Roomlist)
 		{
 			var roomRect = new TextureRect();
+			roomRect.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
 			_roomTextureRects[room.Position] = roomRect;
 			SubMapPanel.AddChild(roomRect);
 			roomRect.Size = roomSize;

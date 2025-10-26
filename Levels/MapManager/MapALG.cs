@@ -8,7 +8,7 @@ public partial class MapALG : Node2D
 	[Export] public int Width = 4;
 	[Export] public int Height = 3;
 	[Export] public int Depth = 4;
-	[Export] public Vector2I startPos = new Vector2I(0, 1);
+	[Export] public Vector2I startPos = new Vector2I(2, 2);
 	public static MapALG Instance { get; private set; }
 	public List<Map> Roomlist = new();
 	public List<Map> EndRooms = new();
@@ -85,6 +85,7 @@ public partial class MapALG : Node2D
 		Map startRoom = GetMapAtPosition(startPos);
 		startRoom.IsEnabled = true;
 		startRoom.RightExit = true;
+		startRoom.LeftExit = true;
 		Walk(startRoom);
 	}
 	public void Randomize(Map Map, Map fromRoom, int depth = 0)

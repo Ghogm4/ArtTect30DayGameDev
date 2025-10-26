@@ -10,6 +10,7 @@ public partial class StartMenu : Control
 		AudioManager.Instance.LoadSFX("Confirm", "res://Assets/SFX/confirm.wav");
 		AudioManager.Instance.LoadSFX("Select", "res://Assets/SFX/zijizuode/select.wav");
 		AudioManager.Instance.PlayBGM("StartBGM", 57.78f, 86.22f, 26f, 5f);
+		InGameUI.Instance.Visible = false;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -20,5 +21,7 @@ public partial class StartMenu : Control
 	public override void _ExitTree()
 	{
 		AudioManager.Instance.StopBGM(1f);
+		InGameUI.Instance.Visible = true;
+		InGameUI.Instance.GetNode<Control>("%PlayerHealthBar").Visible = true;
 	}
 }

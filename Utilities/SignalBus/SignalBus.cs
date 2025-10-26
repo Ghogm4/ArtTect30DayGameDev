@@ -36,7 +36,6 @@ public partial class SignalBus : Node
         var tuple = _onSceneChangeStartedActions.FirstOrDefault(x => x.Item2 == action);
         if (tuple != default)
             _onSceneChangeStartedActions.Remove(tuple);
-
     }
     public void RegisterSceneChangeStartedAction(Action action, Priority priority)
     {

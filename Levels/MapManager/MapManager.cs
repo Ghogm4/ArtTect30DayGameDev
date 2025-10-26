@@ -10,7 +10,7 @@ public partial class MapManager : Node2D
 	[Export] public Godot.Collections.Array<PackedScene> MapPool;
 	[Signal] public delegate void MapGeneratedEventHandler();
 	[Signal] public delegate void MapChangedEventHandler();
-	public List<Map> Maps = null;
+	public List<Map> Maps = new();
 	public List<Map> EnabledMaps = new List<Map>();
 	public List<Map> EndNodeMaps = new List<Map>();
 	public string Entrance = null;
@@ -30,9 +30,19 @@ public partial class MapManager : Node2D
 			QueueFree();
 		}
 
-		SignalBus.Instance.EntranceSignal += OnEntranceChanged;
+		SignalBus.Instance.EntranceSignal += OnEntranceEntered;
 	}
-	public async void OnEntranceChanged(string entrance)
+	private void Reset()
+	{
+		Maps = new();
+		EnabledMaps.Clear();
+		EndNodeMaps.Clear();
+		NowMap = null;
+		StartMap = null;
+		EndMap = null;
+		_isEndCreated = false;
+	}
+	public async void OnEntranceEntered(string entrance)
 	{
 		Map TargetMap = NowMap.GetMap(entrance);
 		Entrance = entrance;
@@ -41,12 +51,17 @@ public partial class MapManager : Node2D
 			GD.PrintErr("TargetMap is null.");
 			return;
 		}
-		NowMap = TargetMap;
+
 		SceneManager.Instance.ChangeScene(TargetMap.Scene);
 		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 
-		SetPlayerPosition(entrance);
+		if (GetTree().CurrentScene is BaseLevel newLevel)
+			newLevel.InitializeLevel(TargetMap.Position);
+		
 		NowMap = TargetMap;
+
+		SetPlayerPosition(entrance);
+		
 		if (!NowMap.IsDiscovered)
 			NowMap.IsDiscovered = true;
 		
@@ -107,6 +122,7 @@ public partial class MapManager : Node2D
 
 	public void InitMaps()
 	{
+		Reset();
 		if (Maps != null)
 			Maps.ForEach(map => map.IsEnabled = false);
 		
@@ -146,17 +162,23 @@ public partial class MapManager : Node2D
 		ApplyMap();
 		EmitSignal(SignalName.MapGenerated);
 	}
-	public async void StartLevel()
-	{
-		NowMap = StartMap;
-		StartMap.IsDiscovered = true;
-		EmitSignal(SignalName.MapChanged);
-		SceneManager.Instance.ChangeScene(NowMap.Scene);
-		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
-		SetPlayerPosition("Start");
-	}
-	public void ApplyMap()
-	{
+    public async void StartLevel()
+    {
+        NowMap = StartMap;
+        StartMap.IsDiscovered = true;
+        EmitSignal(SignalName.MapChanged);
+        SceneManager.Instance.ChangeScene(NowMap.Scene);
+        await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
+
+        if (GetTree().CurrentScene is BaseLevel newLevel)
+        {
+            newLevel.InitializeLevel(NowMap.Position);
+        }
+
+        SetPlayerPosition("Start");
+    }
+    public void ApplyMap()
+    {
 		var assigned = new Dictionary<Vector2I, Map>();
 
 		foreach (var room in MapALG.Instance.Roomlist)
@@ -189,7 +211,7 @@ public partial class MapManager : Node2D
 				{
 					map.TopMap = assigned[key];
 					assigned[key].BottomMap = map;
-					GD.Print("Connected ", map.Position, " top to", assigned[key].Position);
+					GD.Print("Connected ", map.Position, " top to ", assigned[key].Position);
 				}
 			}
 			if (room.BottomExit)
@@ -199,7 +221,7 @@ public partial class MapManager : Node2D
 				{
 					map.BottomMap = assigned[key];
 					assigned[key].TopMap = map;
-					GD.Print("Connected ", map.Position, " bottom to", assigned[key].Position);
+					GD.Print("Connected ", map.Position, " bottom to ", assigned[key].Position);
 				}
 			}
 			if (room.LeftExit)
@@ -209,7 +231,7 @@ public partial class MapManager : Node2D
 				{
 					map.LeftMap = assigned[key];
 					assigned[key].RightMap = map;
-					GD.Print("Connected ", map.Position, " left to", assigned[key].Position);
+					GD.Print("Connected ", map.Position, " left to ", assigned[key].Position);
 				}
 			}
 			if (room.RightExit)
@@ -219,7 +241,7 @@ public partial class MapManager : Node2D
 				{
 					map.RightMap = assigned[key];
 					assigned[key].LeftMap = map;
-					GD.Print("Connected ", map.Position, " right to", assigned[key].Position);
+					GD.Print("Connected ", map.Position, " right to ", assigned[key].Position);
 				}
 			}
 
@@ -251,15 +273,15 @@ public partial class MapManager : Node2D
 		EndMap.IsEnabled = true;
 		if (!EnabledMaps.Contains(EndMap)) EnabledMaps.Add(EndMap);
 
-		foreach (var map in EnabledMaps)
-		{
-			if (map.TopMap == node) map.TopMap = EndMap;
-			if (map.BottomMap == node) map.BottomMap = EndMap;
-			if (map.LeftMap == node) map.LeftMap = EndMap;
-			if (map.RightMap == node) map.RightMap = EndMap;
-		}
+        foreach (var map in EnabledMaps)
+        {
+            if (map.TopMap == node) map.TopMap = EndMap;
+            if (map.BottomMap == node) map.BottomMap = EndMap;
+            if (map.LeftMap == node) map.LeftMap = EndMap;
+            if (map.RightMap == node) map.RightMap = EndMap;
+        }
 
-		node.IsEnabled = false;
+        node.IsEnabled = false;
 		EnabledMaps.Remove(node);
 	}
 

@@ -56,7 +56,7 @@ public partial class ShopItem : Node2D, ISavable
 	public override async void _Ready()
 	{
 		_itemSpriteOriginalPosition = ItemSprite.Position;
-		await ToSignal(GetTree().CurrentScene, Node.SignalName.Ready);
+		await ToSignal(GetTree().CurrentScene as BaseLevel, BaseLevel.SignalName.LevelInitialized);
 		if (_isFirstEntering)
 		{
 			Refresh();

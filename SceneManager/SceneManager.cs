@@ -5,7 +5,6 @@ public partial class SceneManager : Node
 {
 	public static SceneManager Instance { get; private set; }
 	public PackedScene StartMenuScene;
-
 	public TransitionLayer Transition => GetNode<TransitionLayer>("/root/TransitionLayer");
 	public async void ChangeScene(PackedScene scene)
 	{

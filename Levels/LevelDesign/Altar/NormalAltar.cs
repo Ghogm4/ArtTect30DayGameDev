@@ -12,8 +12,9 @@ public partial class NormalAltar : Node2D, ISavable
 	private bool _isInteractable = false;
 	private bool _isPlayerNearby = false;
 	private bool _isClaimed = false;
-	public override void _Ready()
+	public override async void _Ready()
 	{
+		await ToSignal(GetTree().CurrentScene as BaseLevel, BaseLevel.SignalName.LevelInitialized);
 		LinkedEnemyWaveController?.AllWavesCompleted += () => _isInteractable = true;
 		if (!NeedToCompleteWaves)
 			_isInteractable = true;

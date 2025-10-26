@@ -1,7 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using GodotDictionary = Godot.Collections.Dictionary;
+using GDDictionary = Godot.Collections.Dictionary;
 public partial class GameData : Node
 {
     public static GameData Instance { get; private set; }
@@ -15,7 +15,7 @@ public partial class GameData : Node
     public List<Action<StatComponent, PlayerStatComponent>> PlayerAttackActions = new();
     public List<Action<PlayerStatComponent, Vector2>> PlayerOnEnemyDeathActions = new();
     public bool PlayerStatComponentInitialized = false;
-    public Dictionary<Vector2I, GodotDictionary> MapStates { get; set; } = new();
+    public Dictionary<Vector2I, GDDictionary> MapStates { get; set; } = new();
     public void Reset()
     {
         StatModifierDict.Clear();
@@ -26,26 +26,24 @@ public partial class GameData : Node
         MapStates.Clear();
     }
 
-    public GodotDictionary GetRoomState(Vector2I roomPos)
+    public GDDictionary GetRoomState(Vector2I roomPos)
     {
         if (!MapStates.ContainsKey(roomPos))
-            MapStates[roomPos] = new GodotDictionary();
+            MapStates[roomPos] = new GDDictionary();
     
         return MapStates[roomPos];
     }
-    public void SaveObjectState(Vector2I roomPos, string objectID, GodotDictionary state)
-    {
+    public void SaveObjectState(Vector2I roomPos, string objectID, GDDictionary state) =>
         GetRoomState(roomPos)[objectID] = state;
-    }
 
-    public GodotDictionary LoadObjectState(Vector2I roomPos, string objectID)
+    public GDDictionary LoadObjectState(Vector2I roomPos, string objectID)
     {
         var roomState = GetRoomState(roomPos);
         
         if (roomState.ContainsKey(objectID))
             return roomState[objectID].AsGodotDictionary();
-        
-        GD.PushError($"No saved state for objectID: {objectID} in room position: {roomPos}. Is it the first time entering this room?");
+
+        GD.PushWarning($"No saved state for objectID: {objectID} in room position: {roomPos}. Is it the first time entering this room?");
         return null;
     }
 }

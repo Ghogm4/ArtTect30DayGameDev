@@ -11,8 +11,9 @@ public partial class ExitToTitleButton : ResponsiveButton
 		SceneManager.Instance.ChangeScenePath("res://UI/StartMenu/StartMenuExclusive/StartMenu.tscn");
 		SignalBus.Instance.RegisterSceneChangeStartedAction(() =>
 		{
-			CanvasLayer playerHealthBar = GetNode<CanvasLayer>("/root/PlayerHealthBar");
+			Control playerHealthBar = GetNode<Control>("%PlayerHealthBar");
 			playerHealthBar.Visible = false;
+			_isPressedOnce = false;
 		}, SignalBus.Priority.Low);
 		_isPressedOnce = true;
 	}
