@@ -49,6 +49,7 @@ public partial class DropTable : Node2D
     [Export] public BoostDropMode DropMode = BoostDropMode.UniformRarity;
     [Export] public int MinTimesToRun = 1;
     [Export] public int MaxTimesToRun = 2;
+    [Export] public bool DoSpread = true;
     private int _timesToRun = 0;
     private int TimesToRun
     {
@@ -396,7 +397,9 @@ public partial class DropTable : Node2D
 
         GetTree().CurrentScene.CallDeferred(MethodName.AddChild, boost);
 
-        float spread = Mathf.Atan(_timesToRun) / 2;
+        float spread = 0;
+        if (DoSpread)
+            spread = Mathf.Atan(_timesToRun) / 2;
         float radian = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
         float force = 200f;
         boost.ApplyCentralImpulse(Vector2.Right.Rotated(radian) * force);

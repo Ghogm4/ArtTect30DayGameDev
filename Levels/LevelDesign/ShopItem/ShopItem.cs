@@ -85,6 +85,8 @@ public partial class ShopItem : Node2D, ISavable
 		ResetDisplayState();
 		TogglePurchase(false);
 		SetPrice();
+		if (_isPlayerNearby)
+			ToggleWhiteOutline(true);
 	}
 	private void RunItemDropTable()
 	{
@@ -120,17 +122,17 @@ public partial class ShopItem : Node2D, ISavable
 	private bool _isPlayerNearby = false;
 	public void OnBodyEntered(Node2D body)
 	{
+		_isPlayerNearby = true;
 		if (!body.IsInGroup("Player") || _isPurchased)
 			return;
 		ToggleWhiteOutline(true);
-		_isPlayerNearby = true;
 	}
 	public void OnBodyExited(Node2D body)
 	{
+		_isPlayerNearby = false;
 		if (!body.IsInGroup("Player") || _isPurchased)
 			return;
 		ToggleWhiteOutline(false);
-		_isPlayerNearby = false;
 	}
 	private int GetPlayerCoin()
 	{
@@ -184,7 +186,6 @@ public partial class ShopItem : Node2D, ISavable
 			["IsPurchased"] = _isPurchased,
 			["PurchasedTimes"] = _purchasedTimes,
 			["CurrentPrice"] = _finalPrice,
-			// 安全地使用已保存的路径，而不是访问可能已销毁的对象
 			["ItemSceneFilePath"] = _itemSceneFilePath,
 			["IsFirstEntering"] = _isFirstEntering
 		};
@@ -201,7 +202,6 @@ public partial class ShopItem : Node2D, ISavable
 			_itemSceneFilePath = (string)itemSceneFilePath;
 		if (state?.TryGetValue("IsFirstEntering", out var isFirstEntering) ?? false)
 			_isFirstEntering = (bool)isFirstEntering;
-		GD.Print($"ShopItem {UniqueID} loaded state: IsPurchased = {_isPurchased}, PurchasedTimes = {_purchasedTimes}");
 		if (_isPurchased)
 			HandleDisplayAfterPurchase();
 	}

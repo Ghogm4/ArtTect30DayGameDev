@@ -9,7 +9,19 @@ public partial class NormalAltar : Node2D, ISavable
 	[Export] public EnemyWaveController LinkedEnemyWaveController;
 	[Export] public bool NeedToCompleteWaves = true;
 	public string UniqueID => Name;
-	private bool _isInteractable = false;
+	private bool _isInteractable
+	{
+		get
+		{
+			return field;
+		}
+		set
+		{
+			field = value;
+			if (value && _isPlayerNearby && !_isClaimed)
+				ToggleWhiteOutline(true);
+		}
+	} = false;
 	private bool _isPlayerNearby = false;
 	private bool _isClaimed = false;
 	public override async void _Ready()
@@ -21,18 +33,18 @@ public partial class NormalAltar : Node2D, ISavable
 	}
 	public void OnBodyEntered(Node2D body)
 	{
+		_isPlayerNearby = true;
 		if (!body.IsInGroup("Player"))
 			return;
 		if (_isInteractable && !_isClaimed)
 			ToggleWhiteOutline(true);
-		_isPlayerNearby = true;
 	}
 	public void OnBodyExited(Node2D body)
 	{
+		_isPlayerNearby = false;
 		if (!body.IsInGroup("Player"))
 			return;
 		ToggleWhiteOutline(false);
-		_isPlayerNearby = false;
 	}
 	public override void _Process(double delta)
 	{
@@ -61,6 +73,5 @@ public partial class NormalAltar : Node2D, ISavable
 	{
 		if (state?.TryGetValue("IsClaimed", out var isClaimed) ?? false)
 			_isClaimed = (bool)isClaimed;
-		GD.Print($"NormalAltar {UniqueID} loaded state: IsClaimed = {_isClaimed}");
 	}
 }

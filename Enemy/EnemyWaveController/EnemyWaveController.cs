@@ -61,6 +61,5 @@ public partial class EnemyWaveController : Node, ISavable
 	{
 		if (state?.TryGetValue("AllWavesCompleted", out var allWavesCompleted) ?? false)
 			_allWavesCompleted = (bool)allWavesCompleted;
-		GD.Print($"EnemyWaveController {UniqueID} loaded state: AllWavesCompleted = {_allWavesCompleted}");
 	}
 }
