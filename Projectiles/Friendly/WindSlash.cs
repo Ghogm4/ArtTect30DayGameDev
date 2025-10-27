@@ -15,6 +15,7 @@ public partial class WindSlash : Projectile
 			{
 				enemy.TakeDamage(Damage);
 				PierceEnemyCount--;
+				PlayEffect();
 			}
 			if (PierceEnemyCount == 0)
 			{
@@ -28,8 +29,8 @@ public partial class WindSlash : Projectile
 		if (_isExpired) return;
 		Vector2 velocity = Velocity;
 		Position += velocity * (float)delta;
-		velocity.X = Mathf.Lerp(velocity.X, 0, 0.1f);
-		velocity.Y = Mathf.Lerp(velocity.Y, 0, 0.1f);
+		velocity.X = Mathf.Lerp(velocity.X, 0, 0.15f);
+		velocity.Y = Mathf.Lerp(velocity.Y, 0, 0.15f);
 		Velocity = velocity;
 		float tolerance = 1f;
 		if (Mathf.IsEqualApprox(Velocity.Length(), 0f, tolerance))
@@ -41,7 +42,13 @@ public partial class WindSlash : Projectile
 	private void RunExpireAnimation()
 	{
 		Tween tween = CreateTween();
-		tween.TweenProperty(this, "scale", Vector2.Zero, 0.2f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.In);
+		tween.TweenProperty(this, "scale", Vector2.Zero, 0.1f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.In);
 		tween.TweenCallback(Callable.From(QueueFree));
+	}
+	private void PlayEffect()
+	{
+		WindSlashEffect effect = ResourceLoader.Load<PackedScene>("res://Effects/WindSlashEffect.tscn").Instantiate<WindSlashEffect>();
+		GetTree().CurrentScene.AddChild(effect);
+		effect.GlobalPosition = GlobalPosition;
 	}
 }

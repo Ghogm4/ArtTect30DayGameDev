@@ -25,8 +25,9 @@ public partial class WindSlasherStatModifierComponent : StatModifierComponent
 			bool headingLeft = playerStat.GetStatValue("HeadingLeft") > 0;
 			float spread = Mathf.Pi / 20f;
 			float radianOffset = (float)GD.RandRange(-spread, spread);
+			float speedMultiplierOffset = (float)GD.RandRange(0.9f, 1f);
 			int dir = headingLeft ? -1 : 1;
-			windSlash.Velocity = dir * Vector2.Right.Rotated(radianOffset) * windSlash.BaseSpeed * projectileSpeedMultiplier;
+			windSlash.Velocity = dir * Vector2.Right.Rotated(radianOffset) * windSlash.BaseSpeed * projectileSpeedMultiplier * speedMultiplierOffset;
 			windSlash.Rotation = windSlash.Velocity.Angle();
 
 			playerStat.GetTree().CurrentScene.AddChild(windSlash);
