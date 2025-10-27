@@ -11,7 +11,6 @@ public partial class EnemyMap : Node
 	[Export] public PackedScene[] EnemyList = Array.Empty<PackedScene>();
 	private Dictionary<string, PackedScene> EnemyDict = new();
 	private int _enemyCount = 0;
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		InitDict();
@@ -51,9 +50,22 @@ public partial class EnemyMap : Node
 		}
 		probability.Run();
 	}
-
-	public void SpawnEnemy(string enemyName, Vector2 position)
+	private async Task MakeEnemySpawnHint(Vector2 position)
+    {
+        Sprite2D iconSpriteNode = new();
+		iconSpriteNode.Texture = ResourceLoader.Load<Texture2D>("res://Assets/Special Tiles/EnemySpawnIcon/EnemySpawnIcon.png");
+		iconSpriteNode.Position = position;
+		GetTree().CurrentScene.CallDeferred("add_child", iconSpriteNode);
+		Tween tween = iconSpriteNode.CreateTween();
+		tween.SetLoops(3);
+		tween.TweenProperty(iconSpriteNode, "modulate:a", 0f, 0.1f);
+		tween.TweenProperty(iconSpriteNode, "modulate:a", 1f, 0.1f);
+		await ToSignal(tween, Tween.SignalName.Finished);
+		iconSpriteNode.QueueFree();
+    }
+	public async void SpawnEnemy(string enemyName, Vector2 position)
 	{
+		await MakeEnemySpawnHint(position);
 		if (EnemyDict.ContainsKey(enemyName))
 		{
 			var enemy = EnemyDict[enemyName];
