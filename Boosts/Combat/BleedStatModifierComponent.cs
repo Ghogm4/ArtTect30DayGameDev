@@ -6,7 +6,7 @@ public partial class BleedStatModifierComponent : StatModifierComponent
     protected override void Modify(StatComponent statComponent, bool reverse = false)
     {
 		PlayerStatComponent playerStats = statComponent as PlayerStatComponent;
-		playerStats?.AttackActions.Add((StatComponent enemyStats, PlayerStatComponent ps) =>
+		playerStats?.OnHittingEnemyAction.Add((StatComponent enemyStats, PlayerStatComponent ps) =>
 		{
 			float attack = ps.GetStatValue("Attack");
 			float attackBase = ps.GetStatValue("AttackBase");

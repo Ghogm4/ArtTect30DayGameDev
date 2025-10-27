@@ -103,4 +103,5 @@ public partial class StatComponent : Node
 	public void AddBase(string statName, float value) => GetStat(statName)?.AddBase(value);
 	public void Mult(string statName, float multiplier) => GetStat(statName)?.Mult(multiplier);
 	public void AddFinal(string statName, float value) => GetStat(statName)?.AddFinal(value);
+	public void SetValue(string statName, float value) => GetStat(statName)?.SetValue(value);
 }

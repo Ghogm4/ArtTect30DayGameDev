@@ -128,7 +128,10 @@ public partial class Player_MoveControlState : State
 			}
 		}
 		if (direction != 0)
+		{
 			Storage.SetVariant("HeadingLeft", direction < 0);
+			Stats.SetValue("HeadingLeft", direction < 0 ? 1f : 0f);
+		}
 
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();

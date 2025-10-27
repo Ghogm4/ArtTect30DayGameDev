@@ -12,6 +12,7 @@ public partial class TextManager : Node
 	public TextureRect ProfileLeft;
 	public TextureRect ProfileRight;
 	public Label DialogueTextLabel;
+	public string CurrentDialogueScene = "";
 	private bool _isTextShowing = false;
 	[Serializable]
 	public class DialogueLine
@@ -45,6 +46,7 @@ public partial class TextManager : Node
 		if (_isTextShowing)
 			return;
 		Index = 0;
+		_isTextShowing = true;
 		ShowText();
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.DialogueStarted);
 	}
@@ -65,6 +67,7 @@ public partial class TextManager : Node
 		file.Close();
 		var json = JsonSerializer.Deserialize<Dictionary<string, DialogueLine[]>>(jsonText);
 		Lines = json[scene];
+		CurrentDialogueScene = scene;
 	}
 	public void RunLines(string path, string scene)
 	{
@@ -73,16 +76,22 @@ public partial class TextManager : Node
 		LoadLines(path, scene);
 		StartDialogue();
 	}
+	public void EndDialogue()
+	{
+		if (!_isTextShowing)
+			return;
+			
+		Lines = null;
+		Index = 0;
+		_isTextShowing = false;
+		TextScene.Instance.Visible = false;
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.DialogueEnded);
+	}
 	private async void ShowText()
 	{
-		if (Lines is null)
-			return;
-
-		if (Index >= Lines.Length)
+		if (!_isTextShowing || Lines is null || Index >= Lines.Length)
 		{
-			TextScene.Instance.Visible = false;
-			_isTextShowing = false;
-			SignalBus.Instance.EmitSignal(SignalBus.SignalName.DialogueEnded);
+			EndDialogue();
 			return;
 		}
 
@@ -110,13 +119,12 @@ public partial class TextManager : Node
 
 		while (true)
 		{
+			if (!_isTextShowing) return;
+
 			if (IsSkipping())
 			{
 				tween.Kill();
 				DialogueTextLabel.VisibleRatio = 1f;
-
-				while (IsSkipping())
-					await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
 				await ToSignal(GetTree().CreateTimer(0.1f), SceneTreeTimer.SignalName.Timeout);
 				break;
@@ -126,6 +134,11 @@ public partial class TextManager : Node
 				break;
 			}
 			await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+			if (Lines == null || Index >= Lines.Length)
+			{
+				EndDialogue();
+				return;
+			}
 		}
 
 		WaitAdvance();
@@ -135,19 +148,19 @@ public partial class TextManager : Node
 	{
 		while (true)
 		{
+			if (!_isTextShowing) return;
+
 			if (IsSkipping())
 			{
-				while (IsSkipping())
-					await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-
 				await ToSignal(GetTree().CreateTimer(0.1f), SceneTreeTimer.SignalName.Timeout);
 				break;
 			}
 			await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-			if (Index >= Lines.Length)
+
+			if (Lines == null || Index >= Lines.Length)
 			{
-				TextScene.Instance.Visible = false;
-				break;
+				EndDialogue();
+				return;
 			}
 		}
 		Index++;

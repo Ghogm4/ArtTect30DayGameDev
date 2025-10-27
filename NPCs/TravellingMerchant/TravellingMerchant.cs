@@ -20,6 +20,7 @@ public partial class TravellingMerchant : Node2D, ISavable
 			return;
 		_isPlayerNearby = false;
 		ToggleWhiteOutline(false);
+		TextManager.Instance.EndDialogue();
 	}
 	public override void _Process(double delta)
 	{

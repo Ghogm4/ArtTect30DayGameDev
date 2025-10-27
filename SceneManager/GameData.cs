@@ -12,15 +12,16 @@ public partial class GameData : Node
     }
     public Dictionary<string, List<StatModifierResource>> StatModifierDict = new();
     public List<IntervalTrigger> PlayerPassiveSkills = new();
-    public List<Action<StatComponent, PlayerStatComponent>> PlayerAttackActions = new();
+    public List<Action<StatComponent, PlayerStatComponent>> PlayerOnHittingEnemyActions = new();
     public List<Action<PlayerStatComponent, Vector2>> PlayerOnEnemyDeathActions = new();
+    public List<Action<PlayerStatComponent, Vector2>> PlayerOnAttackActions = new();
     public bool PlayerStatComponentInitialized = false;
     public Dictionary<Vector2I, GDDictionary> MapStates { get; set; } = new();
     public void Reset()
     {
         StatModifierDict.Clear();
         PlayerPassiveSkills.Clear();
-        PlayerAttackActions.Clear();
+        PlayerOnHittingEnemyActions.Clear();
         PlayerOnEnemyDeathActions.Clear();
         PlayerStatComponentInitialized = false;
         MapStates.Clear();

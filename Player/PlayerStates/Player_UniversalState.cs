@@ -45,13 +45,14 @@ public partial class Player_UniversalState : State
 		_maxHealth = new(Stats.GetStat("MaxHealth"));
 		_invincibilityTime = new(Stats.GetStat("InvincibilityTime"));
 	}
-	protected override void FrameUpdate(double delta)
+	private void UpdateFacingDirection()
 	{
 		bool headingLeft = Storage.GetVariant<bool>("HeadingLeft");
-		if (headingLeft)
-			_sprite.FlipH = true;
-		else
-			_sprite.FlipH = false;
+		_sprite.FlipH = headingLeft;
+	}
+	protected override void FrameUpdate(double delta)
+	{
+		UpdateFacingDirection();
 
 		if (Input.IsActionJustPressed("Use") && Stats.IsStatValueApprox("CanUseHealthPotion", 1f) && Stats.GetStatValue("HealthPotionAmount") > 0)
 			UseHealthPotion();

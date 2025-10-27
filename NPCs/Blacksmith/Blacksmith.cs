@@ -4,6 +4,7 @@ using GDDictionary = Godot.Collections.Dictionary;
 public partial class Blacksmith : Node2D, ISavable
 {
 	[Export] public AnimatedSprite2D BlacksmithSprite;
+	[Export] public DropTable FreeBoostDropTable;
 	public string UniqueID => Name;
 	private bool _isPlayerNearby = false;
 	private bool _hasTalkedBefore = false;
@@ -20,6 +21,7 @@ public partial class Blacksmith : Node2D, ISavable
 			return;
 		_isPlayerNearby = false;
 		ToggleWhiteOutline(false);
+		TextManager.Instance.EndDialogue();
 	}
 	public override void _Process(double delta)
 	{
@@ -30,7 +32,11 @@ public partial class Blacksmith : Node2D, ISavable
 			else
 				TextManager.Instance.RunLines("res://NPCs/Blacksmith/BlacksmithDialogue.json", "BlacksmithRepeat");
 
-			_hasTalkedBefore = true;
+			if (TextManager.Instance.CurrentDialogueScene == "BlacksmithFirstTime" && TextManager.Instance.Index == 4)
+			{
+				_hasTalkedBefore = true;
+				FreeBoostDropTable.Drop();
+			}
 		}
 	}
 	private void ToggleWhiteOutline(bool enabled)

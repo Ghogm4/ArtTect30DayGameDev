@@ -76,7 +76,10 @@ public partial class EnemyBase : CharacterBody2D
 	{
 		MoveAndSlide();
 	}
-
+	public void TakeDamage(float damage)
+	{
+		Stats.AddFinal("Health", -damage);
+	}
 	public void OnHealthChanged(float oldValue, float newValue)
 	{
 		if (_isDead) return;
@@ -148,7 +151,7 @@ public partial class EnemyBase : CharacterBody2D
 			if (IsInsideTree())
 			{
 				coin.Position = Position;
-				GetTree()?.CurrentScene?.AddChild(coin);
+				GetTree()?.CurrentScene?.CallDeferred(Node.MethodName.AddChild, coin);
 				coin.ApplyCentralImpulse(Vector2.Right.Rotated(direction) * force);
 			}
 		}

@@ -229,6 +229,11 @@ public partial class Stat : Resource
     public void AddBase(float value) => AddModifier(StatModifier.Factory.BaseAdd(value));
     public void Mult(float value) => AddModifier(StatModifier.Factory.Mult(value));
     public void AddFinal(float value) => AddModifier(StatModifier.Factory.FinalAdd(value));
+    public void SetValue(float value)
+    {
+        float difference = value - FinalValue;
+        AddFinal(difference);
+    }
 }
 
 public class StatLimit

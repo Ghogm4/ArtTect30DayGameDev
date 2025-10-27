@@ -15,7 +15,7 @@ public partial class NurseStatModifierComponent : StatModifierComponent
 				{
 					if (!IsInstanceValid(ps)) return;
 					Boost healthPotion = ResourceLoader.Load<PackedScene>("res://Boosts/General/HealthPotion.tscn").Instantiate<Boost>();
-					ps.GetTree()?.CurrentScene?.AddChild(healthPotion);
+					ps.GetTree()?.CurrentScene?.CallDeferred(Node.MethodName.AddChild, healthPotion);
 					healthPotion.Position = pos;
 					float spread = Mathf.Pi / 6;
 					float direction = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
