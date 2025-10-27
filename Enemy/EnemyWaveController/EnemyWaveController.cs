@@ -18,9 +18,9 @@ public partial class EnemyWaveController : Node, ISavable
     private bool _allWavesCompleted = false;
     public override async void _Ready()
     {
-        // BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
-		// if (baseLevel != null)
-		// 	await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
+        BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
+		if (baseLevel != null)
+			await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
         if (_allWavesCompleted)
             return;
         _timer = InitialDelay;
