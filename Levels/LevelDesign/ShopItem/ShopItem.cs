@@ -11,6 +11,7 @@ public partial class ShopItem : Node2D, ISavable
 	[Export] public Sprite2D DisplayBaseSprite;
 	[Export] public Label PriceTag;
 	[Export] public HBoxContainer PriceContainer;
+	[Export] public bool DebugMode = false;
 	public string UniqueID => Name;
 	private Vector2 _itemSpriteOriginalPosition;
 	private float _timeElapsed = 0f;
@@ -56,9 +57,12 @@ public partial class ShopItem : Node2D, ISavable
 	public override async void _Ready()
 	{
 		_itemSpriteOriginalPosition = ItemSprite.Position;
-		BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
-		if (baseLevel != null)
-			await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
+		if (!DebugMode)
+		{
+			BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
+			if (baseLevel != null)
+				await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
+		}
 		if (_isFirstEntering)
 		{
 			Refresh();

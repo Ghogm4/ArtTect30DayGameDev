@@ -11,6 +11,7 @@ public partial class EnemyWaveController : Node, ISavable
     [Signal] public delegate void AllWavesCompletedEventHandler();
     [Export] public float InitialDelay = 0f;
     [Export] public float TimeBetweenWaves = 2f;
+    [Export] public bool DebugMode = false;
     public string UniqueID => Name;
     private float _timer = 0f;
     private List<EnemyMap> _enemyMaps = new();
@@ -18,9 +19,12 @@ public partial class EnemyWaveController : Node, ISavable
     private bool _allWavesCompleted = false;
     public override async void _Ready()
     {
-        BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
-		if (baseLevel != null)
-			await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
+        if (!DebugMode)
+        {
+            BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
+            if (baseLevel != null)
+                await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
+        }
         if (_allWavesCompleted)
             return;
         _timer = InitialDelay;

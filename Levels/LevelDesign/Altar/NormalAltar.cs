@@ -8,6 +8,7 @@ public partial class NormalAltar : Node2D, ISavable
 	[Export] public DropTable BoostDropTable;
 	[Export] public EnemyWaveController LinkedEnemyWaveController;
 	[Export] public bool NeedToCompleteWaves = true;
+	[Export] public bool DebugMode = false;
 	public string UniqueID => Name;
 	private bool _isInteractable
 	{
@@ -26,9 +27,12 @@ public partial class NormalAltar : Node2D, ISavable
 	private bool _isClaimed = false;
 	public override async void _Ready()
 	{
-		BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
-		if (baseLevel != null)
-			await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
+		if (!DebugMode)
+		{
+			BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
+			if (baseLevel != null)
+				await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
+		}
 		LinkedEnemyWaveController?.AllWavesCompleted += () => _isInteractable = true;
 		if (!NeedToCompleteWaves)
 			_isInteractable = true;
