@@ -13,21 +13,23 @@ public partial class Refresher : Node2D, ISavable
 	private bool _isPlayerNearby = false;
 	public override async void _Ready()
 	{
-		await ToSignal(GetTree().CurrentScene as BaseLevel, BaseLevel.SignalName.LevelInitialized);
+		BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
+		if (baseLevel != null)
+			await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
 		UpdatePriceTag();
 	}
 	public void OnBodyEntered(Node2D body)
 	{
-		_isPlayerNearby = true;
 		if (!body.IsInGroup("Player"))
 			return;
+		_isPlayerNearby = true;
 		ToggleWhiteOutline(true);
 	}
 	public void OnBodyExited(Node2D body)
 	{
-		_isPlayerNearby = false;
 		if (!body.IsInGroup("Player"))
 			return;
+		_isPlayerNearby = false;
 		ToggleWhiteOutline(false);
 	}
 	private void ToggleWhiteOutline(bool enabled)

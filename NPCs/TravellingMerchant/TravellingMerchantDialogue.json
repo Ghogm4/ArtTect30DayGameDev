@@ -1,5 +1,5 @@
 {
-    "TravellingMerchant":[
+    "TravellingMerchantFirstTime":[
         {
             "Id": "1",
             "Side": "Left",
@@ -11,6 +11,14 @@
             "Side": "Left",
             "Profile": "res://Assets/NPCs/TravellingMerchantPortrait.png",
             "Text": "Offer me your shiny coins, and I shall provide you with treasures untold."
+        }
+    ],
+    "TravellingMerchantRepeat":[
+        {
+            "Id": "1",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/TravellingMerchantPortrait.png",
+            "Text": "Willing to trade again, are we?"
         }
     ]
 }

@@ -55,8 +55,9 @@ public partial class ShopItem : Node2D, ISavable
 	private int _finalPrice = 0;
 	public override async void _Ready()
 	{
-		_itemSpriteOriginalPosition = ItemSprite.Position;
-		await ToSignal(GetTree().CurrentScene as BaseLevel, BaseLevel.SignalName.LevelInitialized);
+		BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
+		if (baseLevel != null)
+			await ToSignal(baseLevel, BaseLevel.SignalName.LevelInitialized);
 		if (_isFirstEntering)
 		{
 			Refresh();
@@ -122,17 +123,19 @@ public partial class ShopItem : Node2D, ISavable
 	private bool _isPlayerNearby = false;
 	public void OnBodyEntered(Node2D body)
 	{
-		_isPlayerNearby = true;
-		if (!body.IsInGroup("Player") || _isPurchased)
+		if (!body.IsInGroup("Player"))
 			return;
-		ToggleWhiteOutline(true);
+		_isPlayerNearby = true;
+		if (!_isPurchased)
+			ToggleWhiteOutline(true);
 	}
 	public void OnBodyExited(Node2D body)
 	{
-		_isPlayerNearby = false;
-		if (!body.IsInGroup("Player") || _isPurchased)
+		if (!body.IsInGroup("Player"))
 			return;
-		ToggleWhiteOutline(false);
+		_isPlayerNearby = false;
+		if (!_isPurchased)
+			ToggleWhiteOutline(false);
 	}
 	private int GetPlayerCoin()
 	{

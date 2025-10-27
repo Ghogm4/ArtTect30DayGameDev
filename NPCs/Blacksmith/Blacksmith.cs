@@ -1,9 +1,9 @@
 using Godot;
 using System;
 using GDDictionary = Godot.Collections.Dictionary;
-public partial class TravellingMerchant : Node2D, ISavable
+public partial class Blacksmith : Node2D, ISavable
 {
-	[Export] public AnimatedSprite2D MerchantSprite;
+	[Export] public AnimatedSprite2D BlacksmithSprite;
 	public string UniqueID => Name;
 	private bool _isPlayerNearby = false;
 	private bool _hasTalkedBefore = false;
@@ -26,16 +26,16 @@ public partial class TravellingMerchant : Node2D, ISavable
 		if (_isPlayerNearby && Input.IsActionJustPressed("Interact"))
 		{
 			if (!_hasTalkedBefore)
-				TextManager.Instance.RunLines("res://NPCs/TravellingMerchant/TravellingMerchantDialogue.json", "TravellingMerchantFirstTime");
+				TextManager.Instance.RunLines("res://NPCs/Blacksmith/BlacksmithDialogue.json", "BlacksmithFirstTime");
 			else
-				TextManager.Instance.RunLines("res://NPCs/TravellingMerchant/TravellingMerchantDialogue.json", "TravellingMerchantRepeat");
+				TextManager.Instance.RunLines("res://NPCs/Blacksmith/BlacksmithDialogue.json", "BlacksmithRepeat");
 
 			_hasTalkedBefore = true;
 		}
 	}
 	private void ToggleWhiteOutline(bool enabled)
 	{
-		ShaderMaterial material = MerchantSprite.Material as ShaderMaterial;
+		ShaderMaterial material = BlacksmithSprite.Material as ShaderMaterial;
 		material.SetShaderParameter("outline_enabled", enabled);
 	}
 	public GDDictionary SaveState()

@@ -5,7 +5,6 @@ public partial class TestText : Node2D
 {
 	public override void _Ready()
 	{
-		TextManager.Instance.LoadLines("res://TextManager/test.json", "scene1");
-		TextManager.Instance.StartDialogue();
+		TextManager.Instance.RunLines("res://TextManager/test.json", "scene1");
 	}
 }

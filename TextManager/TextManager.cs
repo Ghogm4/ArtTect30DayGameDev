@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 public partial class TextManager : Node
 {
 	public static TextManager Instance { get; private set; }
-
 	public Control DialoguePanel;
 	public TextureRect ProfileLeft;
 	public TextureRect ProfileRight;
@@ -41,12 +40,13 @@ public partial class TextManager : Node
 
 		GetTextSceneNodes();
 	}
-	public void StartDialogue()
+	private void StartDialogue()
 	{
 		if (_isTextShowing)
 			return;
 		Index = 0;
 		ShowText();
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.DialogueStarted);
 	}
 	private void GetTextSceneNodes()
 	{
@@ -56,15 +56,23 @@ public partial class TextManager : Node
 		DialogueTextLabel = textScene.GetNode<Label>("%DialogueTextLabel");
 		DialoguePanel = textScene.GetNode<Control>("%DialoguePanel");
 	}
-	public void LoadLines(string path, string scene)
+	private void LoadLines(string path, string scene)
 	{
+		if (_isTextShowing)
+			return;
 		var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
 		var jsonText = file.GetAsText();
 		file.Close();
 		var json = JsonSerializer.Deserialize<Dictionary<string, DialogueLine[]>>(jsonText);
 		Lines = json[scene];
 	}
-
+	public void RunLines(string path, string scene)
+	{
+		if (_isTextShowing)
+			return;
+		LoadLines(path, scene);
+		StartDialogue();
+	}
 	private async void ShowText()
 	{
 		if (Lines is null)
@@ -74,6 +82,7 @@ public partial class TextManager : Node
 		{
 			TextScene.Instance.Visible = false;
 			_isTextShowing = false;
+			SignalBus.Instance.EmitSignal(SignalBus.SignalName.DialogueEnded);
 			return;
 		}
 
@@ -83,29 +92,31 @@ public partial class TextManager : Node
 		Tween tween = CreateTween();
 		if (line.Side == "Left")
 		{
+			ProfileLeft.Texture = ResourceLoader.Load<Texture2D>(line.Profile);
 			ProfileLeft.Visible = true;
 			ProfileRight.Visible = false;
 		}
 		else if (line.Side == "Right")
 		{
+			ProfileRight.Texture = ResourceLoader.Load<Texture2D>(line.Profile);
 			ProfileRight.Visible = true;
 			ProfileLeft.Visible = false;
 		}
 
-		ProfileLeft.Texture = ResourceLoader.Load<Texture2D>(line.Profile);
 		DialogueTextLabel.Text = line.Text;
 		DialogueTextLabel.VisibleRatio = 0f;
-		tween.TweenProperty(DialogueTextLabel, "visible_ratio", 1f, line.Text.Length * 0.035f);
+		float durationFactor = 0.035f;
+		tween.TweenProperty(DialogueTextLabel, "visible_ratio", 1f, line.Text.Length * durationFactor);
 
 		while (true)
 		{
-			if (Input.IsActionJustPressed("ui_accept") || Input.IsMouseButtonPressed(MouseButton.Left))
+			if (IsSkipping())
 			{
 				tween.Kill();
 				DialogueTextLabel.VisibleRatio = 1f;
 
-				while (Input.IsActionPressed("ui_accept") || Input.IsMouseButtonPressed(MouseButton.Left))
-					await ToSignal(GetTree(), "process_frame");
+				while (IsSkipping())
+					await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
 				await ToSignal(GetTree().CreateTimer(0.1f), SceneTreeTimer.SignalName.Timeout);
 				break;
@@ -124,9 +135,9 @@ public partial class TextManager : Node
 	{
 		while (true)
 		{
-			if (Input.IsActionJustPressed("ui_accept") || Input.IsMouseButtonPressed(MouseButton.Left))
+			if (IsSkipping())
 			{
-				while (Input.IsActionPressed("ui_accept") || Input.IsMouseButtonPressed(MouseButton.Left))
+				while (IsSkipping())
 					await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
 				await ToSignal(GetTree().CreateTimer(0.1f), SceneTreeTimer.SignalName.Timeout);
@@ -141,5 +152,9 @@ public partial class TextManager : Node
 		}
 		Index++;
 		ShowText();
+	}
+	private bool IsSkipping()
+	{
+		return Input.IsMouseButtonPressed(MouseButton.Left) || Input.IsActionJustPressed("Interact");
 	}
 }

@@ -9,9 +9,23 @@ public partial class BoostOnObtainDisplay : Control
 	[Export] public Timer DisplayTimer;
 	public const float DisplayDuration = 3f;
 	private Tween tween;
-    public override void _Ready()
-    {
+	private bool _duringDialogue = false;
+	public override void _Ready()
+	{
 		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerBoostPickedUp, Callable.From<BoostInfo, bool>(DisplayBoost));
+		SignalBus.Instance.Connect(SignalBus.SignalName.DialogueStarted, Callable.From(() =>
+		{
+			_duringDialogue = true;
+			tween?.Kill();
+			Modulate = new(1, 1, 1, 0);
+			Visible = false;
+		}));
+		SignalBus.Instance.Connect(SignalBus.SignalName.DialogueEnded, Callable.From(() =>
+		{
+			_duringDialogue = false;
+			Modulate = new(1, 1, 1, 0);
+			Visible = true;
+		}));
 		DisplayTimer.Timeout += () =>
 		{
 			tween?.Kill();
@@ -21,11 +35,11 @@ public partial class BoostOnObtainDisplay : Control
 				.SetEase(Tween.EaseType.InOut);
 			tween.TweenCallback(Callable.From(() => Visible = false));
 		};
-    }
+	}
 
 	public void DisplayBoost(BoostInfo info, bool needDisplay)
 	{
-		if (!needDisplay)
+		if (!needDisplay || _duringDialogue)
 			return;
 		Modulate = new Color(1, 1, 1, 1);
 		tween?.Kill();
