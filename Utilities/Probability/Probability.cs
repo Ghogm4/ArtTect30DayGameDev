@@ -65,4 +65,21 @@ public partial class Probability : RefCounted
 		RunUniform(items.Select(item => new Action(() => chosenItem = item)).ToArray());
 		return chosenItem;
 	}
+	public static T RunWeightedChoose<T>(T[] items, float[] weights)
+	{
+		if (items.Length == 0)
+		{
+			GD.PushWarning("RunWeightedChoose: No items provided.");
+			return default;
+		}
+		if (items.Length != weights.Length)
+		{
+			GD.PushError("RunWeightedChoose: Items and weights length mismatch.");
+			return default;
+		}
+		T chosenItem = default;
+		var probableActions = items.Zip(weights, (item, weight) => new Tuple<float, Action>(weight, new Action(() => chosenItem = item))).ToArray();
+		Run(probableActions);
+		return chosenItem;
+	}
 }
