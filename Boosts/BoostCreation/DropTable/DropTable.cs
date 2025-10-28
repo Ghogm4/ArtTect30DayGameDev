@@ -42,6 +42,8 @@ public partial class DropTable : Node2D
     };
 
     public static HashSet<string> ObtainedOneTimeBoosts = new();
+    // 用于在单次 Drop() 调用中记录已生成的“一次性”物品
+    private HashSet<string> _temporaryObtainedOneTimeBoosts = new();
 
     public static void ResetObtainedOneTimeBoosts() => ObtainedOneTimeBoosts.Clear();
 
@@ -57,7 +59,6 @@ public partial class DropTable : Node2D
         {
             int denominator = (int)Mathf.Pow(2, MaxTimesToRun) - 1;
             int result = MinTimesToRun;
-            GD.Print(result);
             using Probability pb = new();
             for (int i = MinTimesToRun; i <= MaxTimesToRun; i++)
             {
@@ -245,8 +246,15 @@ public partial class DropTable : Node2D
         if (SkipObtainedOneTimeBoosts && boost.Info.IsOneTimeOnly)
         {
             string boostPath = boost.SceneFilePath;
-            if (!string.IsNullOrEmpty(boostPath) && ObtainedOneTimeBoosts.Contains(boostPath))
-                return false;
+            if (!string.IsNullOrEmpty(boostPath))
+            {
+                // 检查永久列表
+                if (ObtainedOneTimeBoosts.Contains(boostPath))
+                    return false;
+                // 检查本次掉落的临时列表
+                if (_temporaryObtainedOneTimeBoosts.Contains(boostPath))
+                    return false;
+            }
         }
 
         bool rarityEnabled = boost.Info.Rarity switch
@@ -276,12 +284,14 @@ public partial class DropTable : Node2D
     {
         _probability.Register(probability, () =>
         {
-            if (SkipObtainedOneTimeBoosts)
+            var testBoost = scene.Instantiate<Boost>();
+            if (SkipObtainedOneTimeBoosts && testBoost.Info.IsOneTimeOnly)
             {
-                var testBoost = scene.Instantiate<Boost>();
-                bool isOneTimeOnly = testBoost.Info.IsOneTimeOnly;
-                testBoost.QueueFree();
+                _temporaryObtainedOneTimeBoosts.Add(scene.ResourcePath);
+                GD.Print($"Registered one-time boost in temporary one-time boost list: {scene.ResourcePath}");
             }
+            testBoost.QueueFree();
+            
             AddBoostFromPackedSceneToLevel(scene);
         });
     }
@@ -426,6 +436,9 @@ public partial class DropTable : Node2D
     }
     public void Drop()
     {
+        // 在每次掉落开始时，清空临时记录
+        _temporaryObtainedOneTimeBoosts.Clear();
+
         _timesToRun = TimesToRun;
         int remainingDrops = _timesToRun;
         int maxAttempts = _timesToRun * 3;

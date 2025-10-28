@@ -32,6 +32,10 @@ public partial class Boost : RigidBody2D
         int amount = Info.Amount;
         for (int i = 0; i < amount; i++)
             _modifierComponent.ModifyStatComponent(statComponent);
-        DropTable.ObtainedOneTimeBoosts.Add(SceneFilePath);
+        if (!DropTable.ObtainedOneTimeBoosts.Contains(SceneFilePath) && Info.IsOneTimeOnly)
+        {
+            DropTable.ObtainedOneTimeBoosts.Add(SceneFilePath);
+            GD.Print($"Registered one-time boost in global one-time boost list: {SceneFilePath}");
+        }
     }
 }

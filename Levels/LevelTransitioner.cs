@@ -13,7 +13,7 @@ public partial class LevelTransitioner : Area2D
 		{
 			if (body is Player && !_isEmitted)
 			{
-				GD.Print(Entrance);
+				GD.Print($"Entrance: {Entrance}");
 				SignalBus.Instance.EmitSignal(SignalBus.SignalName.EntranceSignal, Entrance);
 				_isEmitted = true;
 			}

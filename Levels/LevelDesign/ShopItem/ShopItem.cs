@@ -67,7 +67,6 @@ public partial class ShopItem : Node2D, ISavable
 		{
 			Refresh();
 			_isFirstEntering = false;
-			GD.Print($"ShopItem {UniqueID} is first entering, performed initial refresh.");
 		}
 		else if (!_isPurchased && !string.IsNullOrEmpty(_itemSceneFilePath))
 		{
