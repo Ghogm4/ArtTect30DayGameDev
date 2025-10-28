@@ -76,11 +76,11 @@ public partial class EnemyBase : CharacterBody2D
 	{
 		MoveAndSlide();
 	}
-	public void TakeDamage(float damage)
+	public virtual void TakeDamage(float damage)
 	{
 		Stats.AddFinal("Health", -damage);
 	}
-	public void OnHealthChanged(float oldValue, float newValue)
+	private void OnHealthChanged(float oldValue, float newValue)
 	{
 		if (_isDead) return;
 		if (newValue < oldValue)
@@ -91,7 +91,7 @@ public partial class EnemyBase : CharacterBody2D
 				FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
 				GetTree()?.CurrentScene?.AddChild(Text);
 				Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-5, 5), GD.RandRange(-30, -15));
-				Text.display((int)(oldValue - newValue));
+				Text.Display((int)(oldValue - newValue));
 			}
 		}
 		if (newValue <= 0)
@@ -173,4 +173,8 @@ public partial class EnemyBase : CharacterBody2D
 			0.3f
 		).SetTrans(Tween.TransitionType.Linear).SetEase(Tween.EaseType.InOut);
 	}
+	public void SendDamageRequest(float damage)
+    {
+        SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, damage, Callable.From<Player>(CustomBehaviour));
+    }
 }

@@ -97,7 +97,7 @@ public partial class GreenSlime_MoveControlState : State
 
 	public void Attack()
 	{
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, (float)_damage, Callable.From<Player>(_enemy.CustomBehaviour));
+		_enemy.SendDamageRequest((float)_damage);
 	}
 	
 }

@@ -34,15 +34,21 @@ public partial class Player_AttackUniversalState : State
 	}
 	public void Attack()
 	{
+		InvokeOnAttackActions();
+		InvokeOnHittingEnemyActions();
+	}
+	private void InvokeOnAttackActions()
+	{
 		PlayerStatComponent playerStats = Stats as PlayerStatComponent;
 		foreach (var onAttackAction in playerStats.OnAttackActions)
 			onAttackAction?.Invoke(playerStats, _player.GlobalPosition);
+	}
+	private void InvokeOnHittingEnemyActions()
+	{
+		PlayerStatComponent playerStats = Stats as PlayerStatComponent;
 		foreach (var body in _attackArea.GetOverlappingBodies())
 			if (body is EnemyBase enemy)
-			{
-				StatComponent enemyStats = enemy.GetNode<StatComponent>("StatComponent");
 				foreach (var onHittingEnemyAction in playerStats.OnHittingEnemyAction)
-					onHittingEnemyAction?.Invoke(enemyStats, playerStats);
-			}
+					onHittingEnemyAction?.Invoke(enemy, playerStats);
 	}
 }

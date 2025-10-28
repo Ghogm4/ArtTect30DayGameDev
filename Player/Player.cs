@@ -3,6 +3,7 @@ using System;
 
 public partial class Player : CharacterBody2D
 {
+	[Export] public PlayerStatComponent PlayerStats = null;
 	public override void _Ready()
 	{
 		AudioManager.Instance.LoadSFX("Run", "res://Assets/SFX/zijizuode/foot2.mp3");
@@ -11,5 +12,9 @@ public partial class Player : CharacterBody2D
 		AudioManager.Instance.LoadSFX("Attack1", "res://Assets/SFX/zijizuode/blade1.mp3");
 		AudioManager.Instance.LoadSFX("Attack2", "res://Assets/SFX/zijizuode/blade2.mp3");
 		AudioManager.Instance.LoadSFX("Attack3", "res://Assets/SFX/zijizuode/blade3.mp3");
+	}
+	public void TakeDamage(float damage)
+	{
+		PlayerStats.AddFinal("Health", -damage);
 	}
 }

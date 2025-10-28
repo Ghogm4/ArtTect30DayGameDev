@@ -3,9 +3,11 @@ using System;
 using System.Collections.Generic;
 public partial class PlayerStatComponent : StatComponent
 {
-    public List<Action<StatComponent, PlayerStatComponent>> OnHittingEnemyAction = new();
+    public List<Action<EnemyBase, PlayerStatComponent>> OnHittingEnemyAction = new();
     public List<IntervalTrigger> PassiveSkills = new();
+    // Vector2 is the position of the enemy when it dies
     public List<Action<PlayerStatComponent, Vector2>> OnEnemyDeathActions = new();
+    // Vector2 is the position of the player when attacking
     public List<Action<PlayerStatComponent, Vector2>> OnAttackActions = new();
     private ref bool _initialized => ref GameData.Instance.PlayerStatComponentInitialized;
     public void InitializeOnce()
@@ -34,7 +36,7 @@ public partial class PlayerStatComponent : StatComponent
     }
     private void InitializeDefaultAttackAction()
     {
-        Action<StatComponent, PlayerStatComponent> initialAttackAction = (component, playerStats) =>
+        Action<EnemyBase, PlayerStatComponent> initialAttackAction = (enemy, playerStats) =>
         {
             float minDamageMultiplier = playerStats.GetStatValue("MinDamageMultiplier");
             float maxDamageMultiplier = playerStats.GetStatValue("MaxDamageMultiplier");
@@ -54,7 +56,7 @@ public partial class PlayerStatComponent : StatComponent
             float attackMult = playerStats.GetStatValue("AttackMult");
             float attackFinal = playerStats.GetStatValue("AttackFinal");
             float resultDamage = ((attack + attackBase) * attackMult + attackFinal) * resultDamageMultiplier * (resultCritDamage / 100f);
-            component.GetStat("Health").AddFinal(-resultDamage);
+            enemy.TakeDamage(resultDamage);
         };
         OnHittingEnemyAction.Add(initialAttackAction);
     }

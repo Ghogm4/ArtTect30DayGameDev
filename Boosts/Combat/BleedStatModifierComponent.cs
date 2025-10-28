@@ -6,7 +6,7 @@ public partial class BleedStatModifierComponent : StatModifierComponent
     protected override void Modify(StatComponent statComponent, bool reverse = false)
     {
 		PlayerStatComponent playerStats = statComponent as PlayerStatComponent;
-		playerStats?.OnHittingEnemyAction.Add((StatComponent enemyStats, PlayerStatComponent ps) =>
+		playerStats?.OnHittingEnemyAction.Add((EnemyBase enemy, PlayerStatComponent ps) =>
 		{
 			float attack = ps.GetStatValue("Attack");
 			float attackBase = ps.GetStatValue("AttackBase");
@@ -18,8 +18,8 @@ public partial class BleedStatModifierComponent : StatModifierComponent
 			float bleedInterval = ps.GetStatValue("BleedInterval");
 			Action applyBleed = () =>
 			{
-				if (IsInstanceValid(enemyStats))
-					enemyStats.GetStat("Health").AddFinal(-bleedDamage);
+				if (IsInstanceValid(enemy))
+					enemy.TakeDamage(bleedDamage);
 			};
 			IntervalTrigger bleedTrigger = new(0, bleedInterval, bleedDuration, false, applyBleed);
 			IntervalTriggerTicker.Instance.RegisterTrigger(bleedTrigger);

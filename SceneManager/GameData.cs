@@ -11,8 +11,8 @@ public partial class GameData : Node
         SignalBus.Instance.PlayerStatResetRequested += Reset;
     }
     public Dictionary<string, List<StatModifierResource>> StatModifierDict = new();
+    public List<Action<EnemyBase, PlayerStatComponent>> PlayerOnHittingEnemyActions = new();
     public List<IntervalTrigger> PlayerPassiveSkills = new();
-    public List<Action<StatComponent, PlayerStatComponent>> PlayerOnHittingEnemyActions = new();
     public List<Action<PlayerStatComponent, Vector2>> PlayerOnEnemyDeathActions = new();
     public List<Action<PlayerStatComponent, Vector2>> PlayerOnAttackActions = new();
     public bool PlayerStatComponentInitialized = false;

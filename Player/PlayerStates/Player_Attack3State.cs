@@ -8,17 +8,16 @@ public partial class Player_Attack3State : State
 	protected override void ReadyBehavior()
 	{
 		_animationPlayer = Storage.GetNode<AnimationPlayer>("AnimationPlayer");
-		_animationPlayer.AnimationFinished += OnAnimationFinished;
 	}
 	protected override void Enter()
 	{
 		_animationPlayer.Play("Attack3", -1, AttackSpeed);
-
 		AudioManager.Instance.PlaySFX("Attack3");
+		_animationPlayer.AnimationFinished += OnAnimationFinished;
 	}
-	private void OnAnimationFinished(StringName s)
+	protected override void Exit()
 	{
 		_animationPlayer.AnimationFinished -= OnAnimationFinished;
-		AskTransit("Idle");
 	}
+	private void OnAnimationFinished(StringName s) => AskTransit("Idle");
 }

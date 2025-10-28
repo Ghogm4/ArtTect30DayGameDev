@@ -20,7 +20,7 @@ public partial class FloatingText : Node2D
 	{
 	}
 
-	public void display(float damage)
+	public void Display(float damage)
 	{
 		if (position_tween != null && position_tween.IsRunning())
 		{

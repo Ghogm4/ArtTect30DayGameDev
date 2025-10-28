@@ -185,7 +185,7 @@ public partial class Bird_MoveControlState : State
         {
             if (body is Player player)
             {
-                SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, (float)_damage, Callable.From<Player>(_enemy.CustomBehaviour));
+                _enemy.SendDamageRequest((float)_damage);
                 _attacked = true;
             }
         }
