@@ -55,7 +55,9 @@ public partial class EnemyMap : Node
         Sprite2D iconSpriteNode = new();
 		iconSpriteNode.Texture = ResourceLoader.Load<Texture2D>("res://Assets/Special Tiles/EnemySpawnIcon/EnemySpawnIcon.png");
 		iconSpriteNode.Position = position;
-		GetTree().CurrentScene.CallDeferred("add_child", iconSpriteNode);
+		GetTree().CurrentScene.CallDeferred(Node.MethodName.AddChild, iconSpriteNode);
+		float scaleFactor = 0.5f;
+		iconSpriteNode.Scale *= scaleFactor;
 		Tween tween = iconSpriteNode.CreateTween();
 		tween.SetLoops(3);
 		tween.TweenProperty(iconSpriteNode, "modulate:a", 0f, 0.1f);
@@ -72,7 +74,7 @@ public partial class EnemyMap : Node
 			var enemyInstance = enemy.Instantiate<EnemyBase>();
 			enemyInstance.Died += OnEnemyDied;
 			enemyInstance.Position = position;
-			GetTree().CurrentScene.CallDeferred("add_child", enemyInstance);
+			GetTree().CurrentScene.CallDeferred(Node.MethodName.AddChild, enemyInstance);
 		}
 		else
 		{
