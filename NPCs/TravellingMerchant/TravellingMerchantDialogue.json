@@ -4,13 +4,16 @@
             "Id": "1",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/TravellingMerchantPortrait.png",
-            "Text": "Greetings, traveller."
+            "Text": "Greetings, traveller.",
+            "SpeakerName": "Travelling Merchant"
+
         },
         {
             "Id": "2",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/TravellingMerchantPortrait.png",
-            "Text": "Offer me your shiny coins, and I shall provide you with treasures untold."
+            "Text": "Offer me your shiny coins, and I shall provide you with treasures untold.",
+            "SpeakerName": "Travelling Merchant"
         }
     ],
     "TravellingMerchantRepeat":[
@@ -18,7 +21,8 @@
             "Id": "1",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/TravellingMerchantPortrait.png",
-            "Text": "Willing to trade again, are we?"
+            "Text": "Willing to trade again, are we?",
+            "SpeakerName": "Travelling Merchant"
         }
     ]
 }

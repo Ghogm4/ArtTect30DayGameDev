@@ -4,37 +4,43 @@
             "Id": "1",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/BlacksmithPortrait.png",
-            "Text": "You must be new around here. Maybe you are appointed by our King to handle the Void Crisis?"
+            "Text": "You must be new around here. Maybe you are appointed by our King to handle the Void Crisis?",
+            "SpeakerName": "Blacksmith"
         },
         {
             "Id": "2",
             "Side": "Right",
             "Profile": "res://Assets/PlayerSpriteSheet/AdventurerPortrait.png",
-            "Text": "Yes. It looks like a tough job."
+            "Text": "Yes. It looks like a tough job.",
+            "SpeakerName": "Adventurer"
         },
         {
             "Id": "3",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/BlacksmithPortrait.png",
-            "Text": "Heh. Tough indeed. You'll need good equipment to survive out there."
+            "Text": "Heh. Tough indeed. You'll need good equipment to survive out there.",
+            "SpeakerName": "Blacksmith"
         },
         {
             "Id": "4",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/BlacksmithPortrait.png",
-            "Text": "Feel free to browse my wares. I have the finest weapons and armors in the kingdom!"
+            "Text": "Feel free to browse my wares. I have the finest weapons and armors in the kingdom!",
+            "SpeakerName": "Blacksmith"
         },
         {
             "Id": "5",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/BlacksmithPortrait.png",
-            "Text": "Also, I have some special items that might help you on your journey."
+            "Text": "Also, I have some special items that might help you on your journey.",
+            "SpeakerName": "Blacksmith"
         },
         {
             "Id": "6",
             "Side": "Right",
             "Profile": "res://Assets/PlayerSpriteSheet/AdventurerPortrait.png",
-            "Text": "That's of great help! Thank you!"
+            "Text": "That's of great help! Thank you!",
+            "SpeakerName": "Adventurer"
         }
     ],
     "BlacksmithRepeat":[
@@ -42,13 +48,15 @@
             "Id": "1",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/BlacksmithPortrait.png",
-            "Text": "Back for more, eh?"
+            "Text": "Back for more, eh?",
+            "SpeakerName": "Blacksmith"
         },
         {
             "Id": "2",
             "Side": "Left",
             "Profile": "res://Assets/NPCs/BlacksmithPortrait.png",
-            "Text": "Spend your coins wisely!"
+            "Text": "Spend your coins wisely!",
+            "SpeakerName": "Blacksmith"
         }
     ]
 }

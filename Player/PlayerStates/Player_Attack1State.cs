@@ -17,7 +17,7 @@ public partial class Player_Attack1State : State
 	{
 		_animationPlayer.Play("Attack1", -1, AttackSpeed);
 		_attack1ComboTimer.Start();
-
+		_animationPlayer.AnimationFinished += OnAnimationFinished;
 		if (PreviousState != null && PreviousState.Name == "Run")
 			AudioManager.Instance.StopSFX("Run");
 		AudioManager.Instance.PlaySFX("Attack1");
@@ -33,4 +33,9 @@ public partial class Player_Attack1State : State
 		_attack1ComboTimer.Stop();
 	}
 	private void OnAttack1ComboTimerTimeout() => _canCombo = true;
+	private void OnAnimationFinished(StringName s)
+	{
+		_animationPlayer.AnimationFinished -= OnAnimationFinished;
+		AskTransit("Idle");
+	}
 }

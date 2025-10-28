@@ -10,6 +10,7 @@ public partial class Player_Attack2State : State
 	protected override void ReadyBehavior()
 	{
 		_animationPlayer = Storage.GetNode<AnimationPlayer>("AnimationPlayer");
+		_animationPlayer.AnimationFinished += OnAnimationFinished;
 		_attack2ComboTimer.WaitTime /= AttackSpeed;
 		_attack2ComboTimer.Timeout += OnAttack2ComboTimerTimeout;
 	}
@@ -31,4 +32,9 @@ public partial class Player_Attack2State : State
 		_attack2ComboTimer.Stop();
 	}
 	private void OnAttack2ComboTimerTimeout() => _canCombo = true;
+	private void OnAnimationFinished(StringName s)
+	{
+		_animationPlayer.AnimationFinished -= OnAnimationFinished;
+		AskTransit("Idle");
+	}
 }
