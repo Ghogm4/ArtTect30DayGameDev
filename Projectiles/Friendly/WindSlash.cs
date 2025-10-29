@@ -3,21 +3,16 @@ using System;
 
 public partial class WindSlash : Projectile
 {
+	[Export] public int PierceEnemyCount = 2;
+	[Export] public Area2D ExpireArea = null;
 	public Vector2 Velocity = Vector2.Zero;
 	public float Damage = 0;
 	private bool _isExpired = false;
 	protected override void ReadyBehavior()
 	{
-		Hitbox.BodyEntered += body =>
+		ExpireArea.BodyEntered += (body) =>
 		{
-			if (_isExpired) return;
-			if (body is EnemyBase enemy)
-			{
-				enemy.TakeDamage(Damage);
-				PierceEnemyCount--;
-				PlayEffect();
-			}
-			if (PierceEnemyCount == 0)
+			if (body is TileMapLayer || (body.Get("collision_layer").AsInt32() & 1) == 1)
 			{
 				_isExpired = true;
 				RunExpireAnimation();
@@ -34,6 +29,22 @@ public partial class WindSlash : Projectile
 		Velocity = velocity;
 		float tolerance = 1f;
 		if (Mathf.IsEqualApprox(Velocity.Length(), 0f, tolerance))
+		{
+			_isExpired = true;
+			RunExpireAnimation();
+		}
+	}
+	protected override void HitBehavior(Node2D body)
+	{
+		GD.Print("Hit body: " + body.Name);
+		if (_isExpired) return;
+		if (body is EnemyBase enemy)
+		{
+			enemy.TakeDamage(Damage);
+			PierceEnemyCount--;
+			PlayEffect();
+		}
+		if (PierceEnemyCount == 0)
 		{
 			_isExpired = true;
 			RunExpireAnimation();

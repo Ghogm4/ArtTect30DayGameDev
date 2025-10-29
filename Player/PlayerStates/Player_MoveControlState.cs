@@ -8,6 +8,7 @@ public partial class Player_MoveControlState : State
 	[Export] private Timer _jumpBufferTimer = null;
 	[Export] private Timer _coyoteTimer = null;
 	[Export] private Timer _shortJumpTimer = null;
+	[Export] private Timer _platformPassThroughTimer = null;
 	private const float Acceleration = 25.0f;
 	private const float Deceleration = 25.0f;
 	
@@ -44,6 +45,7 @@ public partial class Player_MoveControlState : State
 			CanCoyoteTimerStart = false;
 		};
 		_jumpBufferTimer.Timeout += () => _willJump = false;
+		_platformPassThroughTimer.Timeout += () => _player.SetCollisionMaskValue(5, true);
 		ResetJumps();
 	}
 	protected override void PhysicsUpdate(double delta)
@@ -68,7 +70,7 @@ public partial class Player_MoveControlState : State
 			_wasOnFloor = false;
 		}
 
-		if (Input.IsActionPressed("Down") && Input.IsActionJustPressed("Jump") && _isOnFloor)
+		if (Input.IsActionPressed("Down") && Input.IsActionJustPressed("Jump"))
 			PassThroughPlatform();
 		
 		if (!Input.IsActionPressed("Down") &&
@@ -136,11 +138,10 @@ public partial class Player_MoveControlState : State
 		_player.Velocity = velocity;
 		_player.MoveAndSlide();
 	}
-	private async void PassThroughPlatform()
+	private void PassThroughPlatform()
 	{
 		_player.SetCollisionMaskValue(5, false);
-		await ToSignal(GetTree().CreateTimer(0.1f), "timeout");
-		_player.SetCollisionMaskValue(5, true);
+		_platformPassThroughTimer.Start(0.2f);
 	}
 	protected override void Exit()
 	{

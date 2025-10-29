@@ -99,6 +99,8 @@ public partial class Player_UniversalState : State
 
 	public void OnPlayerHit(int damage, Callable customBehavior)
 	{
+		if (_isInvincible)
+			return;
 		int remainingDamage = damage;
 		Callable behavior = customBehavior;
 		float evasion = Mathf.Clamp(Stats.GetStatValue("Evasion"), 0f, 100f) / 100f;

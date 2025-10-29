@@ -13,8 +13,8 @@ public partial class Player : CharacterBody2D
 		AudioManager.Instance.LoadSFX("Attack2", "res://Assets/SFX/zijizuode/blade2.mp3");
 		AudioManager.Instance.LoadSFX("Attack3", "res://Assets/SFX/zijizuode/blade3.mp3");
 	}
-	public void TakeDamage(float damage)
+	public void TakeDamage(float damage, Callable customBehavior)
 	{
-		PlayerStats.AddFinal("Health", -damage);
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, damage, customBehavior);
 	}
 }

@@ -4,8 +4,6 @@ using System;
 public partial class Projectile : Node2D
 {
 	[Export] public Area2D Hitbox;
-	[Export] public bool PierceWorld = false;
-	[Export] public int PierceEnemyCount = 1;
 	[Export] public float BaseSpeed = 400f;
 	public enum ProjectileType
 	{
@@ -24,18 +22,20 @@ public partial class Projectile : Node2D
 			PackedScene projectileScene = ResourceLoader.Load<PackedScene>($"res://Projectiles/Hostile/{projectileName}.tscn");
 			return projectileScene.Instantiate<T>();
 		}
+		public static T CreateProjectile<T>(PackedScene scene) where T : Projectile
+        {
+			return scene.Instantiate<T>();
+        }
     }
 	protected virtual void ReadyBehavior() { }
-	public virtual void HitBehavior(Node2D body) { }
-	public override void _Ready()
+	protected virtual void HitBehavior(Node2D body) { }
+	public override sealed void _Ready()
 	{
 		if (Type == ProjectileType.Friendly)
 			Hitbox.SetCollisionMaskValue(3, true);
 		else
 			Hitbox.SetCollisionMaskValue(2, true);
-
-		if (!PierceWorld)
-			Hitbox.SetCollisionMaskValue(1, true);
 		ReadyBehavior();
+		Hitbox.BodyEntered += HitBehavior;
 	}
 }

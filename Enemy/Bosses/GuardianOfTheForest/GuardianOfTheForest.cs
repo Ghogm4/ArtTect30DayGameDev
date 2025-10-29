@@ -5,6 +5,6 @@ public partial class GuardianOfTheForest : EnemyBase
 {
     public override void TakeDamage(float damage)
 	{
-        base.TakeDamage(damage * (1f - Stats.GetStatValue("DamageReduction")));
+        base.TakeDamage(damage * Mathf.Clamp(1f - Stats.GetStatValue("DamageReduction"), 0f, 1f));
     }
 }
