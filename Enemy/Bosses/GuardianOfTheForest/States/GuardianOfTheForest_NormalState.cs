@@ -18,7 +18,11 @@ public partial class GuardianOfTheForest_NormalState : State
 	{
 		_sprite.Play("Normal");
 		_rng.Randomize();
-		GetTree().CreateTimer(_rng.RandfRange(1f, 3f)).Timeout += () => AskTransit("Dash");
+		GetTree().CreateTimer(_rng.RandfRange(1f, 3f)).Timeout += () =>
+		{
+			if (!_enemy.IsDead)
+				AskTransit("Dash");
+		};
 	}
 	protected override void PhysicsUpdate(double delta)
 	{

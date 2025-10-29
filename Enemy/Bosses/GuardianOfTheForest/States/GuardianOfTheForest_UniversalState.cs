@@ -20,7 +20,7 @@ public partial class GuardianOfTheForest_UniversalState : State
 		_player = GetTree().GetFirstNodeInGroup("Player") as Player;
 		Stats.GetStat("HeadingRight").StatChanged += (float oldVal, float newVal) =>
 		{
-			if (!Storage.GetVariant<bool>("CanTurnAround"))
+			if (!Storage.GetVariant<bool>("CanTurnAround") || _enemy.IsDead)
 				return;
 			_sprite.FlipH = Mathf.IsZeroApprox(newVal);
 			AreaContainer.Scale = new Vector2(Mathf.IsEqualApprox(newVal, 1) ? 1 : -1, 1);
@@ -29,9 +29,12 @@ public partial class GuardianOfTheForest_UniversalState : State
 	}
 	protected override void FrameUpdate(double delta)
 	{
+		GD.Print(PreviousState);
 		if (!Storage.GetVariant<bool>("CanTurnAround"))
 			return;
 		HeadingRight = (_player.GlobalPosition.X >= _enemy.GlobalPosition.X) ? 1 : 0;
+		if (_enemy.IsDead && !Storage.GetVariant<bool>("IsInDieState"))
+			AskTransit("Die");
 	}
 	private void InitializeStorageVariants()
     {

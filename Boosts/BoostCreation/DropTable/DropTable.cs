@@ -52,6 +52,9 @@ public partial class DropTable : Node2D
     [Export] public int MinTimesToRun = 1;
     [Export] public int MaxTimesToRun = 2;
     [Export] public bool DoSpread = true;
+    [Export] public float BaseSpreadFactor = 1.0f;
+    [Export] public float SpreadFactorRandomness = 0f;
+    private float SpreadFactor => BaseSpreadFactor + (float)GD.RandRange(-SpreadFactorRandomness, SpreadFactorRandomness);
     private int _timesToRun = 0;
     private int TimesToRun
     {
@@ -409,9 +412,9 @@ public partial class DropTable : Node2D
 
         float spread = 0;
         if (DoSpread)
-            spread = Mathf.Atan(_timesToRun) / 2;
+            spread = SpreadFactor * Mathf.Atan(_timesToRun) / 2;
         float radian = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
-        float force = 200f;
+        float force = 200f * SpreadFactor;
         boost.ApplyCentralImpulse(Vector2.Right.Rotated(radian) * force);
     }
     private bool HasValidDrops()

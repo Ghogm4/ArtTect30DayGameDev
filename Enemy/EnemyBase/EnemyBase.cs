@@ -7,6 +7,9 @@ public partial class EnemyBase : CharacterBody2D
 	[Export] public int MinCoinDrop = 10;
 	[Export] public int MaxCoinDrop = 50;
 	[Export] public float CoinDropRate = 0.5f;
+	[Export] public float BaseCoinSpreadFactor = 1.0f;
+	[Export] public float CoinSpreadFactorRandomness = 0f;
+	public float CoinSpreadFactor => BaseCoinSpreadFactor + (float)GD.RandRange(-CoinSpreadFactorRandomness, CoinSpreadFactorRandomness);
 	[ExportGroup("Soul Settings")]
 	[Export] public int MinSoulDrop = 5;
 	[Export] public int MaxSoulDrop = 20;
@@ -32,7 +35,7 @@ public partial class EnemyBase : CharacterBody2D
 	[Signal] public delegate void DyingEventHandler();
 
 	public Player player = null;
-	private bool _isDead = false;
+	public bool IsDead = false;
 	public override void _Ready()
 	{
 		MonitorArea.BodyEntered += OnMonitorAreaBodyEntered;
@@ -81,26 +84,34 @@ public partial class EnemyBase : CharacterBody2D
 	{
 		Stats.AddFinal("Health", -damage);
 	}
-	private void OnHealthChanged(float oldValue, float newValue)
+	protected virtual void DisplayDamageText(float damage)
 	{
-		if (_isDead) return;
-		if (newValue < oldValue)
+		if (IsInsideTree())
 		{
-			GetHit();
-			if (IsInsideTree())
-			{
-				FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
-				GetTree()?.CurrentScene?.AddChild(Text);
-				Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-5, 5), GD.RandRange(-30, -15));
-				Text.Display((int)(oldValue - newValue));
-			}
+			FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
+			GetTree()?.CurrentScene?.AddChild(Text);
+			Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-5, 5), GD.RandRange(-30, -15));
+			Text.Display((int)damage);
 		}
+	}
+	protected virtual void CheckDeath(float newValue)
+	{
 		if (newValue <= 0)
 		{
 			Die();
-			_isDead = true;
+			IsDead = true;
+		}
+	}
+	private void OnHealthChanged(float oldValue, float newValue)
+	{
+		if (IsDead) return;
+		if (newValue < oldValue)
+		{
+			GetHit();
+			DisplayDamageText(oldValue - newValue);
 		}
 
+		CheckDeath(newValue);
 		if (HealthBar != null)
 			UpdateHealthBar(newValue);
 	}
@@ -111,14 +122,15 @@ public partial class EnemyBase : CharacterBody2D
 			.SetTrans(Tween.TransitionType.Linear)
 			.SetEase(Tween.EaseType.InOut);
 	}
-	public async void Die()
+	public async void Die(bool freeAfterDeath = true)
 	{
 		EmitSignal(SignalName.Dying);
 		await OnDeath();
 		DropCoin();
 		EmitSignal(SignalName.Died);
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.EnemyDied, this);
-		QueueFree();
+		if (freeAfterDeath)
+			QueueFree();
 	}
 	public void GetHit()
 	{
@@ -126,7 +138,7 @@ public partial class EnemyBase : CharacterBody2D
 		Flash();
 	}
 	protected virtual async Task OnDeath() => await Task.Delay(0);
-	protected virtual void OnHit() {}
+	protected virtual void OnHit() { }
 	public virtual void CustomBehaviour(Player player) { }
 	private void DropCoin()
 	{
@@ -140,8 +152,8 @@ public partial class EnemyBase : CharacterBody2D
 		int coinOnGroundAmount = (int)Mathf.Log(coinsToDrop) * 2 + 1;
 		int coinsInCoinBoost = coinsToDrop / coinOnGroundAmount;
 		int remainder = coinsToDrop % coinOnGroundAmount;
-		float spread = Mathf.Pi / 6;
-		float force = 200f;
+		float spread = CoinSpreadFactor * Mathf.Pi / 6;
+		float force = 200f * CoinSpreadFactor;
 		for (int i = 0; i <= coinOnGroundAmount; i++)
 		{
 			float direction = (float)GD.RandRange(-Mathf.Pi / 2 - spread, -Mathf.Pi / 2 + spread);
@@ -158,7 +170,7 @@ public partial class EnemyBase : CharacterBody2D
 				coin.ApplyCentralImpulse(Vector2.Right.Rotated(direction) * force);
 			}
 		}
-    }
+	}
 	private void Flash()
 	{
 		if (Sprite == null)
@@ -176,8 +188,10 @@ public partial class EnemyBase : CharacterBody2D
 			0.3f
 		).SetTrans(Tween.TransitionType.Linear).SetEase(Tween.EaseType.InOut);
 	}
+	protected virtual void AfterDamageRequestSent() {}
 	public void SendDamageRequest(float damage)
-    {
-        SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, damage, Callable.From<Player>(CustomBehaviour));
-    }
+	{
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, damage, Callable.From<Player>(CustomBehaviour));
+		AfterDamageRequestSent();
+	}
 }
