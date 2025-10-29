@@ -28,7 +28,7 @@ public partial class GuardianOfTheForest_ImmuneState : State
         GetTree().CreateTimer(SummonDuration).Timeout += () =>
         {
             if (!_enemy.IsDead)
-                AskTransit("Normal");
+                AskTransit("Decision");
         };
     }
     private Vector2 GetRandomPosition(Vector2 pivot)

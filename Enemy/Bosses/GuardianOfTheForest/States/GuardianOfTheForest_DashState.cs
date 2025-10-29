@@ -9,6 +9,7 @@ public partial class GuardianOfTheForest_DashState : State
 	private float MinDistanceToPerformMeleeAttack = 15.0f;
 	private Vector2 MeleeAreaOffset => Storage.GetVariant<Vector2>("MeleeAreaOffset");
 	private int HeadingRight => (int)Stats.GetStatValue("HeadingRight");
+	private float _timeElapsed = 0f;
 	private Vector2 ChasePos
     {
 		get
@@ -28,18 +29,20 @@ public partial class GuardianOfTheForest_DashState : State
 	protected override void Enter()
 	{
 		_sprite.Play("Normal");
+		_timeElapsed = 0f;
 	}
 	protected override void FrameUpdate(double delta)
     {
 		if (_enemy.GlobalPosition.DistanceTo(ChasePos) <= MinDistanceToPerformMeleeAttack && !_enemy.IsDead)
-			AskTransit("LaserCast");
+			AskTransit("Melee");
+		_timeElapsed += (float)delta;
     }
 	protected override void PhysicsUpdate(double delta)
 	{
 		float dist = _enemy.GlobalPosition.DistanceTo(ChasePos);
 		dist = Mathf.Clamp(dist, 30, 9999);
 		float speedFactor = dist / 8.0f;
-		_enemy.Velocity = (ChasePos - _enemy.GlobalPosition).Normalized() * Stats.GetStatValue("Speed") * speedFactor;
+		_enemy.Velocity = (ChasePos - _enemy.GlobalPosition).Normalized() * Stats.GetStatValue("Speed") * speedFactor * (1 + _timeElapsed);
 		_enemy.MoveAndSlide();
 	}
 }

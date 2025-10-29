@@ -43,7 +43,11 @@ public partial class GuardianOfTheForest_MeleeState : State
 		_animationPlayer.AnimationFinished -= OnAnimationFinished;
 		Storage.SetVariant("CanTurnAround", true);
 	}
-	private void OnAnimationFinished(StringName s) => AskTransit("Normal");
+	private void OnAnimationFinished(StringName s)
+	{
+		if (!_enemy.IsDead)
+			AskTransit("Decision");
+	}
 	private void DoMeleeAttack()
 	{
 		var bodies = MeleeArea.GetOverlappingBodies();

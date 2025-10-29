@@ -33,6 +33,8 @@ public partial class GuardianOfTheForest_ArmLaunchState : State
     {
         for (int i = 0; i < count - 1; i++)
         {
+            if (_enemy.IsDead)
+                break;
             SpawnArmProjectile(false);
             await ToSignal(GetTree().CreateTimer(interval), SceneTreeTimer.SignalName.Timeout);
         }
@@ -41,7 +43,6 @@ public partial class GuardianOfTheForest_ArmLaunchState : State
     }
     private void SpawnArmProjectile(bool glowing = false)
     {
-
         Arm armProjectile;
         if (glowing)
             armProjectile = Projectile.Factory.CreateProjectile<GlowingArm>(GlowingArmScene);
@@ -57,6 +58,6 @@ public partial class GuardianOfTheForest_ArmLaunchState : State
     private async void OnAnimationFinished()
     {
         await LaunchArm(3);
-        AskTransit("Dash");
+        AskTransit("Decision");
     }
 }

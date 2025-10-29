@@ -25,19 +25,19 @@ public partial class GuardianOfTheForest_UniversalState : State
 			_sprite.FlipH = Mathf.IsZeroApprox(newVal);
 			AreaContainer.Scale = new Vector2(Mathf.IsEqualApprox(newVal, 1) ? 1 : -1, 1);
 		};
-		
+
 	}
 	protected override void FrameUpdate(double delta)
 	{
-		if (!Storage.GetVariant<bool>("CanTurnAround"))
-			return;
-		HeadingRight = (_player.GlobalPosition.X >= _enemy.GlobalPosition.X) ? 1 : 0;
-		if (_enemy.IsDead && !Storage.GetVariant<bool>("IsInDieState"))
+		if (_enemy.IsDead)
 			AskTransit("Die");
+		
+		if (Storage.GetVariant<bool>("CanTurnAround"))
+			HeadingRight = (_player.GlobalPosition.X >= _enemy.GlobalPosition.X) ? 1 : 0;
 	}
 	private void InitializeStorageVariants()
-    {
+	{
 		Storage.SetVariant("MeleeAreaOffset", GetNode<Area2D>("%MeleeArea").Position);
 		Storage.SetVariant("CanTurnAround", true);
-    }
+	}
 }

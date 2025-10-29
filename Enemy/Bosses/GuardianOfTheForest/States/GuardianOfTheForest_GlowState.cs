@@ -51,8 +51,8 @@ public partial class GuardianOfTheForest_GlowState : State
         _enemy.Velocity = Vector2.Zero;
         GetTree().CreateTimer(_glowDuration).Timeout += () =>
         {
-            if (IsInstanceValid(this))
-                AskTransit("Dash");
+            if (IsInstanceValid(this) && !_enemy.IsDead)
+                AskTransit("Decision");
         };
     }
     private void ModifyData()

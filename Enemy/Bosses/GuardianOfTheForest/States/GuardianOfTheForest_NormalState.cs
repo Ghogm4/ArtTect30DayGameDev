@@ -6,22 +6,24 @@ public partial class GuardianOfTheForest_NormalState : State
 	private AnimatedSprite2D _sprite = null;
 	private EnemyBase _enemy = null;
 	private Player _player = null;
-	private RandomNumberGenerator _rng = new();
 	private int HeadingRight => (int)Stats.GetStatValue("HeadingRight");
+	private float Health => Stats.GetStatValue("Health");
+	private float MaxHealth => Stats.GetStatValue("MaxHealth");
+	private float Ratio => Mathf.Clamp(Health / MaxHealth, 0, 1);
+	private float DurationFactor => Mathf.Lerp(1f, 0.9f, Ratio);
 	protected override void ReadyBehavior()
-    {
+	{
 		_enemy = Storage.GetNode<EnemyBase>("Enemy");
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
 		_player = GetTree().GetFirstNodeInGroup("Player") as Player;
-    }
+	}
 	protected override void Enter()
 	{
 		_sprite.Play("Normal");
-		_rng.Randomize();
-		GetTree().CreateTimer(_rng.RandfRange(1f, 3f)).Timeout += () =>
+		GetTree().CreateTimer((float)GD.RandRange(3f, 4f) * DurationFactor).Timeout += () =>
 		{
 			if (!_enemy.IsDead)
-				AskTransit("Dash");
+				AskTransit("Decision");
 		};
 	}
 	protected override void PhysicsUpdate(double delta)
