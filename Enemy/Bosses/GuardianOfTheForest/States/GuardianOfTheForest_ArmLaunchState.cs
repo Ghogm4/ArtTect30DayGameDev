@@ -25,7 +25,7 @@ public partial class GuardianOfTheForest_ArmLaunchState : State
         _sprite.Play("ArmLaunch");
         Storage.SetVariant("CanTurnAround", false);
     }
-    protected async override void Exit()
+    protected override void Exit()
     {
         _sprite.AnimationFinished -= OnAnimationFinished;
     }

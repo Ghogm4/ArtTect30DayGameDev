@@ -5,8 +5,7 @@ public partial class PlayerStatComponent : StatComponent
 {
     public List<Action<EnemyBase, PlayerStatComponent>> OnHittingEnemyAction = new();
     public List<IntervalTrigger> PassiveSkills = new();
-    // Vector2 is the position of the enemy when it dies
-    public List<Action<PlayerStatComponent, Vector2>> OnEnemyDeathActions = new();
+    public List<Action<EnemyBase, PlayerStatComponent>> OnEnemyDeathActions = new();
     // Vector2 is the position of the player when attacking
     public List<Action<PlayerStatComponent, Vector2>> OnAttackActions = new();
     private ref bool _initialized => ref GameData.Instance.PlayerStatComponentInitialized;
@@ -29,10 +28,10 @@ public partial class PlayerStatComponent : StatComponent
         AddFinal("AvailableDashes", GetStatValue("MaxDash") - GetStatValue("AvailableDashes"));
         InitializeOnce();
     }
-    private void TriggerOnEnemyDeathActions(Vector2 enemyDeathPos)
+    private void TriggerOnEnemyDeathActions(EnemyBase deadEnemy)
     {
         foreach (var action in OnEnemyDeathActions)
-            action?.Invoke(this, enemyDeathPos);
+            action?.Invoke(deadEnemy, this);
     }
     private void InitializeDefaultAttackAction()
     {

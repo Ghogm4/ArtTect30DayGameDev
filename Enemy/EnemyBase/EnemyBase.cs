@@ -20,7 +20,8 @@ public partial class EnemyBase : CharacterBody2D
 	[Export] public StatComponent Stats;
 	[Export] public TextureProgressBar HealthBar;
 	[Export] public PackedScene FloatingTextScene;
-
+	[ExportGroup("Other Settings")]
+	[Export] public bool WillDropItems = true;
 	[Signal] public delegate void EnterMonitorEventHandler(Node2D body);
 	[Signal] public delegate void EnterChaseEventHandler(Node2D body);
 	[Signal] public delegate void EnterAttackEventHandler(Node2D body);
@@ -116,7 +117,7 @@ public partial class EnemyBase : CharacterBody2D
 		await OnDeath();
 		DropCoin();
 		EmitSignal(SignalName.Died);
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.EnemyDied, GlobalPosition);
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.EnemyDied, this);
 		QueueFree();
 	}
 	public void GetHit()
@@ -128,7 +129,9 @@ public partial class EnemyBase : CharacterBody2D
 	protected virtual void OnHit() {}
 	public virtual void CustomBehaviour(Player player) { }
 	private void DropCoin()
-    {
+	{
+		if (!WillDropItems) return;
+
 		bool willDrop = false;
 		Probability.RunIfElse(CoinDropRate, () => willDrop = true, () => { });
 		if (!willDrop)

@@ -32,7 +32,7 @@ public partial class GuardianOfTheForest_DashState : State
 	protected override void FrameUpdate(double delta)
     {
 		if (_enemy.GlobalPosition.DistanceTo(ChasePos) <= MinDistanceToPerformMeleeAttack)
-			AskTransit("Glow");
+			AskTransit("Immune");
     }
 	protected override void PhysicsUpdate(double delta)
 	{

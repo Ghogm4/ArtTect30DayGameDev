@@ -11,7 +11,7 @@ public partial class SignalBus : Node
     [Signal] public delegate void SceneChangeStartedEventHandler();
     [Signal] public delegate void PlayerBoostPickedUpEventHandler(BoostInfo info, bool needDisplay);
     [Signal] public delegate void EntranceSignalEventHandler(string entrance);
-    [Signal] public delegate void EnemyDiedEventHandler(Vector2 enemyDeathPos);
+    [Signal] public delegate void EnemyDiedEventHandler(EnemyBase deadEnemy);
     [Signal] public delegate void PlayerHealthPotionUsedEventHandler(int cooldownSeconds);
     [Signal] public delegate void PlayerStatResetRequestedEventHandler();
     [Signal] public delegate void PlayerPurchasedEventHandler(int price);

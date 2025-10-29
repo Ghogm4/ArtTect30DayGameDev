@@ -36,7 +36,6 @@ public partial class WindSlash : Projectile
 	}
 	protected override void HitBehavior(Node2D body)
 	{
-		GD.Print("Hit body: " + body.Name);
 		if (_isExpired) return;
 		if (body is EnemyBase enemy)
 		{
