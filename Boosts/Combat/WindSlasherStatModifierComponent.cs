@@ -3,6 +3,7 @@ using System;
 
 public partial class WindSlasherStatModifierComponent : StatModifierComponent
 {
+	[Export] public float AttackMultiplier = 0.7f;
     protected override void Modify(StatComponent statComponent, bool reverse = false)
     {
 		PlayerStatComponent playerStatComponent = statComponent as PlayerStatComponent;
@@ -15,7 +16,7 @@ public partial class WindSlasherStatModifierComponent : StatModifierComponent
 			float attackFinal = playerStat.GetStatValue("AttackFinal");
 			
 			float projectileDamageMultiplier = playerStat.GetStatValue("ProjectileDamageMultiplier");
-			float resultAttack = ((attack + attackBase) * attackMult + attackFinal) * 0.8f * projectileDamageMultiplier;
+			float resultAttack = ((attack + attackBase) * attackMult + attackFinal) * AttackMultiplier * projectileDamageMultiplier;
 
 			WindSlash windSlash = Projectile.Factory.CreateFriendly<WindSlash>("WindSlash");
 			windSlash.Damage = resultAttack;

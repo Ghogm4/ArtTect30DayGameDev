@@ -1,10 +1,14 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 public partial class GuardianOfTheForest_ArmLaunchState : State
 {
     [Export] public PackedScene ArmScene = null;
     [Export] public PackedScene GlowingArmScene = null;
+    [Export] public int NormalArmCount = 2;
+    [Export] public int GlowingArmCount = 2;
+    [Export] public float ArmInterval = 0.2f;
     private EnemyBase _enemy = null;
     private AnimatedSprite2D _sprite = null;
     private Player _player = null;
@@ -29,16 +33,27 @@ public partial class GuardianOfTheForest_ArmLaunchState : State
     {
         _sprite.AnimationFinished -= OnAnimationFinished;
     }
-    private async Task LaunchArm(int count = 1, float interval = 0.2f)
+    private async Task LaunchArm(int normalArmCount = 2, int glowingArmCount = 1, float interval = 0.2f)
     {
-        for (int i = 0; i < count - 1; i++)
+        List<bool> armTypes = new();
+        for (int i = 0; i < normalArmCount; i++)
+            armTypes.Add(false);
+        for (int i = 0; i < glowingArmCount; i++)
+            armTypes.Add(true);
+        for (int i = armTypes.Count - 1; i > 0; i--)
+        {
+            int j = Convert.ToInt32(GD.Randi() % (i + 1));
+            bool temp = armTypes[i];
+            armTypes[i] = armTypes[j];
+            armTypes[j] = temp;
+        }
+        for (int i = 0; i < armTypes.Count; i++)
         {
             if (_enemy.IsDead)
                 break;
-            SpawnArmProjectile(false);
+            SpawnArmProjectile(armTypes[i]);
             await ToSignal(GetTree().CreateTimer(interval), SceneTreeTimer.SignalName.Timeout);
         }
-        SpawnArmProjectile(true);
         Storage.SetVariant("CanTurnAround", true);
     }
     private void SpawnArmProjectile(bool glowing = false)
@@ -57,7 +72,7 @@ public partial class GuardianOfTheForest_ArmLaunchState : State
     }
     private async void OnAnimationFinished()
     {
-        await LaunchArm(3);
+        await LaunchArm(NormalArmCount, GlowingArmCount, ArmInterval);
         AskTransit("Decision");
     }
 }

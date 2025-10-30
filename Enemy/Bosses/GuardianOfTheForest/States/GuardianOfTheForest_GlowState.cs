@@ -22,6 +22,7 @@ public partial class GuardianOfTheForest_GlowState : State
     [Export] public float MaxMoveSpeedMultiplier = 1.0f;
     [Export] public float AccelerationMagnitude = 100f;
     [Export] public float MaxAccelerationMagnitude = 400f;
+    [Export] public float PreparationTime = 0.5f;
     [Export] public PackedScene BlueOrbScene = null;
     private Vector2 PlayerPos => (GetTree().GetFirstNodeInGroup("Player") as Player).GlobalPosition;
     private float Health => Stats.GetStatValue("Health");
@@ -38,6 +39,7 @@ public partial class GuardianOfTheForest_GlowState : State
     private float _moveSpeed = 60f;
     private float _moveSpeedMultiplier = 0f;
     private float _accelerationMagnitude = 200f;
+    private bool _isFiringOrbs = false;
     protected override void ReadyBehavior()
     {
         _sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
@@ -54,6 +56,8 @@ public partial class GuardianOfTheForest_GlowState : State
             if (IsInstanceValid(this) && !_enemy.IsDead)
                 AskTransit("Decision");
         };
+        GetTree().CreateTimer(PreparationTime).Timeout += () => _isFiringOrbs = true;
+        _isFiringOrbs = false;
     }
     private void ModifyData()
     {
@@ -68,6 +72,8 @@ public partial class GuardianOfTheForest_GlowState : State
     {
         ModifyData();
         _sprite.SpeedScale = Mathf.Lerp(MaxGlowSpeed, 1.0f, Ratio);
+        if (!_isFiringOrbs)
+            return;
         _elapsedTime += (float)delta;
         if (_elapsedTime >= _currentOrbLaunchInterval)
         {

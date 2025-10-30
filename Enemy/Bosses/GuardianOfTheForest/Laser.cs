@@ -8,6 +8,7 @@ public partial class Laser : RayCast2D
 	[Export] public PackedScene BlueOrbScene = null;
 	[Export] public float OrbSpawnInterval = 0.2f;
 	[Export] public float OrbSpeed = 150f;
+	[Export] public float PreparationTime = 1.0f;
 	private Area2D LaserDamageArea => GetNode<Area2D>("LaserDamageArea");
 	private Vector2 HitPos => IsColliding() ? ToLocal(GetCollisionPoint()) : TargetPosition;
 	private Tween _laserInnerAppearTween = null;
@@ -25,8 +26,8 @@ public partial class Laser : RayCast2D
 			_laserOuterAppearTween = CreateTween();
 			if (field)
 			{
-				_laserInnerAppearTween.TweenProperty(_laserInnerLine, "width", LaserInnerWidth, 1f);
-				_laserOuterAppearTween.TweenProperty(_laserOuterLine, "width", LaserInnerWidth * 1.5, 1f);
+				_laserInnerAppearTween.TweenProperty(_laserInnerLine, "width", LaserInnerWidth, PreparationTime);
+				_laserOuterAppearTween.TweenProperty(_laserOuterLine, "width", LaserInnerWidth * 1.5, PreparationTime);
 				_laserOuterAppearTween.TweenCallback(Callable.From(() => LaserDamageArea.Monitoring = true));
 				_isFiring = true;
 			}

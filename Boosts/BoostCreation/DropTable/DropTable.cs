@@ -35,10 +35,10 @@ public partial class DropTable : Node2D
     private static readonly Dictionary<BoostRarity, float> _baseRarityWeights = new()
     {
         { BoostRarity.Common, 0.60f },
-        { BoostRarity.Uncommon, 0.23f },
+        { BoostRarity.Uncommon, 0.24f },
         { BoostRarity.Rare, 0.10f },
         { BoostRarity.Epic, 0.05f },
-        { BoostRarity.Legendary, 0.02f }
+        { BoostRarity.Legendary, 0.01f }
     };
 
     public static HashSet<string> ObtainedOneTimeBoosts = new();

@@ -25,6 +25,7 @@ public partial class GuardianOfTheForest_ImmuneState : State
         Stats.SetValue("DamageReduction", 0.95f);
         _sprite.AnimationFinished += OnAnimationFinished;
         _enemy.Velocity = Vector2.Zero;
+        Storage.SetVariant("CanTurnAround", false);
         GetTree().CreateTimer(SummonDuration).Timeout += () =>
         {
             if (!_enemy.IsDead)
@@ -57,6 +58,7 @@ public partial class GuardianOfTheForest_ImmuneState : State
         Stats.SetValue("DamageReduction", _previousDamageReduction);
         _isSummoning = false;
         _sprite.AnimationFinished -= OnAnimationFinished;
+        Storage.SetVariant("CanTurnAround", true);
     }
     private void OnAnimationFinished() => _isSummoning = true;
 }
