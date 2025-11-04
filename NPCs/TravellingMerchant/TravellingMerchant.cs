@@ -24,7 +24,7 @@ public partial class TravellingMerchant : Node2D, ISavable
 	}
 	public override void _Process(double delta)
 	{
-		if (_isPlayerNearby && Input.IsActionJustPressed("Interact"))
+		if (_isPlayerNearby && Input.IsActionJustPressed("AdvanceDialogue"))
 		{
 			if (!_hasTalkedBefore)
 				TextManager.Instance.RunLines("res://NPCs/TravellingMerchant/TravellingMerchantDialogue.json", "TravellingMerchantFirstTime");

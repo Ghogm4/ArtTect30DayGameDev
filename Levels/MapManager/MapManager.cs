@@ -2,15 +2,18 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 [GlobalClass]
 public partial class MapManager : Node2D
 {
 	public static MapManager Instance { get; private set; }
 	[Export] public Godot.Collections.Array<PackedScene> MapPool;
+	[Export] public Godot.Collections.Array<PackedScene> ExtraMapPool;
 	[Signal] public delegate void MapGeneratedEventHandler();
 	[Signal] public delegate void MapChangedEventHandler();
 	public List<Map> Maps = new();
+	public List<Map> ExtraMaps = new();
 	public List<Map> EnabledMaps = new List<Map>();
 	public List<Map> EndNodeMaps = new List<Map>();
 	public string Entrance = null;
@@ -18,6 +21,8 @@ public partial class MapManager : Node2D
 	public Map StartMap = null;
 	public Map EndMap = null;
 	private bool _isEndCreated = false;
+	private Vector2 _returnPos = Vector2.Zero;
+	private Vector2I _returnMapPos = Vector2I.Left;
 	public override void _Ready()
 	{
 		if (Instance == null)
@@ -31,6 +36,81 @@ public partial class MapManager : Node2D
 		}
 
 		SignalBus.Instance.EntranceSignal += OnEntranceEntered;
+	}
+	private void InitializeSavedMap(Vector2I mapPos)
+	{
+		if (GetTree().CurrentScene is BaseLevel nowLevel)
+			nowLevel.InitializeLevel(mapPos);
+		GD.Print("MapManager: Initialized saved map at position: " + mapPos);
+	}
+	public async void ReturnToMainMap()
+	{
+		if (_returnMapPos == Vector2I.Left)
+			return;
+		Map mapToReturn = GetMapAtPosition(_returnMapPos);
+		if (mapToReturn != null)
+			NowMap = mapToReturn;
+		SceneManager.Instance.ChangeScene(NowMap.Scene);
+		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
+		GD.Print("MapManager: Returned to main map at position: " + NowMap.Position);
+		InitializeSavedMap(NowMap.Position);
+		Player player = GetTree().GetFirstNodeInGroup("Player") as Player;
+		if (player == null) CallDeferred(MethodName.ReturnToMainMap);
+		player.GlobalPosition = _returnPos;
+	}	public void RecordReturnPosition(Vector2 portalPos)
+	{
+		_returnPos = portalPos;
+		_returnMapPos = NowMap.Position;
+	}
+	public void InitMaps()
+	{
+		Reset();
+		if (Maps != null)
+			Maps.ForEach(map => map.IsEnabled = false);
+
+		Maps = new List<Map>();
+		EnabledMaps = new List<Map>();
+		foreach (PackedScene scene in MapPool)
+		{
+			var mapLevel = scene.Instantiate<BaseLevel>();
+			if (mapLevel == null)
+			{
+				GD.PrintErr("MapLevel is null.");
+				continue;
+			}
+			Map newMap = new Map(
+				scene, Vector2I.Left,
+				mapLevel.TopExit, mapLevel.BottomExit, mapLevel.LeftExit, mapLevel.RightExit,
+				mapLevel.IsStartLevel, mapLevel.IsEndLevel,
+				mapLevel.RarityWeight
+				);
+			Maps.Add(newMap);
+			if (newMap.IsStartLevel)
+				StartMap = newMap;
+			if (newMap.IsEndLevel)
+				EndMap = newMap;
+
+			GD.Print("Loaded map: " + scene.ResourcePath);
+		}
+		foreach (PackedScene scene in ExtraMapPool)
+		{
+			var mapLevel = scene.Instantiate<BaseLevel>();
+			if (mapLevel == null)
+			{
+				GD.PrintErr("Extra MapLevel is null.");
+				continue;
+			}
+			Map newMap = new Map(scene);
+			newMap.IsExtraLevel = true;
+			ExtraMaps.Add(newMap);
+
+			GD.Print("Loaded extra map: " + scene.ResourcePath);
+		}
+		MapALG.Instance.InitMap();
+		MapALG.Instance.StartRoom();
+		MapALG.Instance.PrintMap();
+		ApplyMap();
+		EmitSignal(SignalName.MapGenerated);
 	}
 	private void Reset()
 	{
@@ -55,16 +135,15 @@ public partial class MapManager : Node2D
 		SceneManager.Instance.ChangeScene(TargetMap.Scene);
 		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 
-		if (GetTree().CurrentScene is BaseLevel newLevel)
-			newLevel.InitializeLevel(TargetMap.Position);
-		
+		InitializeSavedMap(TargetMap.Position);
+
 		NowMap = TargetMap;
 
 		SetPlayerPosition(entrance);
-		
+
 		if (!NowMap.IsDiscovered)
 			NowMap.IsDiscovered = true;
-		
+
 		EmitSignal(SignalName.MapChanged);
 		MapALG.Instance.PrintMap(NowMap.Position);
 	}
@@ -79,33 +158,40 @@ public partial class MapManager : Node2D
 			CallDeferred(MethodName.SetPlayerPosition, entrance);
 			return;
 		}
-
+		bool isMarkerFound = false;
 		switch (entrance)
 		{
 			case "Top":
-				if (baseLevel.BottomMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
+				if (baseLevel.BottomMarker == null) break;
 				player.GlobalPosition = baseLevel.BottomMarker.GlobalPosition;
+				isMarkerFound = true;
 				break;
 			case "Bottom":
-				if (baseLevel.TopMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
+				if (baseLevel.TopMarker == null) break;
 				player.GlobalPosition = baseLevel.TopMarker.GlobalPosition;
+				isMarkerFound = true;
 				break;
 			case "Left":
-				if (baseLevel.RightMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
+				if (baseLevel.RightMarker == null) break;
 				player.GlobalPosition = baseLevel.RightMarker.GlobalPosition;
+				isMarkerFound = true;
 				break;
 			case "Right":
-				if (baseLevel.LeftMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
+				if (baseLevel.LeftMarker == null) break;
 				player.GlobalPosition = baseLevel.LeftMarker.GlobalPosition;
+				isMarkerFound = true;
 				break;
 			case "Start":
-				if (baseLevel.StartMarker == null) { CallDeferred(MethodName.SetPlayerPosition, entrance); return; }
+				if (baseLevel.StartMarker == null) break;
 				player.GlobalPosition = baseLevel.StartMarker.GlobalPosition;
+				isMarkerFound = true;
 				break;
 			default:
 				GD.PrintErr("Invalid entrance for setting player position: " + entrance);
 				break;
 		}
+		if (!isMarkerFound)
+			CallDeferred(MethodName.SetPlayerPosition, entrance);
 	}
 	public Map SearchMap(MapType type)
 	{
@@ -120,65 +206,23 @@ public partial class MapManager : Node2D
 		return null;
 	}
 
-	public void InitMaps()
+	public async void StartLevel()
 	{
-		Reset();
-		if (Maps != null)
-			Maps.ForEach(map => map.IsEnabled = false);
-		
-		Maps = new List<Map>();
-		EnabledMaps = new List<Map>();
-		foreach (PackedScene scene in MapPool)
-		{
-			var mapLevel = scene.Instantiate<BaseLevel>();
-			if (mapLevel == null)
-			{
-				GD.PrintErr("MapLevel is null.");
-				continue;
-			}
-			Map newMap = new Map(
-				scene,
-				Vector2I.Left,
-				mapLevel.TopExit,
-				mapLevel.BottomExit,
-				mapLevel.LeftExit,
-				mapLevel.RightExit,
-				mapLevel.IsStartLevel,
-				mapLevel.IsEndLevel,
-				mapLevel.RarityWeight
-				);
-			Maps.Add(newMap);
-			if (newMap.IsStartLevel)
-				StartMap = newMap;
-			if (newMap.IsEndLevel)
-				EndMap = newMap;
+		NowMap = StartMap;
+		StartMap.IsDiscovered = true;
+		EmitSignal(SignalName.MapChanged);
+		SceneManager.Instance.ChangeScene(NowMap.Scene);
+		await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
 
-			GD.Print("Loaded map: " + scene.ResourcePath);
+		if (GetTree().CurrentScene is BaseLevel newLevel)
+		{
+			newLevel.InitializeLevel(NowMap.Position);
 		}
 
-		MapALG.Instance.InitMap();
-		MapALG.Instance.StartRoom();
-		MapALG.Instance.PrintMap();
-		ApplyMap();
-		EmitSignal(SignalName.MapGenerated);
+		SetPlayerPosition("Start");
 	}
-    public async void StartLevel()
-    {
-        NowMap = StartMap;
-        StartMap.IsDiscovered = true;
-        EmitSignal(SignalName.MapChanged);
-        SceneManager.Instance.ChangeScene(NowMap.Scene);
-        await ToSignal(GetTree(), SceneTree.SignalName.SceneChanged);
-
-        if (GetTree().CurrentScene is BaseLevel newLevel)
-        {
-            newLevel.InitializeLevel(NowMap.Position);
-        }
-
-        SetPlayerPosition("Start");
-    }
-    public void ApplyMap()
-    {
+	public void ApplyMap()
+	{
 		var assigned = new Dictionary<Vector2I, Map>();
 
 		foreach (var room in MapALG.Instance.Roomlist)
@@ -193,7 +237,7 @@ public partial class MapManager : Node2D
 			}
 			if (room.Position == MapALG.Instance.startPos)
 				chosen = StartMap;
-			
+
 			chosen.IsEnabled = true;
 			chosen.Position = room.Position;
 			assigned[room.Position] = chosen;
@@ -273,15 +317,15 @@ public partial class MapManager : Node2D
 		EndMap.IsEnabled = true;
 		if (!EnabledMaps.Contains(EndMap)) EnabledMaps.Add(EndMap);
 
-        foreach (var map in EnabledMaps)
-        {
-            if (map.TopMap == node) map.TopMap = EndMap;
-            if (map.BottomMap == node) map.BottomMap = EndMap;
-            if (map.LeftMap == node) map.LeftMap = EndMap;
-            if (map.RightMap == node) map.RightMap = EndMap;
-        }
+		foreach (var map in EnabledMaps)
+		{
+			if (map.TopMap == node) map.TopMap = EndMap;
+			if (map.BottomMap == node) map.BottomMap = EndMap;
+			if (map.LeftMap == node) map.LeftMap = EndMap;
+			if (map.RightMap == node) map.RightMap = EndMap;
+		}
 
-        node.IsEnabled = false;
+		node.IsEnabled = false;
 		EnabledMaps.Remove(node);
 	}
 

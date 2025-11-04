@@ -19,7 +19,7 @@ public partial class PickupArea : Area2D
 		if (body is Boost boost && boost.Pickable)
 		{
 			boost.DoBoost(StatComponent);
-			SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp, boost.Info, boost.NeedDisplay);
+			SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp, boost.Info, boost.DisplayWhenObtained, boost.DisplayOnCurrentBoosts);
 			Tween tween = boost.CreateTween();
 			tween.TweenProperty(boost, "scale", Vector2.Zero, 0.3f)
 				.SetTrans(Tween.TransitionType.Quad)

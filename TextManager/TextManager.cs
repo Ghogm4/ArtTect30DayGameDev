@@ -178,10 +178,11 @@ public partial class TextManager : Node
 			}
 		}
 		Index++;
+		GD.Print("TextManager: Advancing to line index: " + Index);
 		ShowText();
 	}
 	private bool IsSkipping()
 	{
-		return Input.IsMouseButtonPressed(MouseButton.Left) || Input.IsActionJustPressed("Interact");
+		return Input.IsActionJustPressed("AdvanceDialogue");
 	}
 }

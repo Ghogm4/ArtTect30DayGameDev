@@ -16,6 +16,7 @@ public class Map
     
     public bool IsStartLevel = false;
     public bool IsEndLevel = false;
+    public bool IsExtraLevel = false;
     public float RarityWeight = 1.0f;
 
     public Map LeftMap = null;

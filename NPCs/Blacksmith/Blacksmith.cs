@@ -25,14 +25,14 @@ public partial class Blacksmith : Node2D, ISavable
 	}
 	public override void _Process(double delta)
 	{
-		if (_isPlayerNearby && Input.IsActionJustPressed("Interact"))
+		if (_isPlayerNearby && Input.IsActionJustPressed("AdvanceDialogue"))
 		{
 			if (!_hasTalkedBefore)
 				TextManager.Instance.RunLines("res://NPCs/Blacksmith/BlacksmithDialogue.json", "BlacksmithFirstTime");
 			else
 				TextManager.Instance.RunLines("res://NPCs/Blacksmith/BlacksmithDialogue.json", "BlacksmithRepeat");
 
-			if (TextManager.Instance.CurrentDialogueScene == "BlacksmithFirstTime" && TextManager.Instance.Index == 4)
+			if (TextManager.Instance.CurrentDialogueScene == "BlacksmithFirstTime" && TextManager.Instance.Index == 4 && !_hasTalkedBefore)
 			{
 				_hasTalkedBefore = true;
 				FreeBoostDropTable.Drop();

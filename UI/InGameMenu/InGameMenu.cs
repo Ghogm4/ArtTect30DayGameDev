@@ -12,7 +12,7 @@ public partial class InGameMenu : Control
 	public override void _Ready()
 	{
 		Visible = false;
-		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerBoostPickedUp, Callable.From<BoostInfo, bool>(AddBoost));
+		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerBoostPickedUp, Callable.From<BoostInfo, bool, bool>(AddBoost));
 		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerStatResetRequested, Callable.From(ResetMenu));
 	}
 	public override void _Process(double delta)
@@ -26,9 +26,9 @@ public partial class InGameMenu : Control
 			FloatingBoostInfo.Position = mousePosition + new Vector2(16, 16);
 		}
 	}
-	public void AddBoost(BoostInfo info, bool needDisplay)
+	public void AddBoost(BoostInfo info, bool needDisplay = false, bool displayOnCurrentBoosts = false)
 	{
-		if (!needDisplay)
+		if (!displayOnCurrentBoosts)
 			return;
 		if (_boostDisplayers.TryGetValue(info.Name, out BoostDisplayer existingDisplayer))
 		{

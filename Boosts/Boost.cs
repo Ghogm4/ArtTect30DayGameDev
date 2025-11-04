@@ -5,7 +5,8 @@ using System.Collections.Generic;
 public partial class Boost : RigidBody2D
 {
     [Export] public BoostInfo Info = null;
-    [Export] public bool NeedDisplay = true;
+    [Export] public bool DisplayWhenObtained = true;
+    [Export] public bool DisplayOnCurrentBoosts = true;
     public bool Pickable
     {
         get => field;

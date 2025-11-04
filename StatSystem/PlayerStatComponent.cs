@@ -62,7 +62,8 @@ public partial class PlayerStatComponent : StatComponent
     private void InitializeDefaultBoost()
     {
         using Boost flowerOfSerenity = ResourceLoader.Load<PackedScene>("res://Boosts/Special/FlowerOfSerenity.tscn").Instantiate<Boost>();
-        SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp, flowerOfSerenity.Info, flowerOfSerenity.NeedDisplay);
+        SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerBoostPickedUp,
+            flowerOfSerenity.Info, flowerOfSerenity.DisplayWhenObtained, flowerOfSerenity.DisplayOnCurrentBoosts);
     }
     public override void _Process(double delta)
     {

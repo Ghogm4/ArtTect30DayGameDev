@@ -12,7 +12,7 @@ public partial class BoostOnObtainDisplay : Control
 	private bool _duringDialogue = false;
 	public override void _Ready()
 	{
-		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerBoostPickedUp, Callable.From<BoostInfo, bool>(DisplayBoost));
+		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerBoostPickedUp, Callable.From<BoostInfo, bool, bool>(DisplayBoost));
 		SignalBus.Instance.Connect(SignalBus.SignalName.DialogueStarted, Callable.From(() =>
 		{
 			_duringDialogue = true;
@@ -37,9 +37,9 @@ public partial class BoostOnObtainDisplay : Control
 		};
 	}
 
-	public void DisplayBoost(BoostInfo info, bool needDisplay)
+	public void DisplayBoost(BoostInfo info, bool displayWhenObtained, bool displayOnCurrentBoosts = false)
 	{
-		if (!needDisplay || _duringDialogue)
+		if (!displayWhenObtained || _duringDialogue)
 			return;
 		Modulate = new Color(1, 1, 1, 1);
 		tween?.Kill();

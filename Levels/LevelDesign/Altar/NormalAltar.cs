@@ -1,7 +1,7 @@
 using Godot;
 using System;
-using Godot.Collections;
 using System.Threading.Tasks;
+using GDDictionary = Godot.Collections.Dictionary;
 public partial class NormalAltar : Node2D, ISavable
 {
 	[Export] public Sprite2D AltarSprite;
@@ -25,6 +25,7 @@ public partial class NormalAltar : Node2D, ISavable
 	} = false;
 	private bool _isPlayerNearby = false;
 	private bool _isClaimed = false;
+	private bool _isEntered = false;
 	public override async void _Ready()
 	{
 		if (!DebugMode)
@@ -67,17 +68,20 @@ public partial class NormalAltar : Node2D, ISavable
 		ShaderMaterial altarMaterial = AltarSprite.Material as ShaderMaterial;
 		altarMaterial.SetShaderParameter("outline_enabled", enabled);
 	}
-	public Dictionary SaveState()
+	public GDDictionary SaveState()
 	{
 		return new()
 		{
-			["IsClaimed"] = _isClaimed
+			["IsClaimed"] = _isClaimed,
+			["IsInteractable"] = _isInteractable,
 		};
 	}
 
-	public void LoadState(Dictionary state)
+	public void LoadState(GDDictionary state)
 	{
 		if (state?.TryGetValue("IsClaimed", out var isClaimed) ?? false)
 			_isClaimed = (bool)isClaimed;
+		if (state?.TryGetValue("IsInteractable", out var isInteractable) ?? false)
+			_isInteractable = (bool)isInteractable;
 	}
 }

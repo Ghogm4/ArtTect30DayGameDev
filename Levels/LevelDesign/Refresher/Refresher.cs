@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 using GDDictionary = Godot.Collections.Dictionary;
 public partial class Refresher : Node2D, ISavable
 {
+	[Export] public int BasePrice = 50;
 	[Export] public Label PriceTag;
 	[Export] public ShopItem[] ShopItemsInLevel = [];
 	public string UniqueID => Name;
 	private int _usedTimes = 0;
-	private int Price => Convert.ToInt32(50 * (_usedTimes * 0.5f + 1));
+	private int Price => Convert.ToInt32(BasePrice * (_usedTimes * 0.5f + 1));
 	private bool _isPlayerNearby = false;
 	public override async void _Ready()
 	{
