@@ -6,6 +6,8 @@ using GodotDictionary = Godot.Collections.Dictionary;
 public partial class ShopItem : Node2D, ISavable
 {
 	[Export] public int BasePrice = 75;
+	[Export] public float PriceVariancePercentage = 0.2f;
+	[Export] public float PriceRarityFactorDepression = 0f;
 	[Export] public DropTable ItemDropTable;
 	[Export] public Sprite2D ItemSprite;
 	[Export] public Sprite2D DisplayBaseSprite;
@@ -38,19 +40,19 @@ public partial class ShopItem : Node2D, ISavable
 		[BoostRarity.Epic] = (float)BoostRarityBasedPriceMaxFactor.Epic / 100f,
 		[BoostRarity.Legendary] = (float)BoostRarityBasedPriceMaxFactor.Legendary / 100f
 	};
-	private float GetRandomizedPrice(BoostRarity boostRarity)
+	private float GetRandomizedFactor(BoostRarity boostRarity)
 	{
 		float minFactor = BoostRarityBasedPriceMinFactorDict[boostRarity];
 		float maxFactor = BoostRarityBasedPriceMaxFactorDict[boostRarity];
-		return BasePrice * (float)GD.RandRange(minFactor, maxFactor);
+		return Mathf.Pow((float)GD.RandRange(minFactor, maxFactor), 1f / (1f + PriceRarityFactorDepression));
 	}
-	private int Price => Convert.ToInt32((1f + 0.2f * _purchasedTimes) * (_hoveringBoost?.Info.Rarity switch
+	private int Price => Convert.ToInt32(BasePrice * (1f + PriceVariancePercentage * _purchasedTimes) * (_hoveringBoost?.Info.Rarity switch
 	{
-		BoostRarity.Common => (int)GetRandomizedPrice(BoostRarity.Common),
-		BoostRarity.Uncommon => (int)GetRandomizedPrice(BoostRarity.Uncommon),
-		BoostRarity.Rare => (int)GetRandomizedPrice(BoostRarity.Rare),
-		BoostRarity.Epic => (int)GetRandomizedPrice(BoostRarity.Epic),
-		BoostRarity.Legendary => (int)GetRandomizedPrice(BoostRarity.Legendary),
+		BoostRarity.Common => GetRandomizedFactor(BoostRarity.Common),
+		BoostRarity.Uncommon => GetRandomizedFactor(BoostRarity.Uncommon),
+		BoostRarity.Rare => GetRandomizedFactor(BoostRarity.Rare),
+		BoostRarity.Epic => GetRandomizedFactor(BoostRarity.Epic),
+		BoostRarity.Legendary => GetRandomizedFactor(BoostRarity.Legendary),
 		_ => BasePrice
 	}));
 	private int _finalPrice = 0;

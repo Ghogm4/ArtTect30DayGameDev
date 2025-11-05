@@ -28,9 +28,15 @@ public partial class StatComponent : Node
 		}
 		Func<float> valueProvider;
 		if (int.TryParse(limitVal, out int constLimit))
+		{
 			valueProvider = () => constLimit;
+		}
 		else
-			valueProvider = () => GetStat(limitVal)?.FinalValue ?? 0f;
+		{
+			Stat limitStat = GetStat(limitVal);
+			valueProvider = () => limitStat?.FinalValue ?? 0f;
+			limitStat?.StatChanged += stat.Calculate;
+		}
 
 		if (processMin)
 			stat.MinLimit.ValueProvider = valueProvider;

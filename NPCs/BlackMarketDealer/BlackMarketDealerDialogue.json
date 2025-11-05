@@ -1,0 +1,34 @@
+{
+    "BlackMarketDealerFirstTime": [
+        {
+            "Id": "1",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/BlackMarketDealerPortrait.png",
+            "Text": "Heyo, boy.",
+            "SpeakerName": "Black Market Dealer"
+        },
+        {
+            "Id": "2",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/BlackMarketDealerPortrait.png",
+            "Text": "Don't tell them I'm here, alright?",
+            "SpeakerName": "Black Market Dealer"
+        },
+        {
+            "Id": "3",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/BlackMarketDealerPortrait.png",
+            "Text": "I promise that whatever you are looking for, I can get it for you. For a price, of course.",
+            "SpeakerName": "Black Market Dealer"
+        }
+    ],
+    "BlackMarketDealerRepeat": [
+        {
+            "Id": "1",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/BlackMarketDealerPortrait.png",
+            "Text": "Looking for something... special?",
+            "SpeakerName": "Black Market Dealer"
+        }
+    ]
+}

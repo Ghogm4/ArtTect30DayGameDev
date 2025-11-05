@@ -32,11 +32,8 @@ public partial class Stat : Resource
     private bool _needRefresh = true;
     private List<StatModifier> _modifiers = new();
     private StatModifier _lastAddedModifier = null;
-    public void Calculate(float referencedStatOldValue = 0, float referencedStatNewValue = 0)
+    private (float, float, float) HandleModifiers()
     {
-        if (Mergeable && _normalModifierCount > NormalModifierThreshold)
-            MergeNormalModifiers();
-        float oldValue = _cachedValue;
         float baseAdd = 0f;
         float mult = 1f;
         float finalAdd = 0f;
@@ -55,92 +52,94 @@ public partial class Stat : Resource
                     break;
             }
         }
+        return (baseAdd, mult, finalAdd);
+    }
+    public void Calculate(float referencedStatOldValue = 0, float referencedStatNewValue = 0)
+    {
+        if (Mergeable && _normalModifierCount > NormalModifierThreshold)
+            MergeNormalModifiers();
+        float oldValue = _cachedValue;
 
+        var (baseAdd, mult, finalAdd) = HandleModifiers();
         float _calculatedValue = (BaseValue + baseAdd) * mult + finalAdd;
-        
-        bool _isLastAddedModifierValid =
-        HandleCalculationExceedMinValidation(_calculatedValue, baseAdd, mult) &&
-        HandleCalculationExceedMaxValidation(_calculatedValue, baseAdd, mult);
-        if (!_isLastAddedModifierValid)
+        if (_lastAddedModifier != null)
         {
-            RemoveModifier(_lastAddedModifier);
-            return;
+            bool _isLastAddedModifierValid =
+            HandleCalculationExceedMinValidation(_calculatedValue, baseAdd, mult) &
+            HandleCalculationExceedMaxValidation(_calculatedValue, baseAdd, mult);
+            if (!_isLastAddedModifierValid)
+                return;
         }
 
         _cachedValue = _calculatedValue;
         _needRefresh = false;
         EmitSignal(SignalName.StatChanged, oldValue, _cachedValue);
     }
-    private bool HandleCalculationExceedMinValidation(float _calculatedValue, float baseAdd, float mult)
+    private void CancelLastAddedModifier()
+    {
+        if (_lastAddedModifier == null)
+            return;
+        RemoveModifier(_lastAddedModifier);
+        _lastAddedModifier = null;
+    }
+    private bool HandleCalculationExceedMinValidation(float calculatedValue, float baseAdd, float mult)
     {
         float minVal = MinLimit.Resolve();
-        if (minVal <= _calculatedValue)
+        if (minVal <= calculatedValue)
             return true;
-
-        if (_lastAddedModifier.Type is StatModifier.OperationType.BaseAdd)
+        float _lastAddedModifierValue = _lastAddedModifier.Value;
+        StatModifier.OperationType _lastAddedModifierType = _lastAddedModifier.Type;
+        CancelLastAddedModifier();
+        if (_lastAddedModifierType is StatModifier.OperationType.BaseAdd)
         {
-            float neededAdd = (minVal - _calculatedValue) / mult + _lastAddedModifier.Value;
+            float neededAdd = (minVal - calculatedValue) / mult + _lastAddedModifierValue;
             AddBase(neededAdd);
         }
-        else if (_lastAddedModifier.Type is StatModifier.OperationType.FinalAdd)
+        else if (_lastAddedModifierType is StatModifier.OperationType.FinalAdd)
         {
-            float neededAdd = _lastAddedModifier.Value - _calculatedValue + minVal;
+            float neededAdd = _lastAddedModifierValue - calculatedValue + minVal;
             AddFinal(neededAdd);
         }
         else
         {
-            float neededMult = (minVal - _calculatedValue) / ((BaseValue + baseAdd) * mult) + _lastAddedModifier.Value;
+            float neededMult = (minVal - calculatedValue) / ((BaseValue + baseAdd) * mult) + _lastAddedModifierValue;
             Mult(neededMult);
         }
         EmitSignal(SignalName.StatReachedMin);
+
         return false;
     }
-    private bool HandleCalculationExceedMaxValidation(float _calculatedValue, float baseAdd, float mult)
+    private bool HandleCalculationExceedMaxValidation(float calculatedValue, float baseAdd, float mult)
     {
         float maxVal = MaxLimit.Resolve();
-        if (maxVal >= _calculatedValue)
+        if (maxVal >= calculatedValue)
             return true;
-
-        if (_lastAddedModifier.Type is StatModifier.OperationType.BaseAdd)
+        float _lastAddedModifierValue = _lastAddedModifier.Value;
+        StatModifier.OperationType _lastAddedModifierType = _lastAddedModifier.Type;
+        CancelLastAddedModifier();
+        if (_lastAddedModifierType is StatModifier.OperationType.BaseAdd)
         {
-            float neededAdd = _lastAddedModifier.Value - (_calculatedValue - maxVal) / maxVal;
+            float neededAdd = _lastAddedModifierValue - (calculatedValue - maxVal) / maxVal;
             AddBase(neededAdd);
         }
-        else if (_lastAddedModifier.Type is StatModifier.OperationType.FinalAdd)
+        else if (_lastAddedModifierType is StatModifier.OperationType.FinalAdd)
         {
-            float neededAdd = maxVal + _lastAddedModifier.Value - _calculatedValue;
+            float neededAdd = maxVal + _lastAddedModifierValue - calculatedValue;
             AddFinal(neededAdd);
         }
         else
         {
-            float neededMult = (maxVal - _calculatedValue) / ((BaseValue + baseAdd) * mult) + _lastAddedModifier.Value;
+            float neededMult = (maxVal - calculatedValue) / ((BaseValue + baseAdd) * mult) + _lastAddedModifierValue;
             Mult(neededMult);
         }
         EmitSignal(SignalName.StatReachedMax);
+
         return false;
     }
     public void MergeNormalModifiers()
     {
         _normalModifierCount = 0;
-        float baseAdd = 0f;
-        float mult = 1f;
-        float finalAdd = 0f;
-        foreach (var modifier in _modifiers)
-        {
-            switch (modifier.Type)
-            {
-                case StatModifier.OperationType.BaseAdd:
-                    baseAdd = modifier.Operate(baseAdd);
-                    break;
-                case StatModifier.OperationType.Mult:
-                    mult = modifier.Operate(mult);
-                    break;
-                case StatModifier.OperationType.FinalAdd:
-                    finalAdd = modifier.Operate(finalAdd);
-                    break;
-            }
-        }
-
+        var (baseAdd, mult, finalAdd) = HandleModifiers();
         _modifiers.Clear();
         int types = 0;
         if (!Mathf.IsZeroApprox(baseAdd))
@@ -185,7 +184,7 @@ public partial class Stat : Resource
     {
         return
         (
-            (modifier.Type == StatModifier.OperationType.BaseAdd || modifier.Type == StatModifier.OperationType.FinalAdd) 
+            (modifier.Type == StatModifier.OperationType.BaseAdd || modifier.Type == StatModifier.OperationType.FinalAdd)
                 && Mathf.IsZeroApprox(modifier.Value)
         ) ||
         (
