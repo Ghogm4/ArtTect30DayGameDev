@@ -66,6 +66,10 @@ public partial class Fireball : Projectile
 			Vector2 direction = (_targetEnemy.GlobalPosition - GlobalPosition).Normalized();
 			acceleration = direction * AccelerationMagnitude;
 		}
+		else
+		{
+			velocity = velocity.Lerp(Vector2.Zero, 0.03f);
+		}
 		velocity += acceleration * (float)delta;
 		velocity = velocity.Normalized() * Mathf.Min(velocity.Length(), BaseSpeed);
 		Position += velocity * (float)delta;

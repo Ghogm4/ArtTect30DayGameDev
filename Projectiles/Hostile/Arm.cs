@@ -19,14 +19,17 @@ public partial class Arm : Projectile
 	{
 		_speed = Velocity.Length();
 	}
-
-	protected override void ReadyBehavior()
-	{
-		ExpireArea.BodyEntered += (body) =>
+	private void RegisterExplosionOnWorld()
+    {
+        ExpireArea.BodyEntered += (body) =>
 		{
 			if (body is TileMapLayer || (body.Get("collision_layer").AsInt32() & 1) == 1)
 				Explode();
 		};
+    }
+	protected override void ReadyBehavior()
+	{
+		RegisterExplosionOnWorld();
 		_player = GetTree().GetFirstNodeInGroup("Player") as Player;
 		GetTree().CreateTimer(LifeTime).Timeout += () =>
 		{
@@ -47,7 +50,7 @@ public partial class Arm : Projectile
 		if (body is Player player)
 			Explode();
 	}
-	private void Explode()
+	protected void Explode()
 	{
 		foreach (var body in ExplodeArea.GetOverlappingBodies())
 			if (body is Player player)

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 public partial class GuardianOfTheForest : EnemyBase
 {
     [Export] public Node2D DropTables;
+    public override Vector2 CoinDropPos => DropTables.GlobalPosition;
     private int PlayerHitTimes
     {
         get => Storage.GetVariant<int>("PlayerHitTimes");
@@ -28,7 +29,7 @@ public partial class GuardianOfTheForest : EnemyBase
     protected override async Task OnDeath()
     {
         await base.OnDeath();
-
+        DropTables.GlobalPosition = GetTree().CurrentScene.GetNode<NormalAltar>("%NormalAltar").GlobalPosition;
         DropTables.GetNode<DropTable>("DropTableLowTier").Drop();
         DropTables.GetNode<DropTable>("DropTableHighTier").Drop();
         DropTables.GetNode<DropTable>("DropTableGeneral").Drop();

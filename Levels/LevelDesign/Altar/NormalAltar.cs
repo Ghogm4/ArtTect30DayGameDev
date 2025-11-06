@@ -8,7 +8,7 @@ public partial class NormalAltar : Node2D, ISavable
 	[Export] public DropTable BoostDropTable;
 	[Export] public EnemyWaveController LinkedEnemyWaveController;
 	[Export] public bool NeedToCompleteWaves = true;
-	[Export] public bool DebugMode = false;
+	[Export] public bool SkipLevelInitialization = false;
 	public string UniqueID => Name;
 	private bool _isInteractable
 	{
@@ -28,7 +28,7 @@ public partial class NormalAltar : Node2D, ISavable
 	private bool _isEntered = false;
 	public override async void _Ready()
 	{
-		if (!DebugMode)
+		if (!SkipLevelInitialization)
 		{
 			BaseLevel baseLevel = GetTree().CurrentScene as BaseLevel;
 			if (baseLevel != null)

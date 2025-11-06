@@ -33,7 +33,7 @@ public partial class EnemyBase : CharacterBody2D
 	[Signal] public delegate void ExitMonitorEventHandler(Node2D body);
 	[Signal] public delegate void DiedEventHandler();
 	[Signal] public delegate void DyingEventHandler();
-
+	public virtual Vector2 CoinDropPos => GlobalPosition;
 	public Player player = null;
 	public bool IsDead = false;
 	public override void _Ready()
@@ -167,7 +167,7 @@ public partial class EnemyBase : CharacterBody2D
 
 			if (IsInsideTree())
 			{
-				coin.Position = Position;
+				coin.GlobalPosition = CoinDropPos;
 				GetTree()?.CurrentScene?.CallDeferred(Node.MethodName.AddChild, coin);
 				coin.ApplyCentralImpulse(Vector2.Right.Rotated(direction) * force);
 			}

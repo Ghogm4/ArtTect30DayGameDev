@@ -8,14 +8,28 @@ using System.Threading.Tasks;
 public partial class MapManager : Node2D
 {
 	public static MapManager Instance { get; private set; }
-	[Export] public Godot.Collections.Array<PackedScene> MapPool;
-	[Export] public Godot.Collections.Array<PackedScene> ExtraMapPool;
+	[Export] public Godot.Collections.Array<PackedScene> ForestMapPool;
+	[Export] public Godot.Collections.Array<PackedScene> KingdomMapPool;
+	// [Export] public Godot.Collections.Array<PackedScene> ExtraMapPool;
 	[Signal] public delegate void MapGeneratedEventHandler();
 	[Signal] public delegate void MapChangedEventHandler();
+	public Godot.Collections.Array<PackedScene> TargetMapPool
+	{
+		get
+		{
+			return MapPoolIndex switch
+			{
+				0 => ForestMapPool,
+				1 => KingdomMapPool,
+				_ => default
+			};
+		}
+	}
 	public List<Map> Maps = new();
 	public List<Map> ExtraMaps = new();
 	public List<Map> EnabledMaps = new List<Map>();
 	public List<Map> EndNodeMaps = new List<Map>();
+	public int MapPoolIndex = 0;
 	public string Entrance = null;
 	public Map NowMap = null;
 	public Map StartMap = null;
@@ -23,6 +37,7 @@ public partial class MapManager : Node2D
 	private bool _isEndCreated = false;
 	private Vector2 _returnPos = Vector2.Zero;
 	private Vector2I _returnMapPos = Vector2I.Left;
+
 	public override void _Ready()
 	{
 		if (Instance == null)
@@ -57,7 +72,8 @@ public partial class MapManager : Node2D
 		Player player = GetTree().GetFirstNodeInGroup("Player") as Player;
 		if (player == null) CallDeferred(MethodName.ReturnToMainMap);
 		player.GlobalPosition = _returnPos;
-	}	public void RecordReturnPosition(Vector2 portalPos)
+	}
+	public void RecordReturnPosition(Vector2 portalPos)
 	{
 		_returnPos = portalPos;
 		_returnMapPos = NowMap.Position;
@@ -70,7 +86,7 @@ public partial class MapManager : Node2D
 
 		Maps = new List<Map>();
 		EnabledMaps = new List<Map>();
-		foreach (PackedScene scene in MapPool)
+		foreach (PackedScene scene in TargetMapPool)
 		{
 			var mapLevel = scene.Instantiate<BaseLevel>();
 			if (mapLevel == null)
@@ -87,25 +103,23 @@ public partial class MapManager : Node2D
 			Maps.Add(newMap);
 			if (newMap.IsStartLevel)
 				StartMap = newMap;
-			if (newMap.IsEndLevel)
-				EndMap = newMap;
 
 			GD.Print("Loaded map: " + scene.ResourcePath);
 		}
-		foreach (PackedScene scene in ExtraMapPool)
-		{
-			var mapLevel = scene.Instantiate<BaseLevel>();
-			if (mapLevel == null)
-			{
-				GD.PrintErr("Extra MapLevel is null.");
-				continue;
-			}
-			Map newMap = new Map(scene);
-			newMap.IsExtraLevel = true;
-			ExtraMaps.Add(newMap);
+		// foreach (PackedScene scene in ExtraMapPool)
+		// {
+		// 	var mapLevel = scene.Instantiate<BaseLevel>();
+		// 	if (mapLevel == null)
+		// 	{
+		// 		GD.PrintErr("Extra MapLevel is null.");
+		// 		continue;
+		// 	}
+		// 	Map newMap = new Map(scene);
+		// 	newMap.IsExtraLevel = true;
+		// 	ExtraMaps.Add(newMap);
 
-			GD.Print("Loaded extra map: " + scene.ResourcePath);
-		}
+		// 	GD.Print("Loaded extra map: " + scene.ResourcePath);
+		// }
 		MapALG.Instance.InitMap();
 		MapALG.Instance.StartRoom();
 		MapALG.Instance.PrintMap();
@@ -158,9 +172,14 @@ public partial class MapManager : Node2D
 			CallDeferred(MethodName.SetPlayerPosition, entrance);
 			return;
 		}
-		bool isMarkerFound = false;
+		bool isMarkerFound = true;
 		switch (entrance)
 		{
+			case "Start":
+				if (baseLevel.StartMarker == null) break;
+				player.GlobalPosition = baseLevel.StartMarker.GlobalPosition;
+				isMarkerFound = true;
+				break;
 			case "Top":
 				if (baseLevel.BottomMarker == null) break;
 				player.GlobalPosition = baseLevel.BottomMarker.GlobalPosition;
@@ -179,11 +198,6 @@ public partial class MapManager : Node2D
 			case "Right":
 				if (baseLevel.LeftMarker == null) break;
 				player.GlobalPosition = baseLevel.LeftMarker.GlobalPosition;
-				isMarkerFound = true;
-				break;
-			case "Start":
-				if (baseLevel.StartMarker == null) break;
-				player.GlobalPosition = baseLevel.StartMarker.GlobalPosition;
 				isMarkerFound = true;
 				break;
 			default:
@@ -301,32 +315,49 @@ public partial class MapManager : Node2D
 			StartMap.IsStartLevel = true;
 			NowMap = StartMap;
 		}
-		var rng = new Random();
-		int index = rng.Next(EndNodeMaps.Count);
-		Map node = EndNodeMaps[index];
-
-		EndMap.Position = node.Position;
-		EndMap.TopExit = node.TopExit;
-		EndMap.BottomExit = node.BottomExit;
-		EndMap.LeftExit = node.LeftExit;
-		EndMap.RightExit = node.RightExit;
-		EndMap.TopMap = node.TopMap;
-		EndMap.BottomMap = node.BottomMap;
-		EndMap.LeftMap = node.LeftMap;
-		EndMap.RightMap = node.RightMap;
+		if (EndNodeMaps.Count == 0)
+		{
+			GD.PrintErr("MapManager: No end-node maps found to place the EndLevel. Aborting.");
+			return;
+		}
+		Map nodeToReplace = EndNodeMaps.OrderBy(_ => GD.Randi()).FirstOrDefault();
+		EndMap = Maps.Where(map => map.Type == nodeToReplace.Type && map.IsEndLevel).OrderBy(_ => GD.Randi()).FirstOrDefault();
+		EndMap.Position = nodeToReplace.Position;
 		EndMap.IsEnabled = true;
 		if (!EnabledMaps.Contains(EndMap)) EnabledMaps.Add(EndMap);
 
+		nodeToReplace.IsEnabled = false;
+		EnabledMaps.Remove(nodeToReplace);
+
 		foreach (var map in EnabledMaps)
 		{
-			if (map.TopMap == node) map.TopMap = EndMap;
-			if (map.BottomMap == node) map.BottomMap = EndMap;
-			if (map.LeftMap == node) map.LeftMap = EndMap;
-			if (map.RightMap == node) map.RightMap = EndMap;
-		}
+			if (map == EndMap) continue;
 
-		node.IsEnabled = false;
-		EnabledMaps.Remove(node);
+			if (map.BottomMap == nodeToReplace)
+			{
+				map.BottomMap = EndMap;
+				EndMap.TopMap = map;
+				EndMap.TopExit = true;
+			}
+			if (map.TopMap == nodeToReplace)
+			{
+				map.TopMap = EndMap;
+				EndMap.BottomMap = map;
+				EndMap.BottomExit = true;
+			}
+			if (map.RightMap == nodeToReplace)
+			{
+				map.RightMap = EndMap;
+				EndMap.LeftMap = map;
+				EndMap.LeftExit = true;
+			}
+			if (map.LeftMap == nodeToReplace)
+			{
+				map.LeftMap = EndMap;
+				EndMap.RightMap = map;
+				EndMap.RightExit = true;
+			}
+		}
 	}
 
 	public Map GetMapAtPosition(Vector2I position)

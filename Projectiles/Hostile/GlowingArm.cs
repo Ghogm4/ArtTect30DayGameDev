@@ -15,7 +15,15 @@ public partial class GlowingArm : Arm
 	[Export] public PackedScene BlueOrbScene;
 
 	public float _timeElapsed = 0f;
-
+	protected override void ReadyBehavior()
+	{
+		_player = GetTree().GetFirstNodeInGroup("Player") as Player;
+		GetTree().CreateTimer(LifeTime).Timeout += () =>
+		{
+			if (IsInstanceValid(this))
+				Explode();
+		};
+	}
 	public override void _Process(double delta)
 	{
 		base._Process(delta);

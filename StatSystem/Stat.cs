@@ -85,7 +85,7 @@ public partial class Stat : Resource
     private bool HandleCalculationExceedMinValidation(float calculatedValue, float baseAdd, float mult)
     {
         float minVal = MinLimit.Resolve();
-        if (minVal <= calculatedValue)
+        if (minVal <= calculatedValue || _lastAddedModifier == null)
             return true;
         float _lastAddedModifierValue = _lastAddedModifier.Value;
         StatModifier.OperationType _lastAddedModifierType = _lastAddedModifier.Type;
@@ -112,7 +112,7 @@ public partial class Stat : Resource
     private bool HandleCalculationExceedMaxValidation(float calculatedValue, float baseAdd, float mult)
     {
         float maxVal = MaxLimit.Resolve();
-        if (maxVal >= calculatedValue)
+        if (maxVal >= calculatedValue || _lastAddedModifier == null)
             return true;
         float _lastAddedModifierValue = _lastAddedModifier.Value;
         StatModifier.OperationType _lastAddedModifierType = _lastAddedModifier.Type;

@@ -19,7 +19,7 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
                 float attackMult = ps.GetStatValue("AttackMult");
                 float attackFinal = ps.GetStatValue("AttackFinal");
                 fireball.Damage = ((attack + attackBase) * attackMult + attackFinal) * ps.GetStatValue("ProjectileDamageMultiplier");
-                ps.GetTree().CurrentScene.AddChild(fireball);
+                ps.GetTree().CurrentScene.CallDeferred(MethodName.AddChild, fireball);
             }
         });
         playerStats.OnDashActions.Add((ps, pos) =>
@@ -34,12 +34,12 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
                 float attackMult = ps.GetStatValue("AttackMult");
                 float attackFinal = ps.GetStatValue("AttackFinal");
                 fireball.Damage = ((attack + attackBase) * attackMult + attackFinal) * ps.GetStatValue("ProjectileDamageMultiplier");
-                ps.GetTree().CurrentScene.AddChild(fireball);
+                ps.GetTree().CurrentScene.CallDeferred(MethodName.AddChild, fireball);
             }
         });
         playerStats.OnEnemyDeathActions.Add((enemy, ps) =>
         {
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 3; i++)
             {
                 Fireball fireball = Projectile.Factory.CreateFriendly<Fireball>("Fireball");
                 fireball.GlobalPosition = enemy.GlobalPosition;
@@ -49,7 +49,7 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
                 float attackMult = ps.GetStatValue("AttackMult");
                 float attackFinal = ps.GetStatValue("AttackFinal");
                 fireball.Damage = ((attack + attackBase) * attackMult + attackFinal) * ps.GetStatValue("ProjectileDamageMultiplier");
-                ps.GetTree().CurrentScene.AddChild(fireball);
+                ps.GetTree().CurrentScene.CallDeferred(MethodName.AddChild, fireball);
             }
         });
     }

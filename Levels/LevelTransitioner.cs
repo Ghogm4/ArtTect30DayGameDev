@@ -7,6 +7,11 @@ public partial class LevelTransitioner : Area2D
 	public PackedScene TargetLevel = null;
 	public string Entrance = null;
 	private bool _isEmitted = false;
+	private void ToggleLock(bool enable)
+	{
+		Monitoring = enable;
+		Monitorable = enable;
+	}
 	public override void _Ready()
 	{
 		BodyEntered += (Node2D body) =>
