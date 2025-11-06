@@ -108,6 +108,7 @@ public partial class ShopItem : Node2D, ISavable
 			_hoveringBoost = ItemDropTable.DroppedBoosts[0];
 			_hoveringBoost.Visible = false;
 			_itemSceneFilePath = _hoveringBoost.SceneFilePath;
+			_hoveringBoost.GlobalPosition = ItemSprite.GlobalPosition;
 		}
 	}
 	private void ResetDisplayState()
@@ -165,11 +166,6 @@ public partial class ShopItem : Node2D, ISavable
 			_purchasedTimes++;
 		}
 	}
-	private void HandleDisplayAfterPurchase()
-	{
-		ItemSprite.Visible = false;
-		PriceContainer.Visible = false;
-	}
 	private void EnableBoostPickup()
 	{
 		if (_hoveringBoost != null && IsInstanceValid(_hoveringBoost))
@@ -177,9 +173,13 @@ public partial class ShopItem : Node2D, ISavable
 			_hoveringBoost.Visible = true;
 			_hoveringBoost.GlobalPosition = ItemSprite.GlobalPosition;
 			_hoveringBoost.Pickable = true;
-
-			_hoveringBoost.TreeExiting += () => _hoveringBoost = null;
+			//_hoveringBoost.TreeExiting += () => _hoveringBoost = null;
 		}
+	}
+	private void HandleDisplayAfterPurchase()
+	{
+		ItemSprite.Visible = false;
+		PriceContainer.Visible = false;
 	}
 	private void ToggleWhiteOutline(bool enabled)
 	{

@@ -13,14 +13,14 @@ public partial class BoostOnObtainDisplay : Control
 	public override void _Ready()
 	{
 		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerBoostPickedUp, Callable.From<BoostInfo, bool, bool>(DisplayBoost));
-		SignalBus.Instance.Connect(SignalBus.SignalName.DialogueStarted, Callable.From(() =>
+		TextManager.Instance.Connect(TextManager.SignalName.DialogueStarted, Callable.From(() =>
 		{
 			_duringDialogue = true;
 			tween?.Kill();
 			Modulate = new(1, 1, 1, 0);
 			Visible = false;
 		}));
-		SignalBus.Instance.Connect(SignalBus.SignalName.DialogueEnded, Callable.From(() =>
+		TextManager.Instance.Connect(TextManager.SignalName.DialogueEnded, Callable.From(() =>
 		{
 			_duringDialogue = false;
 			Modulate = new(1, 1, 1, 0);

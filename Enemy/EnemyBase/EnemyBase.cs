@@ -122,8 +122,10 @@ public partial class EnemyBase : CharacterBody2D
 			.SetTrans(Tween.TransitionType.Linear)
 			.SetEase(Tween.EaseType.InOut);
 	}
+	private void DisableHurtbox() => GetNode<CollisionShape2D>("Hurtbox").Disabled = true;
 	public async void Die(bool freeAfterDeath = true)
 	{
+		CallDeferred(MethodName.DisableHurtbox);
 		EmitSignal(SignalName.Dying);
 		await OnDeath();
 		DropCoin();

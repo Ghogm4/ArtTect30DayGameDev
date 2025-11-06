@@ -29,6 +29,7 @@ public partial class Player_DashState : State
 	}
 	protected override void Enter()
 	{
+		_player.EmitSignal(Player.SignalName.PlayerDashed);
 		_sprite.Play("Dash");
 
 		_dashTimer.WaitTime = Stats.GetStatValue("DashDuration");

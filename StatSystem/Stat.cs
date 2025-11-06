@@ -60,7 +60,7 @@ public partial class Stat : Resource
             MergeNormalModifiers();
         float oldValue = _cachedValue;
 
-        var (baseAdd, mult, finalAdd) = HandleModifiers();
+        (float baseAdd, float mult, float finalAdd) = HandleModifiers();
         float _calculatedValue = (BaseValue + baseAdd) * mult + finalAdd;
         if (_lastAddedModifier != null)
         {
@@ -136,10 +136,11 @@ public partial class Stat : Resource
 
         return false;
     }
+    // This method will merge even non-normal modifiers into three types
     public void MergeNormalModifiers()
     {
         _normalModifierCount = 0;
-        var (baseAdd, mult, finalAdd) = HandleModifiers();
+        (float baseAdd, float mult, float finalAdd) = HandleModifiers();
         _modifiers.Clear();
         int types = 0;
         if (!Mathf.IsZeroApprox(baseAdd))

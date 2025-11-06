@@ -15,6 +15,8 @@ public partial class GameData : Node
     public List<IntervalTrigger> PlayerPassiveSkills = new();
     public List<Action<EnemyBase, PlayerStatComponent>> PlayerOnEnemyDeathActions = new();
     public List<Action<PlayerStatComponent, Vector2>> PlayerOnAttackActions = new();
+    public List<Action<PlayerStatComponent, Vector2>> PlayerOnJumpActions = new();
+    public List<Action<PlayerStatComponent, Vector2>> PlayerOnDashActions = new();
     public bool PlayerStatComponentInitialized = false;
     public Dictionary<Vector2I, GDDictionary> MapStates { get; set; } = new();
     public void Reset()

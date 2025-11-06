@@ -1,0 +1,76 @@
+{
+    "MageFirstTime": [
+        {
+            "Id": "1",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/Eleonore/Idle/MagePortrait.png",
+            "Text": "Greetings.",
+            "SpeakerName": "Eleonore, the Greatest Mage"
+        },
+        {
+            "Id": "2",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/Eleonore/Idle/MagePortrait.png",
+            "Text": "I can sense your bravery and strength as the mightiest warrior from the land afar.",
+            "SpeakerName": "Eleonore, the Greatest Mage"
+        },
+        {
+            "Id": "3",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/Eleonore/Idle/MagePortrait.png",
+            "Text": "As you can see, our king is not here. He has gone to confront the invading void that threatens our realm.",
+            "SpeakerName": "Eleonore, the Greatest Mage"
+        },
+        {
+            "Id": "4",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/Eleonore/Idle/MagePortrait.png",
+            "Text": "We've already captured lots of void creatures in the dungeons below to see if we can gather their intel, but their power is unlikely to wane anytime soon.",
+            "SpeakerName": "Eleonore, the Greatest Mage"
+        },
+        {
+            "Id": "5",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/Eleonore/Idle/MagePortrait.png",
+            "Text": "Many of our bravest warriors have been corrupted by the void's influence. Even the strongest can fall.",
+            "SpeakerName": "Eleonore, the Greatest Mage"
+        },
+        {
+            "Id": "6",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/Eleonore/Idle/MagePortrait.png",
+            "Text": "That's why I reached out to you. I need your strength to combat the void.",
+            "SpeakerName": "Eleonore, the Greatest Mage"
+        },
+        {
+            "Id": "7",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/Eleonore/Idle/MagePortrait.png",
+            "Text": "Too much void energy is already damaging my body and I fear it will take long to recover.",
+            "SpeakerName": "Eleonore, the Greatest Mage"
+        },
+        {
+            "Id": "8",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/Eleonore/Idle/MagePortrait.png",
+            "Text": "I'll lend you my power. Please, be careful out there. We all appreciate your help.",
+            "SpeakerName": "Eleonore, the Greatest Mage"
+        },
+        {
+            "Id": "9",
+            "Side": "Right",
+            "Profile": "res://Assets/PlayerSpriteSheet/AdventurerPortrait.png",
+            "Text": "I understand. I'll do my best to help your kingdom. Also, it's a revenge mission for my homeland.",
+            "SpeakerName": "Adventurer"
+        }
+    ],
+    "MageRepeat": [
+        {
+            "Id": "1",
+            "Side": "Left",
+            "Profile": "res://Assets/NPCs/Eleonore/Idle/MagePortrait.png",
+            "Text": "Prepare well before venturing into the dungeons. Feel free to ask me for advice anytime.",
+            "SpeakerName": "Eleonore, the Greatest Mage"
+        }
+    ]
+}

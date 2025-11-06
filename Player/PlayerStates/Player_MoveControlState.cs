@@ -11,7 +11,7 @@ public partial class Player_MoveControlState : State
 	[Export] private Timer _platformPassThroughTimer = null;
 	private const float Acceleration = 25.0f;
 	private const float Deceleration = 25.0f;
-	
+
 	private int AvailableJumps
 	{
 		get => (int)Stats.GetStatValue("AvailableJumps");
@@ -72,7 +72,7 @@ public partial class Player_MoveControlState : State
 
 		if (Input.IsActionPressed("Down") && Input.IsActionJustPressed("Jump"))
 			PassThroughPlatform();
-		
+
 		if (!Input.IsActionPressed("Down") &&
 			(
 				(Input.IsActionJustPressed("Jump") && AvailableJumps > 0) ||
@@ -84,7 +84,7 @@ public partial class Player_MoveControlState : State
 			_shortJumpTimer.Start();
 			AvailableJumps--;
 			CanCoyoteTimerStart = false;
-
+			_player.EmitSignal(Player.SignalName.PlayerJumped);
 			_jumpedFromPlatform = _wasOnFloor && Mathf.Abs(_platformVelocity) > 0.1f;
 			if (_jumpedFromPlatform) _launchPlatformSpeed = Mathf.Abs(_platformVelocity);
 		}

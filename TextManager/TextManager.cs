@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 public partial class TextManager : Node
 {
+	[Signal] public delegate void DialogueStartedEventHandler();
+	[Signal] public delegate void DialogueEndedEventHandler();
 	public static TextManager Instance { get; private set; }
 	public Control DialoguePanel;
 	public TextureRect ProfileLeft;
@@ -51,7 +53,7 @@ public partial class TextManager : Node
 		Index = 0;
 		_isTextShowing = true;
 		ShowText();
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.DialogueStarted);
+		EmitSignal(SignalName.DialogueStarted);
 	}
 	private void GetTextSceneNodes()
 	{
@@ -85,12 +87,12 @@ public partial class TextManager : Node
 	{
 		if (!_isTextShowing)
 			return;
-			
+
 		Lines = null;
 		Index = 0;
 		_isTextShowing = false;
 		TextScene.Instance.Visible = false;
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.DialogueEnded);
+		EmitSignal(SignalName.DialogueEnded);
 	}
 	private async void ShowText()
 	{

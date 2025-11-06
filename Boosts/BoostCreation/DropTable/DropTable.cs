@@ -267,7 +267,7 @@ public partial class DropTable : Node2D
             BoostRarity.Rare => EnableRareRarity,
             BoostRarity.Epic => EnableEpicRarity,
             BoostRarity.Legendary => EnableLegendaryRarity,
-            _ => false
+            _ => true
         };
 
         bool categoryEnabled = boost.Info.Category switch
@@ -277,7 +277,7 @@ public partial class DropTable : Node2D
             BoostCategory.General => EnableGeneralItems,
             BoostCategory.Survival => EnableSurvivalItems,
             BoostCategory.Hybrid => EnableHybridItems,
-            _ => false
+            _ => true
         };
 
         return rarityEnabled && categoryEnabled;

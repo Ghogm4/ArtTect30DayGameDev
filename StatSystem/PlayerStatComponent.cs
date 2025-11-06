@@ -8,6 +8,8 @@ public partial class PlayerStatComponent : StatComponent
     public List<Action<EnemyBase, PlayerStatComponent>> OnEnemyDeathActions = new();
     // Vector2 is the position of the player when attacking
     public List<Action<PlayerStatComponent, Vector2>> OnAttackActions = new();
+    public List<Action<PlayerStatComponent, Vector2>> OnJumpActions = new();
+    public List<Action<PlayerStatComponent, Vector2>> OnDashActions = new();
     private ref bool _initialized => ref GameData.Instance.PlayerStatComponentInitialized;
     public void InitializeOnce()
     {
@@ -25,6 +27,9 @@ public partial class PlayerStatComponent : StatComponent
         SignalBus.Instance.EnemyDied += TriggerOnEnemyDeathActions;
         SignalBus.Instance.PlayerStatResetRequested += ResetStats;
         SignalBus.Instance.PlayerPurchased += (int price) => AddFinal("Coin", -price);
+        Player player = Owner as Player;
+        player.PlayerJumped += TriggerOnPlayerJumpedActions;
+        player.PlayerDashed += TriggerOnPlayerDashedActions;
         AddFinal("AvailableDashes", GetStatValue("MaxDash") - GetStatValue("AvailableDashes"));
         InitializeOnce();
     }
@@ -32,6 +37,16 @@ public partial class PlayerStatComponent : StatComponent
     {
         foreach (var action in OnEnemyDeathActions)
             action?.Invoke(deadEnemy, this);
+    }
+    private void TriggerOnPlayerJumpedActions()
+    {
+        foreach (var action in OnJumpActions)
+            action?.Invoke(this, (Owner as Player).GlobalPosition);
+    }
+    private void TriggerOnPlayerDashedActions()
+    {
+        foreach (var action in OnDashActions)
+            action?.Invoke(this, (Owner as Player).GlobalPosition);
     }
     private void InitializeDefaultAttackAction()
     {
@@ -102,6 +117,8 @@ public partial class PlayerStatComponent : StatComponent
         GameData.Instance.PlayerPassiveSkills = PassiveSkills;
         GameData.Instance.PlayerOnEnemyDeathActions = OnEnemyDeathActions;
         GameData.Instance.PlayerOnAttackActions = OnAttackActions;
+        GameData.Instance.PlayerOnJumpActions = OnJumpActions;
+        GameData.Instance.PlayerOnDashActions = OnDashActions;
     }
     private void LoadActionsFromGameData()
     {
@@ -109,5 +126,7 @@ public partial class PlayerStatComponent : StatComponent
         PassiveSkills = GameData.Instance.PlayerPassiveSkills;
         OnEnemyDeathActions = GameData.Instance.PlayerOnEnemyDeathActions;
         OnAttackActions = GameData.Instance.PlayerOnAttackActions;
+        OnJumpActions = GameData.Instance.PlayerOnJumpActions;
+        OnDashActions = GameData.Instance.PlayerOnDashActions;
     }
 }

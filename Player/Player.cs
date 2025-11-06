@@ -3,6 +3,9 @@ using System;
 
 public partial class Player : CharacterBody2D
 {
+	[Signal] public delegate void PlayerJumpedEventHandler();
+	[Signal] public delegate void PlayerLandedEventHandler();
+	[Signal] public delegate void PlayerDashedEventHandler();
 	[Export] public PlayerStatComponent PlayerStats = null;
 	public override void _Ready()
 	{
