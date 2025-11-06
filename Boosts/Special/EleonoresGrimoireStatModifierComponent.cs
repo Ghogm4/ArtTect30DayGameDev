@@ -18,7 +18,7 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
                 float attackBase = ps.GetStatValue("AttackBase");
                 float attackMult = ps.GetStatValue("AttackMult");
                 float attackFinal = ps.GetStatValue("AttackFinal");
-                fireball.Damage = (attack + attackBase) * attackMult + attackFinal;
+                fireball.Damage = ((attack + attackBase) * attackMult + attackFinal) * ps.GetStatValue("ProjectileDamageMultiplier");
                 ps.GetTree().CurrentScene.AddChild(fireball);
             }
         });
@@ -33,7 +33,7 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
                 float attackBase = ps.GetStatValue("AttackBase");
                 float attackMult = ps.GetStatValue("AttackMult");
                 float attackFinal = ps.GetStatValue("AttackFinal");
-                fireball.Damage = (attack + attackBase) * attackMult + attackFinal;
+                fireball.Damage = ((attack + attackBase) * attackMult + attackFinal) * ps.GetStatValue("ProjectileDamageMultiplier");
                 ps.GetTree().CurrentScene.AddChild(fireball);
             }
         });
