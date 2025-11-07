@@ -1,0 +1,15 @@
+using Godot;
+using System;
+using System.Threading.Tasks;
+public partial class Skeleton : EnemyBase
+{
+	[Export] public Skeleton_MoveControlState state;
+	protected override async Task OnDeath()
+	{
+		state._maxFallSpeed = 0f;
+		GD.Print("Archer Enemy detected Death");
+		Sprite.Play("Die");
+		await ToSignal(Sprite, "animation_finished");
+		return;
+	}
+}
