@@ -14,7 +14,7 @@ public partial class ShopItem : Node2D, ISavable
 	[Export] public Label PriceTag;
 	[Export] public HBoxContainer PriceContainer;
 	[Export] public bool SkipLevelInitialization = false;
-	public string UniqueID => Name;
+	public string UniqueID => Name + GetParent().Name;
 	private Vector2 _itemSpriteOriginalPosition;
 	private float _timeElapsed = 0f;
 	private float _hoverAmplitude = 5f;

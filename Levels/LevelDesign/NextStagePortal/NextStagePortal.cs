@@ -17,7 +17,6 @@ public partial class NextStagePortal : Node2D, ISavable
 			field = value;
 			if (field && NeedToCompleteWaves)
 			{
-				MapManager.Instance.MapPoolIndex++;
 				Tween tween = CreateTween();
 				tween.TweenProperty(this, "scale", Vector2.One, 1f)
 					.SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
@@ -67,14 +66,50 @@ public partial class NextStagePortal : Node2D, ISavable
 			IsInteractable = false;
 		}
 	}
-
+	private void FirstChangeStage()
+	{
+		MapManager.Instance.InitMaps();
+		MapALG.Instance.Roomlist.Clear();
+		MapALG.Instance.Roomlist.Add(
+			new(
+				ResourceLoader.Load<PackedScene>("res://Levels/KingdomLevels/KingdomLevel_R_nrbcb.tscn"),
+				new(2, 2),
+				false, false, false, true, true, false
+			)
+			{ IsEnabled = true }
+		);
+		MapALG.Instance.Roomlist.Add(
+			new(
+				ResourceLoader.Load<PackedScene>("res://Levels/KingdomLevels/KingdomLevel_L_htnmx.tscn"),
+				new(3, 2),
+				false, false, true, false, false, false
+			)
+			{ IsEnabled = true }
+		);
+		MapALG.Instance.StartRoom(false, true, false, false);
+		MapALG.Instance.PrintMap();
+		MapManager.Instance.ApplyMap();
+		MapManager.Instance.StartLevel();
+	}
+	private void SecondStageChange()
+	{
+		MapManager.Instance.InitMaps();
+		MapALG.Instance.InitMap();
+		MapALG.Instance.StartRoom(true, true, false, false, false);
+		MapALG.Instance.PrintMap();
+		MapManager.Instance.ApplyMap();
+		MapManager.Instance.StartLevel();
+	}
 	public override void _Process(double delta)
 	{
 		if (!_isPlayerNearby || _isTeleporting || !Input.IsActionJustPressed("Interact") || !IsInteractable)
 			return;
 		_isTeleporting = true;
-		MapManager.Instance.InitMaps();
-		MapManager.Instance.StartLevel();
+		MapManager.Instance.MapPoolIndex++;
+		if (MapManager.Instance.MapPoolIndex == 1)
+			FirstChangeStage();
+		else if (MapManager.Instance.MapPoolIndex == 2)
+			SecondStageChange();
 	}
 	public GDDictionary SaveState()
 	{

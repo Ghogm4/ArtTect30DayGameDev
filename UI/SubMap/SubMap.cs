@@ -58,7 +58,9 @@ public partial class SubMap : Control
 	{
 		GD.Print("Map generated!");
 		_roomTextureRects.Clear();
-
+		foreach (var roomTextureRect in SubMapPanel.GetChildren())
+			if (string.Compare(roomTextureRect.Name, "Highlight") != 0)
+				roomTextureRect.QueueFree();
 		Vector2 roomSize = _subMapPanelSize / new Vector2(MapALG.Instance.Width, MapALG.Instance.Height);
 		foreach (var room in MapALG.Instance.Roomlist)
 		{
@@ -79,16 +81,13 @@ public partial class SubMap : Control
 	}
 	public void DrawMap()
 	{
-		foreach (var room in MapALG.Instance.Roomlist)
+		foreach (var map in MapManager.Instance.EnabledMaps)
 		{
-			Map map = MapManager.Instance.GetMapAtPosition(room.Position);
-			if (!room.IsEnabled) continue;
-
-			Texture2D roomTexture = GetRoomTexture(room);
-			TextureRect roomTextureRect = GetRoomTextureRect(room);
+			GD.Print("Map type: " + map.JudgeMapType());
+			Texture2D roomTexture = GetRoomTexture(map);
+			TextureRect roomTextureRect = GetRoomTextureRect(map);
 			roomTextureRect.Texture = roomTexture;
-
-			if (!map.IsDiscovered) roomTextureRect.Visible = false;
+			if (!map?.IsDiscovered ?? false) roomTextureRect.Visible = false;
 			else roomTextureRect.Visible = true;
 		}
 	}

@@ -10,6 +10,7 @@ public partial class MapManager : Node2D
 	public static MapManager Instance { get; private set; }
 	[Export] public Godot.Collections.Array<PackedScene> ForestMapPool;
 	[Export] public Godot.Collections.Array<PackedScene> KingdomMapPool;
+	[Export] public Godot.Collections.Array<PackedScene> DungeonMapPool;
 	// [Export] public Godot.Collections.Array<PackedScene> ExtraMapPool;
 	[Signal] public delegate void MapGeneratedEventHandler();
 	[Signal] public delegate void MapChangedEventHandler();
@@ -21,6 +22,7 @@ public partial class MapManager : Node2D
 			{
 				0 => ForestMapPool,
 				1 => KingdomMapPool,
+				2 => DungeonMapPool,
 				_ => default
 			};
 		}
@@ -78,14 +80,22 @@ public partial class MapManager : Node2D
 		_returnPos = portalPos;
 		_returnMapPos = NowMap.Position;
 	}
+	private void Reset()
+	{
+		Maps.Clear();
+		EnabledMaps.Clear();
+		EndNodeMaps.Clear();
+		NowMap = null;
+		StartMap = null;
+		EndMap = null;
+		_isEndCreated = false;
+	}
 	public void InitMaps()
 	{
 		Reset();
 		if (Maps != null)
 			Maps.ForEach(map => map.IsEnabled = false);
-
-		Maps = new List<Map>();
-		EnabledMaps = new List<Map>();
+		GD.Print("TargetMapPool Count: " + TargetMapPool.Count);
 		foreach (PackedScene scene in TargetMapPool)
 		{
 			var mapLevel = scene.Instantiate<BaseLevel>();
@@ -120,21 +130,6 @@ public partial class MapManager : Node2D
 
 		// 	GD.Print("Loaded extra map: " + scene.ResourcePath);
 		// }
-		MapALG.Instance.InitMap();
-		MapALG.Instance.StartRoom();
-		MapALG.Instance.PrintMap();
-		ApplyMap();
-		EmitSignal(SignalName.MapGenerated);
-	}
-	private void Reset()
-	{
-		Maps = new();
-		EnabledMaps.Clear();
-		EndNodeMaps.Clear();
-		NowMap = null;
-		StartMap = null;
-		EndMap = null;
-		_isEndCreated = false;
 	}
 	public async void OnEntranceEntered(string entrance)
 	{
@@ -210,7 +205,7 @@ public partial class MapManager : Node2D
 	public Map SearchMap(MapType type)
 	{
 		GD.Print("Searching for map of type: " + type.ToString());
-		List<Map> filteredMaps = Maps.Where(m => m.Type == type && !m.IsEnabled && !m.IsEndLevel && !m.IsStartLevel).ToList();
+		List<Map> filteredMaps = Maps.Where(m => m.Type == type && !m.IsEnabled && !m.IsEndLevel).ToList();
 		if (filteredMaps.Count > 0)
 		{
 			Random random = new Random();
@@ -232,7 +227,7 @@ public partial class MapManager : Node2D
 		{
 			newLevel.InitializeLevel(NowMap.Position);
 		}
-
+		GameData.Instance.MapStates.Clear();
 		SetPlayerPosition("Start");
 	}
 	public void ApplyMap()
@@ -241,8 +236,10 @@ public partial class MapManager : Node2D
 
 		foreach (var room in MapALG.Instance.Roomlist)
 		{
+			GD.Print("Processing room at position: " + room.Position);
 			if (!room.IsEnabled) continue;
 			MapType desiredType = room.JudgeMapType();
+			GD.Print("Desired map type for position " + room.Position + ": " + desiredType.ToString());
 			Map chosen = SearchMap(desiredType);
 			if (chosen == null)
 			{
@@ -308,6 +305,14 @@ public partial class MapManager : Node2D
 				EndNodeMaps.Add(map);
 			}
 		}
+		// foreach (var map in EnabledMaps)
+        // {
+		// 	GD.Print($"Map at position {map.Position} connections:");
+		// 	GD.Print($"  Top: {(map.TopMap != null ? map.TopMap.Position.ToString() : "None")}");
+		// 	GD.Print($"  Bottom: {(map.BottomMap != null ? map.BottomMap.Position.ToString() : "None")}");
+		// 	GD.Print($"  Left: {(map.LeftMap != null ? map.LeftMap.Position.ToString() : "None")}");
+		// 	GD.Print($"  Right: {(map.RightMap != null ? map.RightMap.Position.ToString() : "None")}");
+        // }
 		Vector2I sp = new(MapALG.Instance.startPos.X, MapALG.Instance.startPos.Y);
 		if (assigned.TryGetValue(sp, out var startMap))
 		{
@@ -322,6 +327,11 @@ public partial class MapManager : Node2D
 		}
 		Map nodeToReplace = EndNodeMaps.OrderBy(_ => GD.Randi()).FirstOrDefault();
 		EndMap = Maps.Where(map => map.Type == nodeToReplace.Type && map.IsEndLevel).OrderBy(_ => GD.Randi()).FirstOrDefault();
+		if (EndMap is null)
+        {
+			EmitSignal(SignalName.MapGenerated);
+			return;
+        }
 		EndMap.Position = nodeToReplace.Position;
 		EndMap.IsEnabled = true;
 		if (!EnabledMaps.Contains(EndMap)) EnabledMaps.Add(EndMap);
@@ -358,6 +368,7 @@ public partial class MapManager : Node2D
 				EndMap.RightExit = true;
 			}
 		}
+		EmitSignal(SignalName.MapGenerated);
 	}
 
 	public Map GetMapAtPosition(Vector2I position)

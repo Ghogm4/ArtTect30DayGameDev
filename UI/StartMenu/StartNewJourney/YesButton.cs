@@ -13,6 +13,10 @@ public partial class YesButton : Button
 		_isPressedOnce = true;
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerStatResetRequested);
 		MapManager.Instance.InitMaps();
+		MapALG.Instance.InitMap();
+		MapALG.Instance.StartRoom(true, true, false, false, true);
+		MapALG.Instance.PrintMap();
+		MapManager.Instance.ApplyMap();
 		MapManager.Instance.StartLevel();
 	}
 }

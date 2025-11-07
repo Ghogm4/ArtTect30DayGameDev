@@ -80,13 +80,16 @@ public partial class MapALG : Node2D
 
 	public Map GetMapAtPosition(int x, int y) => Roomlist.FirstOrDefault(map => map.Position == new Vector2I(x, y));
 	public Map GetMapAtPosition(Vector2I position) => GetMapAtPosition(position.X, position.Y);
-	public void StartRoom()
+	public void StartRoom(bool isLeft, bool isRight, bool isTop, bool isBottom, bool doWalk = true)
 	{
 		Map startRoom = GetMapAtPosition(startPos);
 		startRoom.IsEnabled = true;
-		startRoom.RightExit = true;
-		startRoom.LeftExit = true;
-		Walk(startRoom);
+		startRoom.RightExit = isRight;
+		startRoom.LeftExit = isLeft;
+		startRoom.TopExit = isTop;
+		startRoom.BottomExit = isBottom;
+		if (doWalk)
+			Walk(startRoom);
 	}
 	public void Randomize(Map Map, Map fromRoom, int depth = 0)
 	{

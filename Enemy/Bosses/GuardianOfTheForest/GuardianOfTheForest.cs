@@ -29,7 +29,9 @@ public partial class GuardianOfTheForest : EnemyBase
     protected override async Task OnDeath()
     {
         await base.OnDeath();
-        DropTables.GlobalPosition = GetTree().CurrentScene.GetNode<NormalAltar>("%NormalAltar").GlobalPosition;
+        NormalAltar altar = GetTree().CurrentScene.GetNode<NormalAltar>("%NormalAltar");
+        if (altar != null)
+            DropTables.GlobalPosition = altar.GlobalPosition;
         DropTables.GetNode<DropTable>("DropTableLowTier").Drop();
         DropTables.GetNode<DropTable>("DropTableHighTier").Drop();
         DropTables.GetNode<DropTable>("DropTableGeneral").Drop();
