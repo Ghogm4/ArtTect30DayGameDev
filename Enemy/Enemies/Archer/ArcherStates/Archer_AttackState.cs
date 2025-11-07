@@ -7,6 +7,8 @@ public partial class Archer_AttackState : State
     private AnimatedSprite2D _sprite = null;
     private EnemyBase _enemy = null;
     private Player _player = null;
+    private Vector2 _playerLastPosition = Vector2.Zero;
+    private float _maxDegree = 30f;
 
     protected override void ReadyBehavior()
     {
@@ -48,27 +50,35 @@ public partial class Archer_AttackState : State
             _sprite.FlipH = false;
         }
     }
-    protected override void FrameUpdate(double delta)
+    protected override async void FrameUpdate(double delta)
     {
+
+
         if (_sprite.Frame == 6 && Storage.GetVariant<bool>("HasSpawnedArrow") == false)
         {
             SpawnArrow();
             Storage.SetVariant("HasSpawnedArrow", true);
         }
+        await ToSignal(GetTree().CreateTimer(0.1f), "timeout");
+        _playerLastPosition = _player.GlobalPosition;
     }
     public void SpawnArrow()
     {
         Vector2 startPosition = _enemy.GlobalPosition + new Vector2(Storage.GetVariant<bool>("HeadingLeft") ? -20f : 20f, -5f);
         Vector2 direction = new Vector2();
-        if (Storage.GetVariant<bool>("HeadingLeft"))
+        if (_playerLastPosition.X < _enemy.GlobalPosition.X)
         {
-            direction = new Vector2(-1, 0);
+            Storage.SetVariant("HeadingLeft", true);
         }
         else
         {
-            direction = new Vector2(1, 0);
+            Storage.SetVariant("HeadingLeft", false);
         }
-        
+        direction = _enemy.GlobalPosition.DirectionTo(_playerLastPosition);
+        if (Mathf.Abs(direction.Y / direction.X) > Mathf.Tan(Mathf.DegToRad(_maxDegree)))
+        {
+            direction.Y = direction.Y * Mathf.Tan(Mathf.DegToRad(_maxDegree)) * Math.Abs(direction.X);
+        }
         Vector2 velocity = direction * 1000f;
         var arrow = Projectile.Factory.CreateHostile<Arrow>("Arrow");
         arrow.Position = startPosition;
