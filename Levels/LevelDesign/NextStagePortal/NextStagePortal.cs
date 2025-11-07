@@ -7,6 +7,7 @@ public partial class NextStagePortal : Node2D, ISavable
 	[Export] public AnimatedSprite2D PortalSprite;
 	[Export] public bool NeedToCompleteWaves = true;
 	[Export] public bool SkipLevelInitialization = false;
+	[Export] public bool ActiveOnDialogueEnd = false;
 	[Export] public EnemyWaveController LinkedEnemyWaveController = null;
 	private bool IsInteractable
 	{
@@ -65,6 +66,16 @@ public partial class NextStagePortal : Node2D, ISavable
 			Visible = false;
 			IsInteractable = false;
 		}
+
+		if (ActiveOnDialogueEnd)
+		{
+			TextManager.Instance.DialogueEnded += () =>
+			{
+				GD.Print("Dialogue ended - activating portal");
+				Visible = true;
+				IsInteractable = true;
+			};
+		}
 	}
 	private void FirstChangeStage()
 	{
@@ -93,8 +104,14 @@ public partial class NextStagePortal : Node2D, ISavable
 	}
 	private void SecondStageChange()
 	{
+		if (MapALG.Instance == null)
+		{
+			GD.PrintErr("MapALG.Instance is null - cannot change to second stage");
+			return;
+		}
 		MapManager.Instance.InitMaps();
 		MapALG.Instance.InitMap();
+		GD.Print(MapALG.Instance.Roomlist.Count);
 		MapALG.Instance.StartRoom(true, true, false, false, false);
 		MapALG.Instance.PrintMap();
 		MapManager.Instance.ApplyMap();
