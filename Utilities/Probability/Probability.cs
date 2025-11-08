@@ -31,6 +31,15 @@ public partial class Probability : RefCounted
 
 		foreach (var tuple in probableActions)
 			probability.Register(tuple.Item1, tuple.Item2);
+
+		probability.Run();
+	}
+	public static void Run(List<Tuple<float, Action>> probableActions)
+	{
+		using Probability probability = new();
+
+		foreach (var tuple in probableActions)
+			probability.Register(tuple.Item1, tuple.Item2);
 		
 		probability.Run();
 	}

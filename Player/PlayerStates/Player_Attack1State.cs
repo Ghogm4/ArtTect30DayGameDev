@@ -31,6 +31,7 @@ public partial class Player_Attack1State : State
 	{
 		_canCombo = false;
 		_attack1ComboTimer.Stop();
+		_animationPlayer.Stop();
 		_animationPlayer.AnimationFinished -= OnAnimationFinished;
 	}
 	private void OnAttack1ComboTimerTimeout() => _canCombo = true;

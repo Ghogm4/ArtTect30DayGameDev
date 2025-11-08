@@ -30,9 +30,7 @@ public partial class Boost : RigidBody2D
     }
     public void DoBoost(StatComponent statComponent)
     {
-        int amount = Info.Amount;
-        for (int i = 0; i < amount; i++)
-            _modifierComponent.ModifyStatComponent(statComponent);
+        _modifierComponent.ModifyStatComponent(statComponent);
         if (!DropTable.ObtainedOneTimeBoosts.Contains(SceneFilePath) && Info.IsOneTimeOnly)
         {
             DropTable.ObtainedOneTimeBoosts.Add(SceneFilePath);

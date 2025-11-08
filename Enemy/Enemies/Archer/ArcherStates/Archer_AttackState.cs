@@ -25,7 +25,7 @@ public partial class Archer_AttackState : State
         
     }
 
-    protected override async void Enter()
+    protected override void Enter()
     {
 
         _sprite.Play("Attack");

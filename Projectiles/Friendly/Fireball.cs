@@ -12,6 +12,7 @@ public partial class Fireball : Projectile
 	public Vector2 Velocity = Vector2.Zero;
 	public float Damage = 0;
 	private bool _updated = false;
+	private float _speed = 300f;
 	private bool IsExpired
 	{
 		get => field;
@@ -25,6 +26,7 @@ public partial class Fireball : Projectile
 	} = false;
 	protected override void ReadyBehavior()
 	{
+		_speed = Velocity.Length();
 		GetTree().CreateTimer(LifeTime).Timeout += () =>
 		{
 			if (IsInstanceValid(this))
@@ -71,7 +73,7 @@ public partial class Fireball : Projectile
 			velocity = velocity.Lerp(Vector2.Zero, 0.03f);
 		}
 		velocity += acceleration * (float)delta;
-		velocity = velocity.Normalized() * Mathf.Min(velocity.Length(), BaseSpeed);
+		velocity = velocity.Normalized() * Mathf.Min(velocity.Length(), _speed);
 		Position += velocity * (float)delta;
 		Rotation = velocity.Angle();
 		Velocity = velocity;

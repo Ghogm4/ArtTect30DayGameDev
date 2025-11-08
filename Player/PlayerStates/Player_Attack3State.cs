@@ -17,6 +17,7 @@ public partial class Player_Attack3State : State
 	}
 	protected override void Exit()
 	{
+		_animationPlayer.Stop();
 		_animationPlayer.AnimationFinished -= OnAnimationFinished;
 	}
 	private void OnAnimationFinished(StringName s) => AskTransit("Idle");

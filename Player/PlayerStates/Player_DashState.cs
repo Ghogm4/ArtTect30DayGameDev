@@ -36,10 +36,18 @@ public partial class Player_DashState : State
 		_dashTimer.Start();
 
 		_dashTrail.Emitting = true;
-
+		CreateDashInvincibility();
 		CreateDashCooldownTimer();
 
 		HandleTrailDirection();
+	}
+	private void CreateDashInvincibility()
+	{
+		Storage.SetVariant("DashInvincible", true);
+		Scheduler.Instance.ScheduleAction(Stats.GetStatValue("DashInvincibilityDuration"), () =>
+		{
+			Storage.SetVariant("DashInvincible", false);
+		}, 0, true);
 	}
 	private void CreateDashCooldownTimer()
 	{
@@ -49,14 +57,14 @@ public partial class Player_DashState : State
 				AvailableDashes++;
 		}
 		, 10, true);
-    }
+	}
 	private void HandleTrailDirection()
-    {
-        if (Storage.GetVariant<bool>("HeadingLeft"))
+	{
+		if (Storage.GetVariant<bool>("HeadingLeft"))
 			_dashTrail.Texture = ResourceLoader.Load<Texture2D>("res://Assets/PlayerSpriteSheet/PlayerDashLeft.png");
 		else
 			_dashTrail.Texture = ResourceLoader.Load<Texture2D>("res://Assets/PlayerSpriteSheet/PlayerDashRight.png");
-    }
+	}
 	protected override void PhysicsUpdate(double delta)
 	{
 		int direction = Storage.GetVariant<bool>("HeadingLeft") ? -1 : 1;

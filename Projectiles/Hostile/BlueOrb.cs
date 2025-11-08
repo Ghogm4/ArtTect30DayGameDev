@@ -19,7 +19,8 @@ public partial class BlueOrb : Projectile
         }
     }
     protected override void HitBehavior(Node2D body)
-    {
+	{
+		if (_isExpired) return;
         if (body is Player player)
 		{
 			player.TakeDamage(1, Callable.From<Player>((player) => { }));

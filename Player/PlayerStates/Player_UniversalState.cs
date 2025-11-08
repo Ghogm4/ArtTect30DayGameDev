@@ -78,7 +78,7 @@ public partial class Player_UniversalState : State
 			_invincibilityTween?.Kill();
 			return;
 		}
-		if (_isInvincible)
+		if (IsInvincible())
 			return;
 		for (int collisionIndex = 0; collisionIndex < _player.GetSlideCollisionCount(); collisionIndex++)
 		{
@@ -99,7 +99,7 @@ public partial class Player_UniversalState : State
 
 	public void OnPlayerHit(int damage, Callable customBehavior)
 	{
-		if (_isInvincible)
+		if (IsInvincible())
 			return;
 		int remainingDamage = damage;
 		Callable behavior = customBehavior;
@@ -158,5 +158,9 @@ public partial class Player_UniversalState : State
 	{
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthStatusUpdated,
 		(int)_health, (int)_maxHealth, (int)_shield, (int)Stats.GetStatValue("Coin"), (int)Stats.GetStatValue("HealthPotionAmount"));
+	}
+	private bool IsInvincible()
+	{
+		return _isInvincible || Storage.GetVariant<bool>("DashInvincible");
 	}
 }

@@ -23,6 +23,7 @@ public partial class VarStorage : Node
     public T GetNode<T>(string varName) where T : Node => (T)_nodeStorage[varName];
     // 设置变量
     public void SetVariant(string varName, Variant variant) => _variantStorage[varName] = variant;
+    public void SetNode(string varName, Node node) => _nodeStorage[varName] = node;
     // 移除变量与节点
     public void RemoveVariant(string varName) => _variantStorage.Remove(varName);
     public void RemoveNode(string varName) => _nodeStorage.Remove(varName);
