@@ -8,7 +8,7 @@ public partial class Archer_AttackState : State
 	private EnemyBase _enemy = null;
 	private Player _player = null;
 	private Vector2 _playerLastPosition = Vector2.Zero;
-	private float _maxDegree = 30f;
+	[Export] private float _maxDegree = 40f;
 
 	protected override void ReadyBehavior()
 	{
@@ -64,7 +64,7 @@ public partial class Archer_AttackState : State
 	}
 	public void SpawnArrow()
 	{
-		Vector2 startPosition = _enemy.GlobalPosition + new Vector2(Storage.GetVariant<bool>("HeadingLeft") ? -20f : 20f, -5f);
+		Vector2 startPosition = _enemy.GlobalPosition + new Vector2(Storage.GetVariant<bool>("HeadingLeft") ? -20f : 20f, -10f);
 		Vector2 direction = new Vector2();
 		if (_playerLastPosition.X < _enemy.GlobalPosition.X)
 		{
@@ -80,7 +80,7 @@ public partial class Archer_AttackState : State
 			direction.Y = direction.Y * Mathf.Tan(Mathf.DegToRad(_maxDegree)) * Math.Abs(direction.X);
 		}
 		direction = direction.Normalized();
-		Vector2 velocity = direction * 1000f;
+		Vector2 velocity = direction * 700f;
 		var arrow = Projectile.Factory.CreateHostile<Arrow>("Arrow");
 		arrow.Position = startPosition;
 		arrow.Rotation = direction.Angle();

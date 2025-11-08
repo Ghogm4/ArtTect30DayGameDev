@@ -208,9 +208,8 @@ public partial class MapManager : Node2D
 		List<Map> filteredMaps = Maps.Where(m => m.Type == type && !m.IsEnabled && !m.IsEndLevel).ToList();
 		if (filteredMaps.Count > 0)
 		{
-			Random random = new Random();
-			int index = random.Next(filteredMaps.Count);
-			return filteredMaps[index];
+			float[] weights = filteredMaps.Select(m => (float)m.RarityWeight).ToArray();
+			return Probability.RunWeightedChoose(filteredMaps.ToArray(), weights);
 		}
 		return null;
 	}
@@ -306,13 +305,13 @@ public partial class MapManager : Node2D
 			}
 		}
 		// foreach (var map in EnabledMaps)
-        // {
+		// {
 		// 	GD.Print($"Map at position {map.Position} connections:");
 		// 	GD.Print($"  Top: {(map.TopMap != null ? map.TopMap.Position.ToString() : "None")}");
 		// 	GD.Print($"  Bottom: {(map.BottomMap != null ? map.BottomMap.Position.ToString() : "None")}");
 		// 	GD.Print($"  Left: {(map.LeftMap != null ? map.LeftMap.Position.ToString() : "None")}");
 		// 	GD.Print($"  Right: {(map.RightMap != null ? map.RightMap.Position.ToString() : "None")}");
-        // }
+		// }
 		Vector2I sp = new(MapALG.Instance.startPos.X, MapALG.Instance.startPos.Y);
 		if (assigned.TryGetValue(sp, out var startMap))
 		{
@@ -328,10 +327,10 @@ public partial class MapManager : Node2D
 		Map nodeToReplace = EndNodeMaps.OrderBy(_ => GD.Randi()).FirstOrDefault();
 		EndMap = Maps.Where(map => map.Type == nodeToReplace.Type && map.IsEndLevel).OrderBy(_ => GD.Randi()).FirstOrDefault();
 		if (EndMap is null)
-        {
+		{
 			EmitSignal(SignalName.MapGenerated);
 			return;
-        }
+		}
 		EndMap.Position = nodeToReplace.Position;
 		EndMap.IsEnabled = true;
 		if (!EnabledMaps.Contains(EndMap)) EnabledMaps.Add(EndMap);

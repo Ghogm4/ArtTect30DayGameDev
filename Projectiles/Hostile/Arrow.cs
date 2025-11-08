@@ -21,6 +21,8 @@ public partial class Arrow : Projectile
 	{
 		if (body is Player player)
 		{
+			if (_isExpired)
+				return;
 			GD.Print("Arrow hit Player");
 			player.TakeDamage(1, Callable.From<Player>((player) => { }));
 			RunExpireAnimation();
