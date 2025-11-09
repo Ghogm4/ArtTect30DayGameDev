@@ -51,8 +51,8 @@ public partial class EnemyMap : Node
 		probability.Run();
 	}
 	private async Task MakeEnemySpawnHint(Vector2 position)
-    {
-        Sprite2D iconSpriteNode = new();
+	{
+		Sprite2D iconSpriteNode = new();
 		iconSpriteNode.Texture = ResourceLoader.Load<Texture2D>("res://Assets/Special Tiles/EnemySpawnIcon/EnemySpawnIcon.png");
 		iconSpriteNode.Position = position;
 		GetTree().CurrentScene.CallDeferred(Node.MethodName.AddChild, iconSpriteNode);
@@ -64,7 +64,7 @@ public partial class EnemyMap : Node
 		tween.TweenProperty(iconSpriteNode, "modulate:a", 1f, 0.1f);
 		await ToSignal(tween, Tween.SignalName.Finished);
 		iconSpriteNode.QueueFree();
-    }
+	}
 	public async void SpawnEnemy(string enemyName, Vector2 position)
 	{
 		await MakeEnemySpawnHint(position);
