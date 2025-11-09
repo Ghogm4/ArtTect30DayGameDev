@@ -8,7 +8,7 @@ public partial class Wolf : EnemyBase
 	{
 		state._maxFallSpeed = 0f;
 		GD.Print("Wolf Enemy detected Death");
-		Sprite.Play("Die");
+//		Sprite.Play("Die");
 		await ToSignal(Sprite, "animation_finished");
 		return;
 	}

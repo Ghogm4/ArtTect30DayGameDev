@@ -14,7 +14,7 @@ public partial class Wolf_AttackIdleState : State
 		_player = GetTree().GetFirstNodeInGroup("Player") as Player;
 
 		_attackIdleTimer = new Timer();
-		GetTree().Root.AddChild(_attackIdleTimer);
+		GetTree().Root.CallDeferred(MethodName.AddChild, _attackIdleTimer);
 		_attackIdleTimer.WaitTime = 0.5f; // 攻击间隔时间
 		_attackIdleTimer.OneShot = true;
 		_attackIdleTimer.Timeout += () =>
