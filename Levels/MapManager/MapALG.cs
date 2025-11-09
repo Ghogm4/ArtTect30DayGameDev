@@ -12,6 +12,11 @@ public partial class MapALG : Node2D
 	public static MapALG Instance { get; private set; }
 	public List<Map> Roomlist = new();
 	public List<Map> EndRooms = new();
+	public void ResetRoomState()
+    {
+		Roomlist.Clear();
+		EndRooms.Clear();
+    }
 	public void InitMap()
 	{
 		for (int x = 0; x < Width; x++)

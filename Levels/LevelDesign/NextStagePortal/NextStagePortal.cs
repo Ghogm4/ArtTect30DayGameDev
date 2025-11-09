@@ -109,10 +109,11 @@ public partial class NextStagePortal : Node2D, ISavable
 			GD.PrintErr("MapALG.Instance is null - cannot change to second stage");
 			return;
 		}
+		MapALG.Instance.ResetRoomState();
 		MapManager.Instance.InitMaps();
 		MapALG.Instance.InitMap();
 		GD.Print(MapALG.Instance.Roomlist.Count);
-		MapALG.Instance.StartRoom(true, true, false, false, false);
+		MapALG.Instance.StartRoom(true, true, false, false, true);
 		MapALG.Instance.PrintMap();
 		MapManager.Instance.ApplyMap();
 		MapManager.Instance.StartLevel();

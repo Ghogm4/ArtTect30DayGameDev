@@ -44,7 +44,7 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
         });
         playerStats.OnEnemyDeathActions.Add((enemy, ps) =>
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 2; i++)
                 CreateFireball(ps, enemy.GlobalPosition);
         });
         playerStats.OnAttackActions.Add((ps, pos) =>

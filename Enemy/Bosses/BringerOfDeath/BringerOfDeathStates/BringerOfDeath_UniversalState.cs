@@ -3,7 +3,13 @@ using System;
 
 public partial class BringerOfDeath_UniversalState : State
 {
+	[Export] public float DarkSoulSummonRadius = 100f;
+	[Export] public float MinDarkSoulSummonInterval = 0.7f;
+	[Export] public float MaxDarkSoulSummonInterval = 1f;
+	[Export] public Timer DarkSoulSummonTimer;
+	[Export] public PackedScene DarkSoulScene;
 	private const float SpriteXOffset = -35f;
+	private float DarkSoulSummonInterval => Mathf.Lerp(MinDarkSoulSummonInterval, MaxDarkSoulSummonInterval, Ratio);
 	private bool HeadingLeft
 	{
 		get => Storage.GetVariant<bool>("HeadingLeft");
@@ -35,9 +41,22 @@ public partial class BringerOfDeath_UniversalState : State
 		_enemy = Storage.GetNode<EnemyBase>("Enemy");
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
 		_areaContainer = Storage.GetNode<Node2D>("AreaContainer");
+
+		DarkSoulSummonTimer.Timeout += () =>
+		{
+			if (_enemy.IsDead) return;
+			DarkSoulSummonTimer.WaitTime = DarkSoulSummonInterval;
+			DarkSoul darkSoul = DarkSoulScene.Instantiate<DarkSoul>();
+			float radian = (float)GD.RandRange(0, Mathf.Tau);
+			Vector2 summonPos = _enemy.GlobalPosition + Vector2.Right.Rotated(radian) * (float)GD.RandRange(0, DarkSoulSummonRadius);
+			darkSoul.GlobalPosition = summonPos;
+			GetTree().CurrentScene.CallDeferred(MethodName.AddChild, darkSoul);
+		};
 	}
 	protected override void FrameUpdate(double delta)
 	{
+		if (Ratio <= 0.5f && DarkSoulSummonTimer.IsStopped())
+			DarkSoulSummonTimer.Start(DarkSoulSummonInterval);
 		if (_enemy.IsDead)
 			AskTransit("Die");
 	}

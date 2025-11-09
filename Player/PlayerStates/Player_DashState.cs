@@ -36,6 +36,7 @@ public partial class Player_DashState : State
 		_dashTimer.Start();
 
 		_dashTrail.Emitting = true;
+		AvailableDashes--;
 		CreateDashInvincibility();
 		CreateDashCooldownTimer();
 

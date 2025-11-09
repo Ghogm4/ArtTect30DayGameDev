@@ -5,7 +5,7 @@ public partial class LargeBat_NormalState : State
 {
     [Export] public float WanderRadius = 100f;
     [Export] public float ChaseRadius = 50f;
-    [Export] public float Duration = 200f;
+    [Export] public float Duration = 2f;
     private Vector2 RandomWanderPos
     {
         get
@@ -77,7 +77,7 @@ public partial class LargeBat_NormalState : State
             _player = player;
             _targetMovePos = RandomChasePos;
             Storage.RegisterNode("Player", _player);
-            CreateTransitionTimer();
+            AskTransit("Decision");
         }
     }
     private void MoveToTargetPos()

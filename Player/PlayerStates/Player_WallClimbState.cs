@@ -87,10 +87,9 @@ public partial class Player_WallClimbState : State
 			AskTransit("Idle");
 		}
 
-		if (Input.IsActionJustPressed("Dash"))
+		if (Input.IsActionJustPressed("Dash") && AvailableDashes > 0)
 		{
 			HeadingLeft = !HeadingLeft;
-			AvailableDashes--;
 			AskTransit("Dash");
 		}
 		_player.Velocity = velocity;

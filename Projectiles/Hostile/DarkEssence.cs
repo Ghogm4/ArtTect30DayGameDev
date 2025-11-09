@@ -3,15 +3,16 @@ using System;
 
 public partial class DarkEssence : Projectile
 {
-    [Export] public float Gravity = 100f;
     public Vector2 Velocity = Vector2.Zero;
     public float Damage = 1;
     private bool _isExpired = false;
+    private Vector2 _originalScale;
     protected override void ReadyBehavior()
     {
+        _originalScale = Scale;
         Scale = Vector2.Zero;
         Tween tween = CreateTween();
-        tween.TweenProperty(this, "scale", Vector2.One, 0.2f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+        tween.TweenProperty(this, "scale", _originalScale, 0.2f).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
         Hitbox.BodyEntered += (body) =>
         {
             if (body is TileMapLayer || (body.Get("collision_layer").AsInt32() & 1) == 1)
@@ -24,10 +25,13 @@ public partial class DarkEssence : Projectile
     public override void _Process(double delta)
     {
         if (_isExpired) return;
-        Vector2 velocity = Velocity;
-        Position += velocity * (float)delta;
-        velocity.Y = Mathf.Clamp(velocity.Y + Gravity * (float)delta, -1000f, 1000f);
-        Velocity = velocity;
+        Position += Velocity * (float)delta;
+        Velocity = Velocity.Lerp(Vector2.Zero, (float)delta * 4f);
+        if (Velocity.Length() < 1f)
+        {
+            _isExpired = true;
+            RunExpireAnimation();
+        }
     }
     protected override void HitBehavior(Node2D body)
     {

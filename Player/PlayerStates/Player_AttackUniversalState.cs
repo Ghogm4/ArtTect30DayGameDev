@@ -3,6 +3,11 @@ using System;
 
 public partial class Player_AttackUniversalState : State
 {
+	private int AvailableDashes
+	{
+		get => (int)Stats.GetStatValue("AvailableDashes");
+		set => Stats.GetStat("AvailableDashes").AddFinal(value - (int)Stats.GetStatValue("AvailableDashes"));
+	}
 	private AnimatedSprite2D _sprite = null;
 	private Area2D _attackArea = null;
 	private Player _player = null;
@@ -24,7 +29,7 @@ public partial class Player_AttackUniversalState : State
 	{
 		if (Input.IsActionJustPressed("Left") || Input.IsActionJustPressed("Right"))
 			AskTransit("Idle");
-		if (Input.IsActionJustPressed("Dash"))
+		if (Input.IsActionJustPressed("Dash") && AvailableDashes > 0)
 			AskTransit("Dash");
 	}
 

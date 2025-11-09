@@ -33,6 +33,7 @@ public partial class DarkSoul_DieState : State
 	{
 		DarkEssence darkEssence = Projectile.Factory.CreateProjectile<DarkEssence>(DarkEssenceScene);
 		darkEssence.GlobalPosition = _enemy.GlobalPosition;
+		darkEssence.Velocity = Vector2.Right.Rotated((float)GD.RandRange(0, Mathf.Tau)) * GD.RandRange(100, 200);
 		GetTree().CurrentScene.AddChild(darkEssence);
 	}
 }

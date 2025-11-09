@@ -3,9 +3,20 @@ using System;
 
 public partial class BringerOfDeath_AttackState : State
 {
+	[ExportGroup("Extra Attack Settings")]
 	[Export] public float MinContinueAttackChance = 0.1f;
 	[Export] public float MaxContinueAttackChance = 0.5f;
 	[Export] public int MaxExtraAttacks = 2;
+	[ExportGroup("Hand Attack Settings")]
+	[Export] public float TriggerWhenUnderRatio = 0.5f;
+	[Export] public int MinHandCount = 3;
+	[Export] public int MaxHandCount = 5;
+	[Export] public float HandGap = 20f;
+	[Export] public float HandScale = 1f;
+	[Export] public float HandSpawnDelay = 0.1f;
+	[Export] public PackedScene HandScene;
+	private const float HandYOffset = -32f;
+	private int HandCount => (int)Mathf.Lerp(MaxHandCount, MinHandCount, Ratio);
 	private float ContinueAttackChance
 	{
 		get
@@ -21,6 +32,7 @@ public partial class BringerOfDeath_AttackState : State
 		set => Storage.SetVariant("CanTurnAround", value);
 	}
 	private float WalkSpeed => Stats.GetStatValue("WalkSpeed");
+	private float Ratio => Stats.GetStatValue("Health") / Stats.GetStatValue("MaxHealth");
 	private EnemyBase _enemy;
 	private AnimationPlayer _animationPlayer;
 	private Area2D _attackArea;
@@ -73,5 +85,29 @@ public partial class BringerOfDeath_AttackState : State
 			int damage = (int)Stats.GetStatValue("MeleeDamage");
 			player.TakeDamage(damage, Callable.From<Player>(_enemy.CustomBehaviour));
 		}
+		if (Ratio <= TriggerWhenUnderRatio)
+		{
+			CreateHands();
+		}
 	}
+	private async void CreateHands()
+	{
+		int direction = Storage.GetVariant<bool>("HeadingLeft") ? -1 : 1;
+		float currentXOffset = direction * HandGap;
+        for (int i = 0; i < HandCount; i++)
+		{
+			float spread = Mathf.Pi / 10;
+			float radian = (float)GD.RandRange(-Mathf.Pi - spread, -Mathf.Pi + spread);
+			Vector2 spawnPosition = _enemy.GlobalPosition + Vector2.Right * currentXOffset;
+
+			var handInstance = HandScene.Instantiate<Hand>();
+			handInstance.GlobalPosition = spawnPosition + Vector2.Up * HandYOffset;
+			handInstance.Rotation = radian;
+			handInstance.Scale = Vector2.One * HandScale;
+			GetTree().CurrentScene.CallDeferred(MethodName.AddChild, handInstance);
+
+			currentXOffset += HandGap * direction;
+			await ToSignal(GetTree().CreateTimer(HandSpawnDelay), SceneTreeTimer.SignalName.Timeout);
+        }
+    }
 }

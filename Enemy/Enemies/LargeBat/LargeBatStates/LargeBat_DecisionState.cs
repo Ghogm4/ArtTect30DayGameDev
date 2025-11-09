@@ -7,7 +7,7 @@ public partial class LargeBat_DecisionState : State
 		Tuple.Create("SoundAttack", 1f),
 		Tuple.Create("Summon", 0.8f),
 	];
-	private bool _wasNormalDecided = false;
+	private bool _wasNormalDecided = true;
 	protected override void Enter()
 	{
 		string nextState = "";

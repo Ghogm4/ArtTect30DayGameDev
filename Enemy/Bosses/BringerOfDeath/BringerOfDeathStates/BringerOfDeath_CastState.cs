@@ -14,6 +14,11 @@ public partial class BringerOfDeath_CastState : State
 	[Export] public float MinHandSummonGap = 150f;
 	[Export] public float MaxHandSummonGap = 200f;
 	[Export] public PackedScene HandScene;
+	[ExportGroup("Summon Monsters Settings")]
+	[Export] public float SummonMonsterRadius = 250f;
+	[Export] public int MinMonsterSummonCount = 2;
+	[Export] public int MaxMonsterSummonCount = 5;
+	[Export] public PackedScene[] MonsterScenes;
 	private const float HandSummonYOffset = 38f;
 	private float SummonGap => Mathf.Lerp(MinHandSummonGap, MaxHandSummonGap, Ratio);
 	private float Ratio
@@ -36,6 +41,7 @@ public partial class BringerOfDeath_CastState : State
 
 		CastActions.Add(Tuple.Create(0.5f, SummonReapers));
 		CastActions.Add(Tuple.Create(0.5f, SummonHands));
+		CastActions.Add(Tuple.Create(0.5f, SummonMonsters));
 	}
 	protected override void Enter()
 	{
@@ -89,4 +95,17 @@ public partial class BringerOfDeath_CastState : State
 			SummonHand(summonPosRight, summonGap / 2 + randomOffset);
 		}
 	}
+	private async void SummonMonsters()
+    {
+        for (int i = 0; i < Mathf.Lerp(MinMonsterSummonCount, MaxMonsterSummonCount, Ratio); i++)
+		{
+			float radian = (float)GD.RandRange(0, Mathf.Tau);
+			Vector2 summonPos = _enemy.GlobalPosition + Vector2.Right.Rotated(radian) * (float)GD.RandRange(0, SummonMonsterRadius) + Vector2.Up * SummonMonsterRadius;
+			EnemyBase monster = Probability.RunUniformChoose(MonsterScenes).Instantiate<EnemyBase>();
+			monster.GlobalPosition = summonPos;
+			monster.WillDropItems = false;
+			GetTree().CurrentScene.CallDeferred(MethodName.AddChild, monster);
+			await ToSignal(GetTree().CreateTimer(0.3f), SceneTreeTimer.SignalName.Timeout);
+		}
+    }
 }

@@ -5,7 +5,7 @@ public partial class BringerOfDeath_DecisionState : State
 {
 	private Tuple<string, float>[] _nextStates = [
 		Tuple.Create("Walk", 1f),
-		Tuple.Create("Cast", 1.5f),
+		Tuple.Create("Cast", 1.3f),
 	];
 	private bool _wasNormalDecided = false;
 	protected override void Enter()

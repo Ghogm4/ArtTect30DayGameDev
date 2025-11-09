@@ -13,7 +13,6 @@ public partial class Player_CanDashState : State
 		if (AvailableDashes > 0 && Input.IsActionJustPressed("Dash"))
 		{
 			AskTransit("Dash");
-			AvailableDashes--;
 		}
     }
 }

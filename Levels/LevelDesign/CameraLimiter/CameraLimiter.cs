@@ -28,7 +28,9 @@ public partial class CameraLimiter : Marker2D
 		set { _lineLength = value; QueueRedraw(); }
 	}
 	private float _lineThickness = 2.0f;
-	[Export] public float LineThickness {
+	[Export]
+	public float LineThickness
+	{
 		get => _lineThickness;
 		set { _lineThickness = value; QueueRedraw(); }
 	}
@@ -49,8 +51,17 @@ public partial class CameraLimiter : Marker2D
 			}
 		}
 	}
+	public void SetCameraLimiterPosition(Vector2 position)
+	{
+		GlobalPosition = position;
+		UpdateCameraLimit();
+	}
 	public override void _Ready()
-    {
+	{
+		UpdateCameraLimit();
+	}
+	private void UpdateCameraLimit()
+	{
 		Player player = GetTree().GetFirstNodeInGroup("Player") as Player;
 		if (player is null)
 		{
@@ -68,5 +79,5 @@ public partial class CameraLimiter : Marker2D
 			camera.LimitRight = (int)GlobalPosition.X;
 			camera.LimitBottom = (int)GlobalPosition.Y;
 		}
-    }
+	}
 }
