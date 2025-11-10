@@ -14,11 +14,6 @@ public partial class Wolf_AttackState : State
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
 		_enemy = Storage.GetNode<EnemyBase>("Enemy");
         _attackEffectSprite = _enemy.GetNode<AnimatedSprite2D>("AnimatedSprite2D2");
-		_sprite.AnimationFinished += () =>
-		{
-			_sprite.Stop();
-			AskTransit("AttackIdle");
-		};
         Storage.RegisterVariant<bool>("HasDealtDamage", false);
         _attackEffectSprite.Visible = false;
         _attackEffectSprite.AnimationFinished += () =>
@@ -27,8 +22,6 @@ public partial class Wolf_AttackState : State
             _attackEffectSprite.Stop();
         };
 	}
-
-	
 
 	protected override void Enter()
 	{
@@ -41,10 +34,12 @@ public partial class Wolf_AttackState : State
 		Storage.SetVariant("HasDealtDamage", false);
 		_enemy.Velocity = new Vector2(0, _enemy.Velocity.Y);
 		_sprite.Play("Attack");
-
-		
+		_sprite.AnimationFinished += OnAnimationFinished;
 	}
-
+	protected override void Exit()
+	{
+		_sprite.AnimationFinished -= OnAnimationFinished;
+	}
 	protected override void FrameUpdate(double delta)
 	{
         if (_sprite.Frame == 3 && Storage.GetVariant<bool>("HasDealtDamage") == false)
@@ -54,7 +49,6 @@ public partial class Wolf_AttackState : State
             DealDamage();
             Storage.SetVariant("HasDealtDamage", true);
         }
-
 	}
 	public void DealDamage()
 	{
@@ -67,5 +61,10 @@ public partial class Wolf_AttackState : State
 				player.TakeDamage(1, Callable.From<Player>((player) => { }));
 			}
 		}
+	}
+	private void OnAnimationFinished()
+	{
+		_sprite.Stop();
+		AskTransit("AttackIdle");
 	}
 }
