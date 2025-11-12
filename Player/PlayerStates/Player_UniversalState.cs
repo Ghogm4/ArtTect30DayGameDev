@@ -26,7 +26,7 @@ public partial class Player_UniversalState : State
 		};
 		InitializeSignals();
 		InitializeWrappers();
-		EmitHealthStatus(0, 0);
+		EmitHealthStatus();
 	}
 	private void InitializeSignals()
 	{
@@ -61,7 +61,8 @@ public partial class Player_UniversalState : State
 	{
 		Stats.AddFinal("HealthPotionAmount", -1);
 		_health++;
-		Stats.AddBuff("CanUseHealthPotion", new(StatModifier.OperationType.FinalAdd, -1f), Stats.GetStatValue("HealthPotionCooldown"), false);
+		float healthPotionCooldown = Mathf.Max(Stats.GetStatValue("HealthPotionCooldown"), 10f);
+		Stats.AddBuff("CanUseHealthPotion", new(StatModifier.OperationType.FinalAdd, -1f), healthPotionCooldown, false);
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthPotionUsed, Stats.GetStatValue("HealthPotionCooldown"));
 	}
 	protected override void PhysicsUpdate(double delta)

@@ -3,20 +3,16 @@ using System;
 
 public partial class Player_Attack1State : State
 {
-	[Export] private Timer _attack1ComboTimer = null;
 	private AnimationPlayer _animationPlayer = null;
 	private bool _canCombo = false;
 	private float AttackSpeed => Stats.GetStatValue("AttackSpeed");
 	protected override void ReadyBehavior()
 	{
 		_animationPlayer = Storage.GetNode<AnimationPlayer>("AnimationPlayer");
-		_attack1ComboTimer.WaitTime /= AttackSpeed;
-		_attack1ComboTimer.Timeout += OnAttack1ComboTimerTimeout;
 	}
 	protected override void Enter()
 	{
 		_animationPlayer.Play("Attack1", -1, AttackSpeed);
-		_attack1ComboTimer.Start();
 		_animationPlayer.AnimationFinished += OnAnimationFinished;
 		if (PreviousState != null && PreviousState.Name == "Run")
 			AudioManager.Instance.StopSFX("Run");
@@ -30,10 +26,9 @@ public partial class Player_Attack1State : State
 	protected override void Exit()
 	{
 		_canCombo = false;
-		_attack1ComboTimer.Stop();
-		_animationPlayer.Stop();
+		_animationPlayer.Pause();
 		_animationPlayer.AnimationFinished -= OnAnimationFinished;
 	}
-	private void OnAttack1ComboTimerTimeout() => _canCombo = true;
+	private void EnableCombo() => _canCombo = true;
 	private void OnAnimationFinished(StringName s) => AskTransit("Idle");
 }

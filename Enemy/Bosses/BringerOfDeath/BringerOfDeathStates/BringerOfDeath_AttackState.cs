@@ -53,7 +53,11 @@ public partial class BringerOfDeath_AttackState : State
 	}
 	protected override void Enter()
 	{
-		Dash();
+		Player player = Storage.GetNode<Player>("Player");
+		if (Mathf.Abs(player.GlobalPosition.X - _enemy.GlobalPosition.X) > 60f)
+			Dash();
+		else
+			_enemy.Velocity = Vector2.Zero;
 		_animationPlayer.Play("Attack");
 		CanTurnAround = false;
 		_animationPlayer.AnimationFinished += OnAnimationFinished;
