@@ -10,11 +10,7 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
         fireball.GlobalPosition = pos;
         float fireballRadian = radian ?? (float)GD.RandRange(0, Mathf.Tau);
         fireball.Velocity = fireball.BaseSpeed * Vector2.Right.Rotated(fireballRadian) * (float)GD.RandRange(1f, 1.3f);
-        float attack = ps.GetStatValue("Attack");
-        float attackBase = ps.GetStatValue("AttackBase");
-        float attackMult = ps.GetStatValue("AttackMult");
-        float attackFinal = ps.GetStatValue("AttackFinal");
-        fireball.Damage = ((attack + attackBase) * attackMult + attackFinal) * ps.GetStatValue("ProjectileDamageMultiplier") * DamageMultiplier;
+        fireball.Damage = ps.GetAttack() * ps.GetStatValue("ProjectileDamageMultiplier") * DamageMultiplier;
         ps.GetTree().CurrentScene.CallDeferred(MethodName.AddChild, fireball);
     }
     protected override void Modify(StatComponent statComponent, bool reverse = false)

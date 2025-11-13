@@ -10,6 +10,7 @@ public partial class PlayerStatComponent : StatComponent
     public List<Action<PlayerStatComponent, Vector2>> OnAttackActions = new();
     public List<Action<PlayerStatComponent, Vector2>> OnJumpActions = new();
     public List<Action<PlayerStatComponent, Vector2>> OnDashActions = new();
+    public List<Func<float, PlayerStatComponent, float>> DamageCalculators = new();
     private ref bool _initialized => ref GameData.Instance.PlayerStatComponentInitialized;
     public void InitializeOnce()
     {
@@ -17,6 +18,47 @@ public partial class PlayerStatComponent : StatComponent
         _initialized = true;
         InitializeDefaultAttackAction();
         InitializeDefaultBoost();
+    }
+    public float GetAttack()
+    {
+        float attack = GetStatValue("Attack");
+        float attackBase = GetStatValue("AttackBase");
+        float attackMult = GetStatValue("AttackMult");
+        float attackFinal = GetStatValue("AttackFinal");
+        return (attack + attackBase) * attackMult + attackFinal;
+    }
+    public float GetCritDamageMultiplier()
+    {
+        float critChance = GetStatValue("CritChance");
+        float critDamage = GetStatValue("CritDamage");
+        float resultCritDamage = 100f;
+        Probability.RunSingle(critChance / 100f, () =>
+        {
+            resultCritDamage = critDamage;
+        });
+        return resultCritDamage / 100f;
+    }
+    public float GetRandomDamageMultiplier()
+    {
+        float minDamageMultiplier = GetStatValue("MinDamageMultiplier");
+        float maxDamageMultiplier = GetStatValue("MaxDamageMultiplier");
+        float minVal = Mathf.Min(minDamageMultiplier, maxDamageMultiplier);
+        float maxVal = Mathf.Max(minDamageMultiplier, maxDamageMultiplier);
+        float resultDamageMultiplier = (float)GD.RandRange(minVal, maxVal);
+        return resultDamageMultiplier;
+    }
+    public float CalculateDamage()
+    {
+        float damageMultiplier = GetRandomDamageMultiplier();
+
+        float attack = GetAttack();
+
+        float critDamageMultiplier = GetCritDamageMultiplier();
+        float damage = attack * damageMultiplier * critDamageMultiplier;
+        foreach (var calculator in DamageCalculators)
+            damage = calculator(damage, this);
+        
+        return damage;
     }
     public override void _Ready()
     {
@@ -52,25 +94,7 @@ public partial class PlayerStatComponent : StatComponent
     {
         Action<EnemyBase, PlayerStatComponent> initialAttackAction = (enemy, playerStats) =>
         {
-            float minDamageMultiplier = playerStats.GetStatValue("MinDamageMultiplier");
-            float maxDamageMultiplier = playerStats.GetStatValue("MaxDamageMultiplier");
-            float minVal = Mathf.Min(minDamageMultiplier, maxDamageMultiplier);
-            float maxVal = Mathf.Max(minDamageMultiplier, maxDamageMultiplier);
-            float resultDamageMultiplier = (float)GD.RandRange(minVal, maxVal);
-
-            float critChance = playerStats.GetStatValue("CritChance");
-            float critDamage = playerStats.GetStatValue("CritDamage");
-            float resultCritDamage = 100f;
-            Probability.RunSingle(critChance / 100f, () =>
-            {
-                resultCritDamage = critDamage;
-            });
-            float attack = playerStats.GetStatValue("Attack");
-            float attackBase = playerStats.GetStatValue("AttackBase");
-            float attackMult = playerStats.GetStatValue("AttackMult");
-            float attackFinal = playerStats.GetStatValue("AttackFinal");
-            float resultDamage = ((attack + attackBase) * attackMult + attackFinal) * resultDamageMultiplier * (resultCritDamage / 100f);
-            enemy.TakeDamage(resultDamage);
+            enemy.TakeDamage(playerStats.CalculateDamage());
         };
         OnHittingEnemyAction.Add(initialAttackAction);
     }
@@ -119,6 +143,7 @@ public partial class PlayerStatComponent : StatComponent
         GameData.Instance.PlayerOnAttackActions = OnAttackActions;
         GameData.Instance.PlayerOnJumpActions = OnJumpActions;
         GameData.Instance.PlayerOnDashActions = OnDashActions;
+        GameData.Instance.PlayerDamageCalculators = DamageCalculators;
     }
     private void LoadActionsFromGameData()
     {
@@ -128,5 +153,6 @@ public partial class PlayerStatComponent : StatComponent
         OnAttackActions = GameData.Instance.PlayerOnAttackActions;
         OnJumpActions = GameData.Instance.PlayerOnJumpActions;
         OnDashActions = GameData.Instance.PlayerOnDashActions;
+        DamageCalculators = GameData.Instance.PlayerDamageCalculators;
     }
 }

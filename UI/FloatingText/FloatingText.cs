@@ -6,13 +6,12 @@ public partial class FloatingText : Node2D
 	public Tween position_tween;
 	public Tween scale_tween;
 	public Label label = null;
+	private Vector2 initialScale;
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		label = GetNode<Label>("Label");
-
-		Scale = new Vector2(1f, 1f);
-		
+		initialScale = Scale;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -43,13 +42,13 @@ public partial class FloatingText : Node2D
 
 		scale_tween.TweenProperty(
 			this, "scale",
-			new Vector2(0.7f, 0.7f),
+			initialScale * 0.7f,
 			0.2f
 		).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
 
 		scale_tween.TweenProperty(
 			this, "scale",
-			new Vector2(0.5f, 0.5f),
+			initialScale * 0.5f,
 			0.1f
 		).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
 
@@ -61,7 +60,7 @@ public partial class FloatingText : Node2D
 
 		scale_tween.TweenProperty(
 			this, "scale",
-			new Vector2(0f, 0f),
+			Vector2.Zero,
 			0.2f
 		).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
 

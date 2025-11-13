@@ -90,8 +90,12 @@ public partial class EnemyBase : CharacterBody2D
 		{
 			FloatingText Text = FloatingTextScene.Instantiate<FloatingText>();
 			GetTree()?.CurrentScene?.AddChild(Text);
-			Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-5, 5), GD.RandRange(-30, -15));
+			Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-18, 18), GD.RandRange(-30, -15));
 			Text.Display((int)damage);
+			float minDamage = 20f;
+			float maxDamage = 1000f;
+			float ratio = Mathf.Max(damage - minDamage, 0) / (maxDamage - minDamage);
+			Text.Scale = Vector2.One * Mathf.Lerp(0.8f, 2.5f, ratio);
 		}
 	}
 	protected virtual void CheckDeath(float newValue)

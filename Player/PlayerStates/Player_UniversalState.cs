@@ -63,7 +63,7 @@ public partial class Player_UniversalState : State
 		_health++;
 		float healthPotionCooldown = Mathf.Max(Stats.GetStatValue("HealthPotionCooldown"), 10f);
 		Stats.AddBuff("CanUseHealthPotion", new(StatModifier.OperationType.FinalAdd, -1f), healthPotionCooldown, false);
-		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthPotionUsed, Stats.GetStatValue("HealthPotionCooldown"));
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthPotionUsed, healthPotionCooldown);
 	}
 	protected override void PhysicsUpdate(double delta)
 	{

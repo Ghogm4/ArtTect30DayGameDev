@@ -10,13 +10,8 @@ public partial class WindSlasherStatModifierComponent : StatModifierComponent
 		if (playerStatComponent == null) return;
 		Action<PlayerStatComponent, Vector2> OnPlayerAttack = (playerStat, playerPos) =>
 		{
-			float attack = playerStat.GetStatValue("Attack");
-			float attackBase = playerStat.GetStatValue("AttackBase");
-			float attackMult = playerStat.GetStatValue("AttackMult");
-			float attackFinal = playerStat.GetStatValue("AttackFinal");
-			
 			float projectileDamageMultiplier = playerStat.GetStatValue("ProjectileDamageMultiplier");
-			float resultAttack = ((attack + attackBase) * attackMult + attackFinal) * AttackMultiplier * projectileDamageMultiplier;
+			float resultAttack = playerStat.GetAttack() * AttackMultiplier * projectileDamageMultiplier;
 
 			WindSlash windSlash = Projectile.Factory.CreateFriendly<WindSlash>("WindSlash");
 			windSlash.Damage = resultAttack;

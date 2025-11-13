@@ -8,12 +8,7 @@ public partial class BleedStatModifierComponent : StatModifierComponent
 		PlayerStatComponent playerStats = statComponent as PlayerStatComponent;
 		playerStats?.OnHittingEnemyAction.Add((EnemyBase enemy, PlayerStatComponent ps) =>
 		{
-			float attack = ps.GetStatValue("Attack");
-			float attackBase = ps.GetStatValue("AttackBase");
-			float attackMult = ps.GetStatValue("AttackMult");
-			float attackFinal = ps.GetStatValue("AttackFinal");
-			float resultAttack = (attack + attackBase) * attackMult + attackFinal;
-			float bleedDamage = Mathf.Ceil(resultAttack * ps.GetStatValue("BleedDamageMultiplier"));
+			float bleedDamage = Mathf.Ceil(ps.GetAttack() * ps.GetStatValue("BleedDamageMultiplier"));
 			float bleedDuration = ps.GetStatValue("BleedDuration");
 			float bleedInterval = Mathf.Max(ps.GetStatValue("BleedInterval"), 0.2f);
 			Action applyBleed = () =>

@@ -205,7 +205,7 @@ public partial class MapManager : Node2D
 	public Map SearchMap(MapType type)
 	{
 		GD.Print("Searching for map of type: " + type.ToString());
-		List<Map> filteredMaps = Maps.Where(m => m.Type == type && !m.IsEnabled && !m.IsEndLevel).ToList();
+		List<Map> filteredMaps = Maps.Where(m => m.Type == type && !m.IsEnabled && !m.IsEndLevel && (!m.IsStartLevel || MapPoolIndex == 1)).ToList();
 		if (filteredMaps.Count > 0)
 		{
 			float[] weights = filteredMaps.Select(m => (float)m.RarityWeight).ToArray();

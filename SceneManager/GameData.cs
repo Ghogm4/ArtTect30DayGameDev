@@ -17,6 +17,7 @@ public partial class GameData : Node
     public List<Action<PlayerStatComponent, Vector2>> PlayerOnAttackActions = new();
     public List<Action<PlayerStatComponent, Vector2>> PlayerOnJumpActions = new();
     public List<Action<PlayerStatComponent, Vector2>> PlayerOnDashActions = new();
+    public List<Func<float, PlayerStatComponent, float>> PlayerDamageCalculators = new();
     public bool PlayerStatComponentInitialized = false;
     public Dictionary<Vector2I, GDDictionary> MapStates { get; set; } = new();
     public void Reset()
