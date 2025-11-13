@@ -10,6 +10,9 @@ public partial class GameData : Node
         Instance = this;
         SignalBus.Instance.PlayerStatResetRequested += Reset;
     }
+    public float TotalPlayTimeInSeconds = 0f;
+    public int TotalBoostsCollected = 1;
+    public bool VictoryAchieved = false;
     public Dictionary<string, List<StatModifierResource>> StatModifierDict = new();
     public List<Action<EnemyBase, PlayerStatComponent>> PlayerOnHittingEnemyActions = new();
     public List<IntervalTrigger> PlayerPassiveSkills = new();
@@ -20,12 +23,24 @@ public partial class GameData : Node
     public List<Func<float, PlayerStatComponent, float>> PlayerDamageCalculators = new();
     public bool PlayerStatComponentInitialized = false;
     public Dictionary<Vector2I, GDDictionary> MapStates { get; set; } = new();
+    public override void _Process(double delta)
+    {
+        TotalPlayTimeInSeconds += (float)delta;
+    }
+
     public void Reset()
     {
+        TotalPlayTimeInSeconds = 0;
+        TotalBoostsCollected = 1;
+        VictoryAchieved = false;
         StatModifierDict.Clear();
         PlayerPassiveSkills.Clear();
         PlayerOnHittingEnemyActions.Clear();
         PlayerOnEnemyDeathActions.Clear();
+        PlayerOnAttackActions.Clear();
+        PlayerOnJumpActions.Clear();
+        PlayerOnDashActions.Clear();
+        PlayerDamageCalculators.Clear();
         PlayerStatComponentInitialized = false;
         MapStates.Clear();
     }

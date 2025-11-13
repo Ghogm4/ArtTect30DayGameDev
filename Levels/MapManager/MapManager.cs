@@ -31,7 +31,7 @@ public partial class MapManager : Node2D
 	public List<Map> ExtraMaps = new();
 	public List<Map> EnabledMaps = new List<Map>();
 	public List<Map> EndNodeMaps = new List<Map>();
-	public int MapPoolIndex = 0;
+	public int MapPoolIndex = 2;
 	public string Entrance = null;
 	public Map NowMap = null;
 	public Map StartMap = null;

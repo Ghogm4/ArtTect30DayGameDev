@@ -26,6 +26,7 @@ public partial class PickupArea : Area2D
 				.SetTrans(Tween.TransitionType.Quad)
 				.SetEase(Tween.EaseType.In);
 			tween.TweenCallback(Callable.From(boost.QueueFree));
+			GameData.Instance.TotalBoostsCollected++;
 		}
 	}
 	private void OnBoostPickableFieldChanged(bool pickable)

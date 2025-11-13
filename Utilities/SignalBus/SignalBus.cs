@@ -16,6 +16,8 @@ public partial class SignalBus : Node
     [Signal] public delegate void PlayerStatResetRequestedEventHandler();
     [Signal] public delegate void PlayerPurchasedEventHandler(int price);
     [Signal] public delegate void BoostPickableFieldChangedEventHandler(bool pickable);
+    [Signal] public delegate void GameFinishedEventHandler();
+    [Signal] public delegate void GameStartedEventHandler();
 
     public static SignalBus Instance { get; private set; }
     public enum Priority

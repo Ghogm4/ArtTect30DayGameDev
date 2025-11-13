@@ -16,5 +16,7 @@ public partial class Player_DieState : State
 		_player.Velocity = Vector2.Zero;
 		await ToSignal(_sprite, AnimatedSprite2D.SignalName.AnimationFinished);
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerDied);
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.GameFinished);
+		SceneManager.Instance.ChangeScenePath("res://UI/GameFinished/GameFinished.tscn");
 	}
 }

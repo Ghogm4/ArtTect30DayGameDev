@@ -128,6 +128,11 @@ public partial class NextStagePortal : Node2D, ISavable
 			FirstChangeStage();
 		else if (MapManager.Instance.MapPoolIndex == 2)
 			SecondStageChange();
+		else if (MapManager.Instance.MapPoolIndex == 3) {
+			SceneManager.Instance.ChangeScenePath("res://UI/GameFinished/GameFinished.tscn");
+			SignalBus.Instance.EmitSignal(SignalBus.SignalName.GameFinished);
+			GameData.Instance.VictoryAchieved = true;
+		}
 	}
 	public GDDictionary SaveState()
 	{

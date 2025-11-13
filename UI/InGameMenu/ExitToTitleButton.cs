@@ -16,5 +16,6 @@ public partial class ExitToTitleButton : ResponsiveButton
 			_isPressedOnce = false;
 		}, SignalBus.Priority.Low);
 		_isPressedOnce = true;
+		MapManager.Instance.MapPoolIndex = 0;
 	}
 }

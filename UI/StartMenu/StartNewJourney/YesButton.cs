@@ -18,5 +18,6 @@ public partial class YesButton : Button
 		MapALG.Instance.PrintMap();
 		MapManager.Instance.ApplyMap();
 		MapManager.Instance.StartLevel();
+		SignalBus.Instance.EmitSignal(SignalBus.SignalName.GameStarted);
 	}
 }

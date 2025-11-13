@@ -20,6 +20,7 @@ public partial class PlayerHealthBar : Control
         SignalBus.Instance.PlayerDied += () => Visible = false;
         _healthPotionCooldownShader = _healthPotionCooldownPanel.Material as ShaderMaterial;
         SignalBus.Instance.PlayerHealthPotionUsed += OnHealthPotionUsed;
+        SignalBus.Instance.GameFinished += () => Visible = false;
     }
     public void Update(int health = -1, int maxHealth = -1, int shield = -1, int coin = -1, int healthPotion = -1)
     {

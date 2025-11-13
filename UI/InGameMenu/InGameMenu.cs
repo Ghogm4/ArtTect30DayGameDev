@@ -14,10 +14,11 @@ public partial class InGameMenu : Control
 		Visible = false;
 		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerBoostPickedUp, Callable.From<BoostInfo, bool, bool>(AddBoost));
 		SignalBus.Instance.Connect(SignalBus.SignalName.PlayerStatResetRequested, Callable.From(ResetMenu));
+		SignalBus.Instance.Connect(SignalBus.SignalName.GameFinished, Callable.From(() => Visible = true));
 	}
 	public override void _Process(double delta)
 	{
-		if (Input.IsActionJustPressed("ToggleInGameMenu"))
+		if (Input.IsActionJustPressed("ToggleInGameMenu") && MapManager.Instance.MapPoolIndex < 3)
 			Visible = !Visible;
 
 		if (FloatingBoostInfo.Visible)

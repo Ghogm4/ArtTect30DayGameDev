@@ -38,7 +38,6 @@ public partial class SceneManager : Node
 			QueueFree();
 		}
 		StartMenuScene = GD.Load<PackedScene>("res://UI/StartMenu/StartMenuExclusive/StartMenu.tscn");
-		SignalBus.Instance.PlayerDied += () => ChangeScene(StartMenuScene);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
