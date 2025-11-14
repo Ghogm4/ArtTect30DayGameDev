@@ -56,7 +56,7 @@ public partial class Bird_MoveControlState : State
             pastPlayerPosition = _player.GlobalPosition;
             pastTime = 0;
         }
-        if (!_isPreparing && !_isDiving)
+        if (!_isPreparing && !_isDiving && Storage.GetVariant<bool>("Is_Chasing"))
         {
             _attackTimer += (float)delta;
             if (_attackTimer >= AttackCD + GD.RandRange(-1f, 1f))
