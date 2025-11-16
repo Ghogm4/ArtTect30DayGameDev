@@ -9,7 +9,7 @@ public partial class ShaarsMirrorStatModifierComponent : StatModifierComponent
 		if (playerStats == null) return;
 		playerStats.OnAttackActions.Add((ps, pos) =>
         {
-			bool trigger = GD.Randf() < 0.25f;
+			bool trigger = GD.Randf() < 0.30f;
 			if (!trigger) return;
             foreach (var action in ps.OnAttackActions)
 				action?.Invoke(ps, pos);

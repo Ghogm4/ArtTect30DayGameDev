@@ -93,8 +93,8 @@ public partial class EnemyBase : CharacterBody2D
 			Text.GlobalPosition = GlobalPosition + new Vector2(GD.RandRange(-18, 18), GD.RandRange(-30, -15));
 			Text.Display((int)damage);
 			float minDamage = 20f;
-			float maxDamage = 1000f;
-			float ratio = Mathf.Max(damage - minDamage, 0) / (maxDamage - minDamage);
+			float maxDamage = 500f;
+			float ratio = Mathf.Clamp(Mathf.Max(damage - minDamage, 0) / (maxDamage - minDamage), 0, 1);
 			Text.Scale = Vector2.One * Mathf.Lerp(0.8f, 2.5f, ratio);
 		}
 	}
