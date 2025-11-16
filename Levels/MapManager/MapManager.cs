@@ -31,7 +31,7 @@ public partial class MapManager : Node2D
 	public List<Map> ExtraMaps = new();
 	public List<Map> EnabledMaps = new List<Map>();
 	public List<Map> EndNodeMaps = new List<Map>();
-	public int MapPoolIndex = 2;
+	public int MapPoolIndex = 0;
 	public string Entrance = null;
 	public Map NowMap = null;
 	public Map StartMap = null;
@@ -101,7 +101,7 @@ public partial class MapManager : Node2D
 			var mapLevel = scene.Instantiate<BaseLevel>();
 			if (mapLevel == null)
 			{
-				GD.PrintErr("MapLevel is null.");
+				GD.PushError("MapLevel is null.");
 				continue;
 			}
 			Map newMap = new Map(
@@ -121,7 +121,7 @@ public partial class MapManager : Node2D
 		// 	var mapLevel = scene.Instantiate<BaseLevel>();
 		// 	if (mapLevel == null)
 		// 	{
-		// 		GD.PrintErr("Extra MapLevel is null.");
+		// 		GD.PushError("Extra MapLevel is null.");
 		// 		continue;
 		// 	}
 		// 	Map newMap = new Map(scene);
@@ -137,7 +137,7 @@ public partial class MapManager : Node2D
 		Entrance = entrance;
 		if (TargetMap == null)
 		{
-			GD.PrintErr("TargetMap is null.");
+			GD.PushError("TargetMap is null.");
 			return;
 		}
 
@@ -196,7 +196,7 @@ public partial class MapManager : Node2D
 				isMarkerFound = true;
 				break;
 			default:
-				GD.PrintErr("Invalid entrance for setting player position: " + entrance);
+				GD.PushError("Invalid entrance for setting player position: " + entrance);
 				break;
 		}
 		if (!isMarkerFound)
@@ -242,7 +242,7 @@ public partial class MapManager : Node2D
 			Map chosen = SearchMap(desiredType);
 			if (chosen == null)
 			{
-				GD.PrintErr("No available map found for type: " + desiredType.ToString());
+				GD.PushError("No available map found for type: " + desiredType.ToString());
 				continue;
 			}
 			if (room.Position == MapALG.Instance.startPos)
@@ -321,7 +321,7 @@ public partial class MapManager : Node2D
 		}
 		if (EndNodeMaps.Count == 0)
 		{
-			GD.PrintErr("MapManager: No end-node maps found to place the EndLevel. Aborting.");
+			GD.PushError("MapManager: No end-node maps found to place the EndLevel. Aborting.");
 			return;
 		}
 		Map nodeToReplace = EndNodeMaps.OrderBy(_ => GD.Randi()).FirstOrDefault();

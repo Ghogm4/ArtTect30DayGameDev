@@ -116,7 +116,7 @@ public partial class MoveHandler : AnimatableBody2D
 			_reverse = value;
 			if (!_loop)
 			{
-				GD.PrintErr("Reverse only works when Loop is enabled.");
+				GD.PushError("Reverse only works when Loop is enabled.");
 				_reverse = false;
 			}
 			QueueRedraw();

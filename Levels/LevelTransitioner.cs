@@ -40,7 +40,7 @@ public partial class LevelTransitioner : Area2D
 				Entrance = "Right";
 				break;
 			default:
-				GD.PrintErr($"Unknown LevelTransitioner name: {Name}");
+				GD.PushError($"Unknown LevelTransitioner name: {Name}");
 				break;
 		}
 	}

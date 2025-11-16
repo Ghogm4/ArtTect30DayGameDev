@@ -106,7 +106,7 @@ public partial class NextStagePortal : Node2D, ISavable
 	{
 		if (MapALG.Instance == null)
 		{
-			GD.PrintErr("MapALG.Instance is null - cannot change to second stage");
+			GD.PushError("MapALG.Instance is null - cannot change to second stage");
 			return;
 		}
 		MapALG.Instance.ResetRoomState();

@@ -78,7 +78,7 @@ public partial class EnemyMap : Node
 		}
 		else
 		{
-			GD.PrintErr($"Enemy '{enemyName}' not found in EnemyDict.");
+			GD.PushError($"Enemy '{enemyName}' not found in EnemyDict.");
 		}
 	}
 	private void OnEnemyDied()

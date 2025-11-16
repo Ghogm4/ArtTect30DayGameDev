@@ -57,14 +57,15 @@ public partial class PlayerStatComponent : StatComponent
         float damage = attack * damageMultiplier * critDamageMultiplier;
         foreach (var calculator in DamageCalculators)
             damage = calculator(damage, this);
-        
+
         return damage;
     }
+
     public override void _Ready()
     {
-        base._Ready();
         if (GameData.Instance.StatModifierDict.Count > 0)
             InitializeStatsWithGameData();
+        base._Ready();
         SignalBus.Instance.RegisterSceneChangeStartedAction(() => OnSceneChangeStarted(), SignalBus.Priority.Low);
         SignalBus.Instance.EnemyDied += TriggerOnEnemyDeathActions;
         SignalBus.Instance.PlayerStatResetRequested += ResetStats;

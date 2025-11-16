@@ -28,6 +28,7 @@ public partial class Stat : Resource
     }
     public StatLimit MinLimit = new();
     public StatLimit MaxLimit = new();
+    public bool DoLimitValidation = false;
     private float _cachedValue = -1f;
     private bool _needRefresh = true;
     private List<StatModifier> _modifiers = new();
@@ -62,15 +63,17 @@ public partial class Stat : Resource
 
         (float baseAdd, float mult, float finalAdd) = HandleModifiers();
         float _calculatedValue = (BaseValue + baseAdd) * mult + finalAdd;
-        if (_lastAddedModifier != null)
+        if (DoLimitValidation && _lastAddedModifier != null)
         {
             bool _isLastAddedModifierValid =
             HandleCalculationExceedMinValidation(_calculatedValue, baseAdd, mult) &
             HandleCalculationExceedMaxValidation(_calculatedValue, baseAdd, mult);
-            if (!_isLastAddedModifierValid)
+            if (!_isLastAddedModifierValid) {
+                Calculate(referencedStatOldValue, referencedStatNewValue);
                 return;
+            }
         }
-
+        GD.PrintErr($"Stat '{Name}' calculated value {_calculatedValue} is within limits.");
         _cachedValue = _calculatedValue;
         _needRefresh = false;
         EmitSignal(SignalName.StatChanged, oldValue, _cachedValue);
@@ -85,8 +88,9 @@ public partial class Stat : Resource
     private bool HandleCalculationExceedMinValidation(float calculatedValue, float baseAdd, float mult)
     {
         float minVal = MinLimit.Resolve();
-        if (minVal <= calculatedValue || _lastAddedModifier == null)
+        if (minVal < calculatedValue || Mathf.IsEqualApprox(minVal, calculatedValue) ||_lastAddedModifier == null)
             return true;
+        GD.PrintErr($"Stat '{Name}' calculated value {calculatedValue} is below min limit {minVal}.");
         float _lastAddedModifierValue = _lastAddedModifier.Value;
         StatModifier.OperationType _lastAddedModifierType = _lastAddedModifier.Type;
         CancelLastAddedModifier();
@@ -112,7 +116,7 @@ public partial class Stat : Resource
     private bool HandleCalculationExceedMaxValidation(float calculatedValue, float baseAdd, float mult)
     {
         float maxVal = MaxLimit.Resolve();
-        if (maxVal >= calculatedValue || _lastAddedModifier == null)
+        if (maxVal > calculatedValue || Mathf.IsEqualApprox(maxVal, calculatedValue) || _lastAddedModifier == null)
             return true;
         float _lastAddedModifierValue = _lastAddedModifier.Value;
         StatModifier.OperationType _lastAddedModifierType = _lastAddedModifier.Type;

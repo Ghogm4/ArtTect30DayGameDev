@@ -14,6 +14,7 @@ public partial class StatComponent : Node
 			string maxVal = stat.MaxValue;
 			InitializeStatLimit(stat, minVal, true);
 			InitializeStatLimit(stat, maxVal, false);
+			stat.DoLimitValidation = true;
 		}
 	}
 	private void InitializeStatLimit(Stat stat, string limitVal, bool processMin)
@@ -27,7 +28,7 @@ public partial class StatComponent : Node
 			return;
 		}
 		Func<float> valueProvider;
-		if (int.TryParse(limitVal, out int constLimit))
+		if (float.TryParse(limitVal, out float constLimit))
 		{
 			valueProvider = () => constLimit;
 		}

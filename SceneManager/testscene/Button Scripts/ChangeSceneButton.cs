@@ -17,7 +17,7 @@ public partial class ChangeSceneButton : Button
 		if (!string.IsNullOrEmpty(ScenePath))
 			SceneManager.Instance.ChangeScenePath(ScenePath);
 		else
-			GD.PrintErr("未设置目标场景路径！");
+			GD.PushError("未设置目标场景路径！");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

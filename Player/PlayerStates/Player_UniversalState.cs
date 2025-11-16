@@ -61,7 +61,7 @@ public partial class Player_UniversalState : State
 	{
 		Stats.AddFinal("HealthPotionAmount", -1);
 		_health++;
-		float healthPotionCooldown = Mathf.Max(Stats.GetStatValue("HealthPotionCooldown"), 10f);
+		float healthPotionCooldown = Stats.GetStatValue("HealthPotionCooldown");
 		Stats.AddBuff("CanUseHealthPotion", new(StatModifier.OperationType.FinalAdd, -1f), healthPotionCooldown, false);
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHealthPotionUsed, healthPotionCooldown);
 	}

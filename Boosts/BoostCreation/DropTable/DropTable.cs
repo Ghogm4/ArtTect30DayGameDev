@@ -161,7 +161,7 @@ public partial class DropTable : Node2D
             using var dir = DirAccess.Open(directory);
             if (dir == null)
             {
-                GD.PrintErr($"Failed to open directory: {directory}");
+                GD.PushError($"Failed to open directory: {directory}");
                 continue;
             }
 
@@ -369,7 +369,7 @@ public partial class DropTable : Node2D
     {
         if (scene == null)
         {
-            GD.PrintErr("DropTable: Attempted to register a null boost scene");
+            GD.PushError("DropTable: Attempted to register a null boost scene");
             return;
         }
 

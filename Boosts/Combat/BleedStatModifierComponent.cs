@@ -10,7 +10,7 @@ public partial class BleedStatModifierComponent : StatModifierComponent
 		{
 			float bleedDamage = Mathf.Ceil(ps.GetAttack() * ps.GetStatValue("BleedDamageMultiplier"));
 			float bleedDuration = ps.GetStatValue("BleedDuration");
-			float bleedInterval = Mathf.Max(ps.GetStatValue("BleedInterval"), 0.2f);
+			float bleedInterval = ps.GetStatValue("BleedInterval");
 			Action applyBleed = () =>
 			{
 				if (IsInstanceValid(enemy))
