@@ -7,11 +7,11 @@ public partial class GuardianOfTheForest_DecisionState : State
 {
 	private Tuple<string, float>[] _nextStates = [
 		Tuple.Create("Dash", 1f),
-		Tuple.Create("LaserCast", 0.8f),
-		Tuple.Create("ArmLaunch", 1.3f),
+		Tuple.Create("LaserCast", 1f),
+		Tuple.Create("ArmLaunch", 1f),
 		Tuple.Create("Immune", 1f),
 		Tuple.Create("Glow", 1f),
-		Tuple.Create("Armor", 0.8f)
+		Tuple.Create("Armor", 1f)
 	];
 	private bool _wasNormalDecided = false;
 	protected override void Enter()

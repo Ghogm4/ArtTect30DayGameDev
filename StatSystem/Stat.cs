@@ -68,12 +68,13 @@ public partial class Stat : Resource
             bool _isLastAddedModifierValid =
             HandleCalculationExceedMinValidation(_calculatedValue, baseAdd, mult) &
             HandleCalculationExceedMaxValidation(_calculatedValue, baseAdd, mult);
-            if (!_isLastAddedModifierValid) {
-                Calculate(referencedStatOldValue, referencedStatNewValue);
+            if (!_isLastAddedModifierValid)
+            {
+                if (!CalculateOnModify)
+                    Calculate(referencedStatOldValue, referencedStatNewValue);
                 return;
             }
         }
-        GD.PrintErr($"Stat '{Name}' calculated value {_calculatedValue} is within limits.");
         _cachedValue = _calculatedValue;
         _needRefresh = false;
         EmitSignal(SignalName.StatChanged, oldValue, _cachedValue);
@@ -90,7 +91,6 @@ public partial class Stat : Resource
         float minVal = MinLimit.Resolve();
         if (minVal < calculatedValue || Mathf.IsEqualApprox(minVal, calculatedValue) ||_lastAddedModifier == null)
             return true;
-        GD.PrintErr($"Stat '{Name}' calculated value {calculatedValue} is below min limit {minVal}.");
         float _lastAddedModifierValue = _lastAddedModifier.Value;
         StatModifier.OperationType _lastAddedModifierType = _lastAddedModifier.Type;
         CancelLastAddedModifier();

@@ -22,7 +22,7 @@ public partial class GuardianOfTheForest_ArmorState : State
 	}
 	private void OnAnimationFinished()
 	{
-		Stats.AddFinal("DamageReduction", 0.1f);
+		Stats.AddFinal("DamageReduction", 0.05f);
 		if (!_enemy.IsDead)
 			AskTransit("Decision");
 	}

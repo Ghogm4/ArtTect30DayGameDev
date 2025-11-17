@@ -26,7 +26,7 @@ public partial class Player_Attack1State : State
 	protected override void Exit()
 	{
 		_canCombo = false;
-		_animationPlayer.Pause();
+		_animationPlayer.Stop();
 		_animationPlayer.AnimationFinished -= OnAnimationFinished;
 	}
 	private void EnableCombo() => _canCombo = true;
