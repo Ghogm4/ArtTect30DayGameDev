@@ -77,7 +77,7 @@ public partial class DropTable : Node2D
     [Export] public bool SkipObtainedOneTimeBoosts = true;
 
     [ExportGroup("Boost Sources")]
-    [Export] public bool AutoLoadFromDirectories = true;
+    [Export] public bool AutoLoadFromDirectories = false;
     [Export]
     public string[] BoostDirectories =
     {
