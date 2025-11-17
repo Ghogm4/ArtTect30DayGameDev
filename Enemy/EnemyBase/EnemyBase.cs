@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 public partial class EnemyBase : CharacterBody2D
 {
@@ -49,6 +50,24 @@ public partial class EnemyBase : CharacterBody2D
 
 		HealthBar.MaxValue = Stats.GetStatValue("Health");
 		HealthBar.Value = HealthBar.MaxValue;
+
+		foreach (var name in AudioManager.Instance.SFXDict.Keys)
+		{
+			if (name == "EnemyHit")
+			{
+				return;
+			}
+		}
+		AudioManager.Instance.LoadSFX("EnemyHit", "res://Assets/SFX/zijizuode/gethit2.mp3");
+
+		foreach (var name in AudioManager.Instance.SFXDict.Keys)
+		{
+			if (name == "EnemyGetHit")
+			{
+				return;
+			}
+		}
+		AudioManager.Instance.LoadSFX("EnemyGetHit", "res://Assets/SFX/zijizuode/enemyhit3.mp3");
 	}
 
 	public void OnMonitorAreaBodyEntered(Node2D body)
@@ -140,6 +159,16 @@ public partial class EnemyBase : CharacterBody2D
 	}
 	public void GetHit()
 	{
+		int count = 0;
+		foreach (var player in AudioManager.Instance.SFXPlayers)
+		{
+			if (player.Playing && player.Stream == AudioManager.Instance.SFXDict["EnemyGetHit"])
+				count += 1;
+			
+		}
+		GD.Print(count);
+		if (count < 3)
+			AudioManager.Instance.PlaySFX("EnemyGetHit");
 		OnHit();
 		Flash();
 	}
@@ -198,6 +227,7 @@ public partial class EnemyBase : CharacterBody2D
 	public void SendDamageRequest(float damage)
 	{
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, damage, Callable.From<Player>(CustomBehaviour));
+		AudioManager.Instance.PlaySFX("EnemyHit");
 		AfterDamageRequestSent();
 	}
 }

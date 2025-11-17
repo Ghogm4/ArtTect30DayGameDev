@@ -15,9 +15,14 @@ public partial class Player : CharacterBody2D
 		AudioManager.Instance.LoadSFX("Attack1", "res://Assets/SFX/zijizuode/blade1.mp3");
 		AudioManager.Instance.LoadSFX("Attack2", "res://Assets/SFX/zijizuode/blade2.mp3");
 		AudioManager.Instance.LoadSFX("Attack3", "res://Assets/SFX/zijizuode/blade3.mp3");
+		AudioManager.Instance.LoadSFX("Hit", "res://Assets/SFX/zijizuode/gethit2.mp3");
+		AudioManager.Instance.LoadSFX("DashAttack", "res://Assets/SFX/zijizuode/dashattack.mp3");
+		AudioManager.Instance.LoadSFX("Fireball", "res://Assets/SFX/zijizuode/fireball.mp3");
+		AudioManager.Instance.LoadSFX("AltarClaim", "res://Assets/SFX/zijizuode/altar.mp3");
 	}
 	public void TakeDamage(float damage, Callable customBehavior)
 	{
 		SignalBus.Instance.EmitSignal(SignalBus.SignalName.PlayerHit, damage, customBehavior);
+		AudioManager.Instance.PlaySFX("Hit");
 	}
 }

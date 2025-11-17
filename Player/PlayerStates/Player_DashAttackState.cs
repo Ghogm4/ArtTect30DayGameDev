@@ -15,6 +15,7 @@ public partial class Player_DashAttackState : State
 	{
 		_animationPlayer.AnimationFinished += OnAnimationFinished;
 		_animationPlayer.Play("DashAttack", -1, AttackSpeed);
+		AudioManager.Instance.PlaySFX("DashAttack");
 		_player.Velocity = Vector2.Zero;
 	}
 	protected override void Exit()

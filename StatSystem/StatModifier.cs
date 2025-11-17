@@ -45,7 +45,7 @@ public partial class StatModifier : RefCounted
 		return this;
 	}
 	public StatModifierResource CreateResource(string targetStatName)
-    {
+	{
 		StatModifierResource resource = new();
 		resource.Type = Type;
 		resource.Value = _value;
@@ -55,7 +55,7 @@ public partial class StatModifier : RefCounted
 		resource.ReferencedStatName = ReferencedStat.Name;
 		resource.ReferencedPercentage = _referencedPercentage;
 		return resource;
-    }
+	}
 	public class Factory
 	{
 		public static StatModifier BaseAdd(float value) => new(OperationType.BaseAdd, value);

@@ -45,6 +45,15 @@ public partial class Bird_MoveControlState : State
 
         _speed = new(Stats.GetStat("Speed"));
         _damage = new(Stats.GetStat("Damage"));
+
+        foreach (var name in AudioManager.Instance.SFXDict.Keys)
+        {
+            if (name == "BirdDive")
+            {
+                return;
+            }
+        }
+        AudioManager.Instance.LoadSFX("BirdDive", "res://Assets/SFX/zijizuode/Dash.mp3");
     }
 
     protected override void PhysicsUpdate(double delta)
@@ -82,6 +91,7 @@ public partial class Bird_MoveControlState : State
             {
                 _isPreparing = false;
                 _isDiving = true;
+                AudioManager.Instance.PlaySFX("BirdDive");
             }
         }
         else if (_isDiving)

@@ -45,6 +45,14 @@ public partial class GreenSlime_MoveControlState : State
 		var jumpState = GetNode<State>("Jump");
 		jumpState.Connect("Jump", new Callable(this, nameof(OnJump)));
 
+		foreach (var name in AudioManager.Instance.SFXDict.Keys)
+		{
+			if (name == "SlimeSound")
+			{
+				return;
+			}
+		}
+		AudioManager.Instance.LoadSFX("SlimeSound", "res://Assets/SFX/zijizuode/slime.mp3");
 		
 	}
 	protected override void PhysicsUpdate(double delta)
@@ -148,7 +156,7 @@ public partial class GreenSlime_MoveControlState : State
 		// record initial upward speed for mid-jump detection
 		_initialJumpSpeed = (float)_jumpForce;
 		_midJumpLocked = false;
-
+		AudioManager.Instance.PlaySFX("SlimeSound");
 	}
 
 	public void Attack()

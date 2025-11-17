@@ -16,10 +16,10 @@ public partial class StateTree : State
 		foreach (State childState in GetChildren())
 			ProcessChild(childState);
 		if (string.IsNullOrEmpty(InitialStateName))
-        {
-            GD.PushError("InitialStateName is not set in StateTree.");
+		{
+			GD.PushError("InitialStateName is not set in StateTree.");
 			return;
-        }
+		}
 		SetupInitialChain();
 	}
 	protected void ProcessChild(State state)
