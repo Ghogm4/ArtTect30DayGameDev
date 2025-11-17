@@ -57,6 +57,7 @@ public partial class NormalAltar : Node2D, ISavable
 	{
 		if (_isInteractable && !_isClaimed && _isPlayerNearby && Input.IsActionJustPressed("Interact"))
 		{
+			AudioManager.Instance.PlaySFX("AltarClaim");
 			BoostDropTable.Drop();
 			_isInteractable = false;
 			ToggleWhiteOutline(false);

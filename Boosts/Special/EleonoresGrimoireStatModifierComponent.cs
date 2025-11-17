@@ -26,6 +26,7 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
                 float radian = Mathf.Pi / 2 + radianOffset;
                 CreateFireball(ps, pos, radian);
             }
+            AudioManager.Instance.PlaySFX("Fireball");
         });
         playerStats.OnDashActions.Add((ps, pos) =>
         {
@@ -37,11 +38,13 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
                 float radian = (headingLeft ? Mathf.Pi : 0) + radianOffset;
                 CreateFireball(ps, pos, radian);
             }
+            AudioManager.Instance.PlaySFX("Fireball");
         });
         playerStats.OnEnemyDeathActions.Add((enemy, ps) =>
         {
             for (int i = 0; i < 2; i++)
                 CreateFireball(ps, enemy.GlobalPosition);
+            AudioManager.Instance.PlaySFX("Fireball");
         });
         playerStats.OnAttackActions.Add((ps, pos) =>
         {
@@ -53,6 +56,7 @@ public partial class EleonoresGrimoireStatModifierComponent : StatModifierCompon
                 float radian = (headingLeft ? Mathf.Pi : 0) + radianOffset;
                 CreateFireball(ps, pos, radian);
             }
+            AudioManager.Instance.PlaySFX("Fireball");
         });
     }
 }

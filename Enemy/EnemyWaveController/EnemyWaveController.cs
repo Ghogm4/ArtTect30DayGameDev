@@ -72,6 +72,7 @@ public partial class EnemyWaveController : Node, ISavable
             EmitSignal(SignalName.AllWavesCompleted);
             _allWavesCompleted = true;
             ToggleLevelTransitioners(true);
+            AudioManager.Instance.PlaySFX("Confirm");
             return;
         }
         GetTree().CreateTimer(TimeBetweenWaves).Timeout += StartNextWave;

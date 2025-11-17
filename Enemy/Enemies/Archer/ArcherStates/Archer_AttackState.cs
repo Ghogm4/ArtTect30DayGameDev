@@ -22,6 +22,14 @@ public partial class Archer_AttackState : State
 			AskTransit("AttackIdle");
 		};
 
+		foreach (var name in AudioManager.Instance.SFXDict.Keys)
+		{
+			if (name == "ArrowShoot")
+			{
+				return;
+			}
+		}
+		AudioManager.Instance.LoadSFX("ArrowShoot", "res://Assets/SFX/zijizuode/arrow.mp3");
 		
 	}
 
@@ -57,6 +65,7 @@ public partial class Archer_AttackState : State
 		if (_sprite.Frame == 6 && Storage.GetVariant<bool>("HasSpawnedArrow") == false)
 		{
 			SpawnArrow();
+			AudioManager.Instance.PlaySFX("ArrowShoot");
 			Storage.SetVariant("HasSpawnedArrow", true);
 		}
 		await ToSignal(GetTree().CreateTimer(0.1f), "timeout");

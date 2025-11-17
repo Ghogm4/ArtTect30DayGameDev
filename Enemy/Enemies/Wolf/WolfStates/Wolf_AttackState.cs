@@ -21,6 +21,15 @@ public partial class Wolf_AttackState : State
             _attackEffectSprite.Visible = false;
             _attackEffectSprite.Stop();
         };
+
+		foreach (var name in AudioManager.Instance.SFXDict.Keys)
+        {
+            if (name == "WolfAttack")
+			{
+				return;
+			}
+        }
+		AudioManager.Instance.LoadSFX("WolfAttack", "res://Assets/SFX/zijizuode/wolf.mp3");
 	}
 
 	protected override void Enter()
@@ -52,6 +61,7 @@ public partial class Wolf_AttackState : State
 	}
 	public void DealDamage()
 	{
+		AudioManager.Instance.PlaySFX("WolfAttack");
 		GD.Print("Wolf Attack 1 Damage Dealt");
 		foreach (Node body in _enemy.AttackArea.GetOverlappingBodies())
 		{

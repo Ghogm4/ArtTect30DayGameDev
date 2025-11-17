@@ -31,7 +31,7 @@ public partial class Fireball : Projectile
 		{
 			if (IsInstanceValid(this))
 				IsExpired = true;
-		};
+		};		
 	}
 	private void UpdateTargetEnemy()
 	{

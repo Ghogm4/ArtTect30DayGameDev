@@ -20,6 +20,15 @@ public partial class Skeleton_AttackState : State
 		};
 		Storage.RegisterVariant<bool>("HasDealtDamage1", false);
 		Storage.RegisterVariant<bool>("HasDealtDamage2", false);
+
+		foreach (var name in AudioManager.Instance.SFXDict.Keys)
+		{
+			if (name == "SkeletonAttack")
+			{
+				return;
+			}
+		}
+		AudioManager.Instance.LoadSFX("SkeletonAttack", "res://Assets/SFX/zijizuode/hit.mp3");
 	}
 
 	
@@ -56,6 +65,7 @@ public partial class Skeleton_AttackState : State
 	}
 	public void DealDamage1()
 	{
+		AudioManager.Instance.PlaySFX("SkeletonAttack");
 		GD.Print("Skeleton Attack 1 Damage Dealt");
 		foreach (Node body in _enemy.AttackArea.GetOverlappingBodies())
 		{
@@ -68,6 +78,7 @@ public partial class Skeleton_AttackState : State
 	}
 	public void DealDamage2()
 	{
+		AudioManager.Instance.PlaySFX("SkeletonAttack");
 		GD.Print("Skeleton Attack 2 Damage Dealt");
 		foreach (Node body in _enemy.ChaseArea.GetOverlappingBodies())
 		{

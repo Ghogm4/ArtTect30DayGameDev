@@ -16,6 +16,7 @@ public partial class Player_AttackUniversalState : State
 		_sprite = Storage.GetNode<AnimatedSprite2D>("AnimatedSprite");
 		_attackArea = Storage.GetNode<Area2D>("AttackArea");
 		_player = Storage.GetNode<Player>("Player");
+
 	}
 	private void OnAnimationFinished()
 	{
@@ -53,7 +54,9 @@ public partial class Player_AttackUniversalState : State
 		PlayerStatComponent playerStats = Stats as PlayerStatComponent;
 		foreach (var body in _attackArea.GetOverlappingBodies())
 			if (body is EnemyBase enemy)
+			{
 				foreach (var onHittingEnemyAction in playerStats.OnHittingEnemyAction)
 					onHittingEnemyAction?.Invoke(enemy, playerStats);
+			}
 	}
 }
