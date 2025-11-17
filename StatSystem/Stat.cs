@@ -33,6 +33,8 @@ public partial class Stat : Resource
     private bool _needRefresh = true;
     private List<StatModifier> _modifiers = new();
     private StatModifier _lastAddedModifier = null;
+    private int _calculatedTimes = 0;
+    private const int MaxCalculationTimes = 10;
     private (float, float, float) HandleModifiers()
     {
         float baseAdd = 0f;
@@ -57,6 +59,13 @@ public partial class Stat : Resource
     }
     public void Calculate(float referencedStatOldValue = 0, float referencedStatNewValue = 0)
     {
+        if (_calculatedTimes >= MaxCalculationTimes)
+        {
+            GD.PushError($"Stat {Name} calculation exceeded max times {MaxCalculationTimes}.");
+            _calculatedTimes = 0;
+            return;
+        }
+        _calculatedTimes++;
         if (Mergeable && _normalModifierCount > NormalModifierThreshold)
             MergeNormalModifiers();
         float oldValue = _cachedValue;
@@ -66,7 +75,7 @@ public partial class Stat : Resource
         if (DoLimitValidation && _lastAddedModifier != null)
         {
             bool _isLastAddedModifierValid =
-            HandleCalculationExceedMinValidation(_calculatedValue, baseAdd, mult) &
+            HandleCalculationExceedMinValidation(_calculatedValue, baseAdd, mult) &&
             HandleCalculationExceedMaxValidation(_calculatedValue, baseAdd, mult);
             if (!_isLastAddedModifierValid)
             {
@@ -78,6 +87,8 @@ public partial class Stat : Resource
         _cachedValue = _calculatedValue;
         _needRefresh = false;
         EmitSignal(SignalName.StatChanged, oldValue, _cachedValue);
+
+        _calculatedTimes = 0;
     }
     private void CancelLastAddedModifier()
     {
