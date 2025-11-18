@@ -6,6 +6,3 @@ A game project from ArtTech 30-day game development.
   
 # Download
 Check the latest Release and find specific version that fits your system.
-
-
-

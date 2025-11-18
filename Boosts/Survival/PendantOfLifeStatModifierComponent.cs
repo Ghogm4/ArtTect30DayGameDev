@@ -3,14 +3,14 @@ using System;
 
 public partial class PendantOfLifeStatModifierComponent : StatModifierComponent
 {
-	[Export] public float DamageMultiplier = 0.07f;
+	[Export] public float DamageMultiplier = 0.06f;
 	protected override void Modify(StatComponent statComponent, bool reverse = false)
 	{
 		PlayerStatComponent playerStats = statComponent as PlayerStatComponent;
 		if (playerStats == null) return;
 		Action<PlayerStatComponent, Vector2> action = (ps, pos) =>
 		{
-			for (int i = 0; i < (int)ps.GetStatValue("Health") + 2; i++) {
+			for (int i = 0; i < (int)ps.GetStatValue("Health") + 1; i++) {
 				LifeEnergy lifeEnergy = Projectile.Factory.CreateFriendly<LifeEnergy>("LifeEnergy");
 				lifeEnergy.GlobalPosition = pos;
 				bool headingLeft = ps.GetStatValue("HeadingLeft") > 0;
