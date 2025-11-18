@@ -152,7 +152,7 @@ public partial class ShopItem : Node2D, ISavable
 	}
 	public override void _Process(double delta)
 	{
-		if (Input.IsActionJustPressed("Use")) Refresh();
+		//if (Input.IsActionJustPressed("Use")) Refresh();
 		_timeElapsed += (float)delta;
 		float hoverOffset = _hoverAmplitude * Mathf.Sin(_hoverFrequency * _timeElapsed);
 		ItemSprite.Position = _itemSpriteOriginalPosition + Vector2.Up * hoverOffset;
