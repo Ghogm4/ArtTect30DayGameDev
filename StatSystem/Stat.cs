@@ -22,7 +22,7 @@ public partial class Stat : Resource
         get
         {
             GD.Print("Getting FinalValue of ", Name);
-            if (_needRefresh)
+            if (NeedRefresh)
                 Calculate();
             return _cachedValue;
         }
@@ -30,8 +30,8 @@ public partial class Stat : Resource
     public StatLimit MinLimit = new();
     public StatLimit MaxLimit = new();
     public bool DoLimitValidation = false;
+    public bool NeedRefresh = true;
     private float _cachedValue = -1f;
-    private bool _needRefresh = true;
     private List<StatModifier> _modifiers = new();
     private StatModifier _lastAddedModifier = null;
     private int _calculatedTimes = 0;
@@ -87,7 +87,7 @@ public partial class Stat : Resource
             }
         }
         _cachedValue = _calculatedValue;
-        _needRefresh = false;
+        NeedRefresh = false;
         GD.Print("FinalValue of ", Name, " calculated as ", _cachedValue);
         EmitSignal(SignalName.StatChanged, oldValue, _cachedValue);
         GD.Print("Emitted StatChanged signal for ", Name);
@@ -103,7 +103,7 @@ public partial class Stat : Resource
     private bool HandleCalculationExceedMinValidation(float calculatedValue, float baseAdd, float mult)
     {
         float minVal = MinLimit.Resolve();
-        if (minVal < calculatedValue || Mathf.IsEqualApprox(minVal, calculatedValue) ||_lastAddedModifier == null)
+        if (minVal < calculatedValue || Mathf.IsEqualApprox(minVal, calculatedValue) || _lastAddedModifier == null)
             return true;
         float _lastAddedModifierValue = _lastAddedModifier.Value;
         StatModifier.OperationType _lastAddedModifierType = _lastAddedModifier.Type;
@@ -177,7 +177,7 @@ public partial class Stat : Resource
             types++;
         }
         _normalModifierCount = types;
-        _needRefresh = true;
+        NeedRefresh = true;
     }
     public void AddModifier(StatModifier modifier)
     {
@@ -185,7 +185,7 @@ public partial class Stat : Resource
         if (IsUselessModifier(modifier))
             return;
         _modifiers.Add(modifier);
-        _needRefresh = true;
+        NeedRefresh = true;
         _lastAddedModifier = modifier;
         if (CalculateOnModify)
             Calculate();
@@ -214,7 +214,7 @@ public partial class Stat : Resource
     {
         if (modifier == null) return;
         _modifiers.Remove(modifier);
-        _needRefresh = true;
+        NeedRefresh = true;
 
         if (_lastAddedModifier == modifier)
             _lastAddedModifier = null;

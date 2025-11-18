@@ -19,6 +19,23 @@ public partial class StatComponent : Node
 			stat.DoLimitValidation = hasExplicitMin || hasExplicitMax;
 		}
 	}
+	private void ConnectStatChanged(Stat emitterStat, Stat receiverStat)
+	{
+		Action<float, float> calculateAction = (a, b) => receiverStat.NeedRefresh = true;
+		Callable callable = Callable.From<float, float>(calculateAction);
+		if (emitterStat?.IsConnected(Stat.SignalName.StatChanged, callable) ?? true) return;
+
+		emitterStat.Connect(Stat.SignalName.StatChanged, callable);
+		GD.Print($"Connected StatChanged signal of {emitterStat.Name} to Calculate method of {receiverStat.Name}");
+	}
+	private void DisconnectStatChanged(Stat emitterStat, Stat receiverStat)
+	{
+		Callable callable = Callable.From<float, float>((a, b) => receiverStat.NeedRefresh = true);
+		if (!emitterStat?.IsConnected(Stat.SignalName.StatChanged, callable) ?? true) return;
+
+		emitterStat.Disconnect(Stat.SignalName.StatChanged, callable);
+		GD.Print($"Disconnected StatChanged signal of {emitterStat.Name} from Calculate method of {receiverStat.Name}");
+	}
 	private void InitializeStatLimit(Stat stat, string limitVal, bool processMin)
 	{
 		if (string.IsNullOrEmpty(limitVal))
@@ -38,8 +55,7 @@ public partial class StatComponent : Node
 		{
 			Stat limitStat = GetStat(limitVal);
 			valueProvider = () => limitStat?.FinalValue ?? 0f;
-			if (stat.CalculateOnModify)
-				limitStat?.StatChanged += stat.Calculate;
+			ConnectStatChanged(limitStat, stat);
 		}
 
 		if (processMin)
@@ -71,9 +87,7 @@ public partial class StatComponent : Node
 		{
 			Stat stat = GetStat(statName);
 			stat.AddModifier(modifier);
-			if (!modifier.ReferencedStat?.IsConnected(Stat.SignalName.StatChanged, Callable.From(() => stat.Calculate())) ?? false &&
-				stat.CalculateOnModify)
-				modifier.ReferencedStat.StatChanged += stat.Calculate;
+			ConnectStatChanged(modifier.ReferencedStat, stat);
 		}
 		else
 			GD.PushError($"Stat '{statName}' not found in StatComponent.");
@@ -100,9 +114,9 @@ public partial class StatComponent : Node
 	{
 		if (Stats.ContainsKey(statName))
 		{
-			Stats[statName].RemoveModifier(modifier);
-			if (modifier.ReferencedStat?.IsConnected(Stat.SignalName.StatChanged, Callable.From(() => GetStat(statName).Calculate())) ?? false)
-				modifier.ReferencedStat.StatChanged -= GetStat(statName).Calculate;
+			Stat stat = GetStat(statName);
+			stat.RemoveModifier(modifier);
+			DisconnectStatChanged(modifier.ReferencedStat, stat);
 		}
 		else
 			GD.PushError($"Stat '{statName}' not found in StatComponent.");

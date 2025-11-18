@@ -3,7 +3,7 @@ using System;
 
 public partial class PendantOfLifeStatModifierComponent : StatModifierComponent
 {
-	[Export] public float DamageMultiplier = 0.06f;
+	[Export] public float DamageMultiplier = 0.05f;
 	protected override void Modify(StatComponent statComponent, bool reverse = false)
 	{
 		PlayerStatComponent playerStats = statComponent as PlayerStatComponent;
