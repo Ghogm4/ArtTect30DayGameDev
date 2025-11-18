@@ -12,9 +12,11 @@ public partial class StatComponent : Node
 		{
 			string minVal = stat.MinValue;
 			string maxVal = stat.MaxValue;
+			bool hasExplicitMin = !string.IsNullOrEmpty(minVal);
+			bool hasExplicitMax = !string.IsNullOrEmpty(maxVal);
 			InitializeStatLimit(stat, minVal, true);
 			InitializeStatLimit(stat, maxVal, false);
-			stat.DoLimitValidation = true;
+			stat.DoLimitValidation = hasExplicitMin || hasExplicitMax;
 		}
 	}
 	private void InitializeStatLimit(Stat stat, string limitVal, bool processMin)
@@ -36,7 +38,8 @@ public partial class StatComponent : Node
 		{
 			Stat limitStat = GetStat(limitVal);
 			valueProvider = () => limitStat?.FinalValue ?? 0f;
-			limitStat?.StatChanged += stat.Calculate;
+			if (stat.CalculateOnModify)
+				limitStat?.StatChanged += stat.Calculate;
 		}
 
 		if (processMin)
@@ -66,9 +69,11 @@ public partial class StatComponent : Node
 	{
 		if (Stats.ContainsKey(statName))
 		{
-			Stats[statName].AddModifier(modifier);
-			if (!modifier.ReferencedStat?.IsConnected(Stat.SignalName.StatChanged, Callable.From(() => GetStat(statName).Calculate())) ?? false)
-				modifier.ReferencedStat.StatChanged += GetStat(statName).Calculate;
+			Stat stat = GetStat(statName);
+			stat.AddModifier(modifier);
+			if (!modifier.ReferencedStat?.IsConnected(Stat.SignalName.StatChanged, Callable.From(() => stat.Calculate())) ?? false &&
+				stat.CalculateOnModify)
+				modifier.ReferencedStat.StatChanged += stat.Calculate;
 		}
 		else
 			GD.PushError($"Stat '{statName}' not found in StatComponent.");

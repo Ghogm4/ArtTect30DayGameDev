@@ -21,6 +21,7 @@ public partial class Stat : Resource
     {
         get
         {
+            GD.Print("Getting FinalValue of ", Name);
             if (_needRefresh)
                 Calculate();
             return _cachedValue;
@@ -59,6 +60,7 @@ public partial class Stat : Resource
     }
     public void Calculate(float referencedStatOldValue = 0, float referencedStatNewValue = 0)
     {
+        GD.Print("Calculating FinalValue of ", Name);
         if (_calculatedTimes >= MaxCalculationTimes)
         {
             GD.PushError($"Stat {Name} calculation exceeded max times {MaxCalculationTimes}.");
@@ -86,8 +88,9 @@ public partial class Stat : Resource
         }
         _cachedValue = _calculatedValue;
         _needRefresh = false;
+        GD.Print("FinalValue of ", Name, " calculated as ", _cachedValue);
         EmitSignal(SignalName.StatChanged, oldValue, _cachedValue);
-
+        GD.Print("Emitted StatChanged signal for ", Name);
         _calculatedTimes = 0;
     }
     private void CancelLastAddedModifier()
