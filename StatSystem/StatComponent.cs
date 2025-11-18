@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public partial class StatComponent : Node
 {
 	[Export] public Godot.Collections.Dictionary<string, Stat> Stats = new();
+	private List<Tuple<Stat, Stat, Callable>> _connectedStatPairs = new();
 	public override void _Ready()
 	{
 		foreach (var stat in Stats.Values)
@@ -21,20 +22,43 @@ public partial class StatComponent : Node
 	}
 	private void ConnectStatChanged(Stat emitterStat, Stat receiverStat)
 	{
-		Action<float, float> calculateAction = (a, b) => receiverStat.NeedRefresh = true;
-		Callable callable = Callable.From<float, float>(calculateAction);
-		if (emitterStat?.IsConnected(Stat.SignalName.StatChanged, callable) ?? true) return;
+		if (emitterStat == null || receiverStat == null)
+			return;
+
+		int existingIndex = _connectedStatPairs.FindIndex(tuple => tuple.Item1 == emitterStat && tuple.Item2 == receiverStat);
+		if (existingIndex >= 0)
+		{
+			GD.Print($"StatChanged from '{emitterStat.Name}' to '{receiverStat.Name}' is already connected.");
+			return;
+		}
+
+		Callable callable = Callable.From<float, float>((oldValue, newValue) =>
+		{
+			if (receiverStat.CalculateOnModify)
+				receiverStat.Calculate(oldValue, newValue);
+			else
+				receiverStat.NeedRefresh = true;
+		});
 
 		emitterStat.Connect(Stat.SignalName.StatChanged, callable);
-		GD.Print($"Connected StatChanged signal of {emitterStat.Name} to Calculate method of {receiverStat.Name}");
+		_connectedStatPairs.Add(new(emitterStat, receiverStat, callable));
+		GD.Print($"Connected StatChanged from '{emitterStat.Name}' to '{receiverStat.Name}'.");
 	}
 	private void DisconnectStatChanged(Stat emitterStat, Stat receiverStat)
 	{
-		Callable callable = Callable.From<float, float>((a, b) => receiverStat.NeedRefresh = true);
-		if (!emitterStat?.IsConnected(Stat.SignalName.StatChanged, callable) ?? true) return;
+		if (emitterStat == null || receiverStat == null)
+			return;
 
-		emitterStat.Disconnect(Stat.SignalName.StatChanged, callable);
-		GD.Print($"Disconnected StatChanged signal of {emitterStat.Name} from Calculate method of {receiverStat.Name}");
+		int existingIndex = _connectedStatPairs.FindIndex(tuple => tuple.Item1 == emitterStat && tuple.Item2 == receiverStat);
+		if (existingIndex < 0)
+			return;
+
+		Callable callable = _connectedStatPairs[existingIndex].Item3;
+		if (emitterStat.IsConnected(Stat.SignalName.StatChanged, callable))
+			emitterStat.Disconnect(Stat.SignalName.StatChanged, callable);
+
+		_connectedStatPairs.RemoveAt(existingIndex);
+		GD.Print($"Disconnected StatChanged from '{emitterStat.Name}' to '{receiverStat.Name}'.");
 	}
 	private void InitializeStatLimit(Stat stat, string limitVal, bool processMin)
 	{

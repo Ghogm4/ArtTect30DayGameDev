@@ -233,7 +233,9 @@ public partial class Stat : Resource
             if (modifier.ReferencedStat != null)
             {
                 resource.ReferencedStatName = modifier.ReferencedStat.Name;
-                resource.ReferencedPercentage = modifier.Value / modifier.ReferencedStat.FinalValue * 100f;
+                resource.ReferencedPercentage = Mathf.IsZeroApprox(modifier.ReferencedStat.FinalValue)
+                    ? 0f
+                    : modifier.Value / modifier.ReferencedStat.FinalValue * 100f;
             }
             else
             {
