@@ -70,6 +70,7 @@ public partial class GreenSlime_JumpState : State
 					Storage.SetVariant("Colliding", true);
 					setCollide = true;
 				}
+				break;
 			}
 			else setCollide = false;
 		}
