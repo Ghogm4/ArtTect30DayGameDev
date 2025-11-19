@@ -7,6 +7,7 @@ public partial class VolumeSlider : HSlider
 	public override void _Ready()
 	{
 		ValueChanged += SetBusVolume;
+		Value = (AudioServer.GetBusVolumeDb(AudioServer.GetBusIndex(ModifiedBus)) + 40f) / 40f;
 		SetBusVolume(Value);
 	}
 	public void SetBusVolume(double weight)
@@ -17,7 +18,8 @@ public partial class VolumeSlider : HSlider
 			GD.PushError($"Bus {ModifiedBus} not found.");
 			return;
 		}
-		float value = Mathf.Lerp(-40f, 0, (float)weight);
+		float clamped = Mathf.Clamp((float)weight, 0f, 1f);
+		float value = Mathf.Lerp(-40f, 0, clamped);
 		AudioServer.SetBusVolumeDb(index, value);
     }
 }
